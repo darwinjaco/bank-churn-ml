@@ -14,7 +14,7 @@ El dataset no contiene ingresos del banco, valor de vida del cliente (CLV), cost
 
 ## Estado actual
 
-- Implementados: contrato, división, EDA, figuras corregidas, transformadores sin fuga, pipelines de baselines y CV con MLflow.
+- Implementados: contrato, división, EDA, figuras corregidas, transformadores sin fuga, baselines con MLflow, ajuste en dos fases, regla de selección y ablaciones E-02/E-03.
 - Configurados: uv, Ruff, pytest, pre-commit y GitHub Actions; cobertura mínima en CI del 85 %.
 - Documentadas: especificaciones 001–003; modelado v1.1 fija FS-RAW/FS-EDA y CV exclusiva de entrenamiento. EDA v1.1 conserva H1–H6 y resuelve B-01.
 - Verificados localmente: 90 tests aprobados y cobertura del 98,56 %, además de Ruff, formato y pre-commit.
@@ -127,13 +127,13 @@ Cinco pliegues estratificados comunes sobre **6.000 filas de entrenamiento**, co
 
 | Modelo | AP | ROC-AUC | Brier | Log loss |
 |---|---|---|---|---|
-| dummy-raw | 0.203833 ± 0.000456 | 0.500000 ± 0.000000 | 0.162285 ± 0.000270 | 0.505671 ± 0.000622 |
-| logreg-raw | 0.459104 ± 0.029316 | 0.755001 ± 0.012016 | 0.137894 ± 0.003545 | 0.435357 ± 0.009273 |
-| logreg-eda | 0.656790 ± 0.028053 | 0.839331 ± 0.021047 | 0.110680 ± 0.004947 | 0.364184 ± 0.018428 |
+| dummy-raw | 0.204 ± 0.000 | 0.500 ± 0.000 | 0.162 ± 0.000 | 0.506 ± 0.001 |
+| logreg-raw | 0.459 ± 0.029 | 0.755 ± 0.012 | 0.138 ± 0.004 | 0.435 ± 0.009 |
+| logreg-eda | 0.657 ± 0.028 | 0.839 ± 0.021 | 0.111 ± 0.005 | 0.364 ± 0.018 |
 
 FS-RAW es la referencia ingenua. FS-EDA agrupa productos 3–4 antes de one-hot, añade `has_balance` y transforma edad con escala/cuadrática aprendidas dentro de cada pliegue; el salario se conserva hasta E-03. `centered_age()` permanece solo en inferencia de EDA. Se mantiene la lectura conjunta de saldo y geografía de Q-10.
 
-La diferencia de AP media entre las dos LogReg es 0,197686, mayor que ambas desviaciones estándar; es una lectura descriptiva, **sin selección de modelo**. Validación y prueba se reservan para sus fases posteriores. Detalles, procedencia y run IDs en [baselines.md](reports/baselines.md) y [baselines.json](reports/baselines.json).
+La diferencia pareada de AP entre las dos LogReg es **+0,198 ± 0,019**, positiva en los cinco pliegues; es una lectura descriptiva, sin selección de modelo. Validación y prueba se reservan para sus fases posteriores. Detalles, procedencia y run IDs en [baselines.md](reports/baselines.md) y [baselines.json](reports/baselines.json).
 
 Después de colocar el CSV y disponer de la división:
 
@@ -161,7 +161,7 @@ notebooks/    EDA delgado; lógica reutilizable en src/churn/
 | N.º | Especificación | Estado |
 |---|---|---|
 | 001 | [Visión general y contrato de datos](specs/001-overview-and-data-contract.md) | Completada: validación local y CI remoto verificados |
-| 002 | [Modelado y evaluación](specs/002-modeling-and-evaluation.md) | Baselines v1.1 implementadas; selección/calibración pendientes |
+| 002 | [Modelado y evaluación](specs/002-modeling-and-evaluation.md) | v1.4: baselines y selección implementadas (Random Forest); calibración pendiente |
 | 003 | [EDA e hipótesis preregistradas](specs/003-eda-and-hypotheses.md) | Implementada v1.1 y revisada |
 | 004 | Capa de decisión y beneficio esperado | Por redactar antes de la semana 5 |
 | 005 | API y dashboard | Por redactar antes de la semana 7 |
@@ -184,7 +184,30 @@ Plan del **5 de octubre al 29 de noviembre de 2026**, con unas **8 horas por sem
 
 **Prioridad:** la capa de decisión de la semana 5 es el entregable central. Si hay retrasos, se reduce primero el alcance del monitoreo de cambios de distribución de la semana 8.
 
-Estado de cierre: semanas 1–2 revisadas y semana 3 implementada, pendiente de revisión. Semanas 4–8 sin iniciar. La división se adelantó a semana 2 para reservar la prueba antes del EDA.
+### Semana 4: selección de modelo y ablaciones
+
+Ajuste en dos fases (spec 002 v1.4): FASE A busca hiperparámetros (`RandomizedSearchCV`, 5 pliegues, semilla 42); FASE B re-evalúa la mejor configuración de cada familia en pliegues **nuevos** 5×2 (semilla 2027) para reducir el sesgo optimista de la búsqueda. La regla de selección se fijó antes de entrenar.
+
+| Familia | AP FASE B | ROC-AUC | Brier | AP validación |
+|---|---|---|---|---|
+| LogReg (FS-EDA) | 0.655 ± 0.027 | 0.839 ± 0.010 | 0.111 ± 0.004 | 0.637 |
+| Random Forest (FS-TREE) | 0.686 ± 0.018 | 0.854 ± 0.012 | 0.106 ± 0.003 | 0.696 |
+| XGBoost (FS-TREE) | 0.697 ± 0.018 | 0.860 ± 0.010 | 0.106 ± 0.003 | — |
+| Dummy (FS-RAW) | — | — | — | 0.203 |
+
+- **Selección (§6):** XGBoost tiene la mayor AP, pero Random Forest queda a 0.011, menos que la desviación del mejor (0.018); por parsimonia se elige **Random Forest**. En validación supera a Dummy y a LogReg.
+- **E-03 (salario):** quitar `EstimatedSalary` cambia la AP en +0.003 ± 0.004; con el umbral preregistrado (Δ ≥ −0,005) se **elimina**, coherente con H6.
+- **E-02 (productos):** sin `NumOfProducts` la AP cae -0.113. El 3.4% de clientes con 3–4 productos aporta 0.079 de AP: sin ese grupo la AP es 0.608. En ese grupo el modelo predice 73.2% frente a 87.1% observado: insumo para la calibración de la semana 5.
+
+Métricas de desarrollo: la validación se usó para elegir. Detalle, regla paso a paso y run IDs en [model_selection.md](reports/model_selection.md).
+
+```powershell
+uv run churn-tune      # FASE A + FASE B (~8 min con 2 núcleos)
+uv run churn-select    # regla §6, E-03, E-02 y validación
+uv run python -m churn.selection_report
+```
+
+Estado de cierre: semanas 1–3 revisadas; semana 4 implementada, pendiente de revisión. Semanas 5–8 sin iniciar. La división se adelantó a semana 2 para reservar la prueba antes del EDA.
 
 ## Publicación y seguimiento
 

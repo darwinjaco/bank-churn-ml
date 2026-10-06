@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 4: T1–T7 en ejecución (implementación por Claude a petición del responsable) |
+| Fase actual | Semana 4 implementada (T0–T7); pendiente de revisión y publicación |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -587,8 +587,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T3 | Completada (`14b3e01`; CI tras push) | `feat: tree pipelines and preregistered search spaces` |
 | T4 | Completada (`365185e`; CI tras push) | `feat: two-phase tuning and re-evaluation` |
 | T5 | Completada (`bb5e4d0`; CI tras push) | `feat: preregistered model selection rule` |
-| T6 | Código completado; ejecución real en curso | `feat: model selection and ablation experiments` |
-| T7 | Pendiente | `docs: week 4 model selection and experiments` |
+| T6 | Completada (`e0b5c7b` código, `cfca063` resultados) | `feat: model selection and ablation experiments` |
+| T7 | Completada; pendiente de revisión y CI tras push | `docs: week 4 model selection and experiments` |
 
 #### T0 — Enmienda v1.2 y observaciones de semana 3
 
@@ -667,6 +667,23 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - Funciones puras con tests: Δ pareada por (repetición, pliegue); umbral E-03 inclusivo en −0,005; AP por repetición con la referencia B-02 (0,833333; 0,583333; media 0,708333); segmentos de E-02 con error si un cliente se repite dentro de una repetición.
 - Comprobaciones con `pre-commit` real (disponible en el entorno en la nube): todos los hooks en verde; 130 aprobados, cobertura 98 %.
 - El código se versiona antes de la ejecución real para que la procedencia de las corridas apunte a este commit; los resultados van en un commit aparte.
+
+#### T6–T7 — Resultados reales y cierre
+
+- `uv run churn-tune` (≈8 min, 2 núcleos) y `uv run churn-select`, en un clon exacto del commit `e0b5c7b`. FASE B: LogReg 0.655 ± 0.027; RF 0.686 ± 0.018; XGBoost 0.697 ± 0.018. Puntajes de búsqueda (optimistas) entre 0,002 y 0,007 por encima.
+- §6: mejor XGBoost; RF cercano (diferencia 0.011 < std 0.018) → **RF** por parsimonia. Validación (primer uso, una vez): Dummy 0.203, RF 0.696, LogReg 0.637 → `complejo_supera_logreg`; modelo final RF sin `EstimatedSalary`.
+- E-03: Δ AP +0.0033 ± 0.0040 (8/10 positivos) ≥ −0,005 → se elimina el salario.
+- E-02: (a) Δ AP sin productos -0.113 ± 0.021 (10/10 negativos); (b) AP todos 0.687 frente a 0.608 sin el grupo 3–4 (n = 5,799); (c) grupo 3–4 (n = 201): observado 87.1%, predicho 73.2%.
+- **Verificación independiente** (script sin importar `churn`, solo pandas/scikit-learn): RF FASE B con salario 0,6864 ± 0,0181, sin salario 0,6897 ± 0,0179; Δ E-03 +0,0033 ± 0,0040 con 8/10 positivos; AP de validación RF sin salario 0,6964 y Dummy 0,2035. Coinciden con los JSON.
+- Reportes: `reports/model_selection.md` generado desde los JSON (`python -m churn.selection_report`), con test que compara cifras. README con tabla de la semana 4 y tabla de la semana 3 a tres decimales. Spec 002 §8: dos criterios marcados.
+- Comprobaciones con `pre-commit` real: hooks en verde; suite completa en verde con cobertura ≥ 98 %.
+
+**Hallazgos para la semana 5**
+
+- E-02 (c): el modelo subestima el riesgo del grupo 3–4 en ~14 pp. Debe considerarse en la calibración (E-04) y en la ficha del modelo.
+- La procedencia `split_manifest_sha256` se calcula sobre los bytes del archivo y depende del final de línea: copia CRLF de Windows `978161d4…` (semana 3) frente a LF de Git `4354b7e0…` (semana 4). El contenido es idéntico. Propuesta para la T0 de la semana 5: calcular el hash sobre el JSON canónico o tras normalizar a LF.
+- scikit-learn 1.9 advierte que `penalty="l2"` se eliminará en 1.10; migrar a `l1_ratio=0` requiere enmienda.
+- La salida `criterio_fallido` del paso 4 de §6 es inalcanzable por construcción (documentado en T5).
 
 ## 6. Plantilla para nuevas secciones
 

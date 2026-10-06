@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Estado | En implementación: semanas 3–4 completadas/en curso |
+| Estado | En implementación: semanas 3–4 completadas; calibración (semana 5) pendiente |
 | Responsable | Darwin Jacome Cuenca |
 | Dependencia | [Especificación 001](001-overview-and-data-contract.md) |
 | Versión | v1.4 — aclaración previa a resultados: origen de las OOF de E-02 y ajuste de Dummy en validación; §6 y umbral de E-03 sin cambios |
@@ -151,9 +151,9 @@ Decisiones preregistradas de semana 4: sobre la familia seleccionada, con sus hi
 
 ## 8. Criterios de aceptación
 
-- [ ] Tabla de comparación en el README con media ± desviación estándar y protocolo de cálculo.
+- [x] Tabla de comparación en el README con media ± desviación estándar y protocolo de cálculo (semanas 3–4).
 - [ ] Experimentos E-01 a E-04 documentados con resultados y conclusión breve.
-- [ ] División reproducible y ausencia de solapamientos verificada mediante tests.
+- [x] División reproducible y ausencia de solapamientos verificada mediante tests.
 - [ ] Modelo seleccionado conforme a §6 y calibración conforme a §5.3; decisiones registradas en MLflow.
 - [ ] Conjunto de prueba utilizado en una única evaluación final, registrada con la etiqueta `final=true`.
 - [ ] Artefacto guardado: pipeline completo, calibrador elegido si aplica y `metadata.json`, con variables, versiones, hash de datos y referencia a la política de decisión.
