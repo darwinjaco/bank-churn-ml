@@ -697,8 +697,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | Tarea | Estado | Commit requerido |
 |---|---|---|
 | T0 | Completada (`895f293`) | `docs: spec 004 decision layer, spec 002 v1.5 and week 5 plan (SDD gate)` |
-| T1 | Completada (commit local) | `fix: canonical split manifest hash` |
-| T2 | Pendiente | `feat: probability calibration (E-04)` |
+| T1 | Completada (`8bfd342`) | `fix: canonical split manifest hash` |
+| T2 | Completada (commit local) | `feat: probability calibration (E-04)` |
 | T3 | Pendiente | `feat: expected-profit decision layer (spec 004)` |
 | T4 | Pendiente | `feat: calibrate, decide and freeze artifact` |
 | T5 | Pendiente | `chore: calibration and decision results` |
@@ -714,6 +714,11 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 
 - `tracking.manifest_sha256()`: SHA-256 de `json.dumps(contenido, sort_keys=True, separators=(",", ":"))`; lo usan `tracking.provenance()` y `train.main()`. Valor actual: `09ee6a9697dc…`. Los hashes históricos sobre bytes de las semanas 3 (`978161d4…`, CRLF) y 4 (`4354b7e0…`, LF) corresponden al mismo contenido.
 - Tests: mismo hash con LF, CRLF y claves reordenadas; hash distinto si cambia el contenido; `provenance()` usa el hash canónico.
+
+#### T2 — Calibración (E-04)
+
+- `calibration.py`: `oof_predictions` (5 pliegues, semilla 42, `clone` por pliegue), calibradores `none`/`sigmoid` (`LogisticRegression(C=np.inf)` sobre p)/`isotonic` (`IsotonicRegression` acotada y recortada), `choose_calibrator` (menor Brier; empate < 1e-4 resuelto sin calibrar > sigmoide > isotónica), `reliability_table` (10 cuantiles), `group_calibration` y `CalibratedModel` (pipeline + calibrador para el artefacto).
+- Tests con una puntuación sintética que subestima el riesgo (score = p²): ambas calibraciones bajan el Brier en datos no vistos, salidas en [0, 1], sigmoide monótona, isotónica recorta fuera de rango; reglas de empate; OOF completa y determinista. Sin advertencias con `-W error`.
 
 ## 6. Plantilla para nuevas secciones
 
