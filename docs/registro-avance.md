@@ -656,6 +656,11 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - Observación: la salida `criterio_fallido` del paso 4 es lógicamente inalcanzable (si el candidato supera a Dummy y LogReg ≥ candidato, LogReg supera a Dummy). Se mantiene por fidelidad literal a §6 y se excluye de cobertura.
 - Desde T5, el cómputo pesado se ejecuta en el entorno en la nube de Claude: los procesos en segundo plano no sobreviven en el entorno enlazado y la búsqueda supera el límite por llamada. Se usa un clon exacto (bundle de Git del mismo commit), el mismo CSV (SHA-256 `3996cd1f…`), el mismo `uv.lock` y una copia de `mlruns/mlflow.db`, que se devuelve al repositorio con las nuevas corridas.
 
+#### Aclaración v1.4 de la spec 002 (antes de resultados de E-02)
+
+- La v1.3 no fijaba si las OOF de E-02 (b)/(c) correspondían a la configuración con salario (FASE B original) o a la final tras E-03. Se fija la configuración final, porque E-02 audita el modelo que se desplegará y §6 ordena E-02 después de E-03. También se explicita que Dummy usa FS-RAW en validación.
+- Se versiona antes de ejecutar `churn-select` sobre datos reales; la búsqueda de FASE A/B (`churn-tune`) no depende de esta aclaración.
+
 ## 6. Plantilla para nuevas secciones
 
 ```markdown

@@ -5,7 +5,7 @@
 | Estado | En implementación: semanas 3–4 completadas/en curso |
 | Responsable | Darwin Jacome Cuenca |
 | Dependencia | [Especificación 001](001-overview-and-data-contract.md) |
-| Versión | v1.3 — enmienda B-02: agregación de OOF por repetición; reglas de §6 y E-03 sin cambios |
+| Versión | v1.4 — aclaración previa a resultados: origen de las OOF de E-02 y ajuste de Dummy en validación; §6 y umbral de E-03 sin cambios |
 | Última revisión documental | 6 de octubre de 2026 |
 
 ## 1. Objetivo
@@ -146,6 +146,8 @@ Decisiones preregistradas de semana 4: sobre la familia seleccionada, con sus hi
   - Prohibido: (1) promediar probabilidades por cliente entre repeticiones (genera un ensamble distinto del modelo evaluado); (2) juntar las predicciones de ambas repeticiones (duplica a cada cliente).
   - (b) se compara con la AP de todos los clientes calculada de la misma forma, agregada por repetición, no con la media por pliegue de FASE B.
   - n = número de clientes únicos del segmento en entrenamiento, igual en ambas repeticiones. Las OOF se guardan con `CustomerId`, `repeat` (0/1), `fold`, `y` y `proba`.
+  - Aclaración v1.4 (antes de ejecutar E-02 con datos reales): E-02 audita la **configuración final**, es decir, después de la decisión de E-03. (a) compara esa configuración con y sin `NumOfProducts` en los pliegues de FASE B. (b) y (c) usan sus OOF de FASE B: si E-03 elimina el salario, las OOF de la re-evaluación sin salario (mismos pliegues); si no, las OOF de FASE B de la familia elegida.
+  - Validación (pasos 3–4): Dummy se ajusta con FS-RAW sobre todo el entrenamiento; el candidato y, si es complejo, LogReg usan sus mejores hiperparámetros de FASE A y la misma decisión de E-03.
 
 ## 8. Criterios de aceptación
 
