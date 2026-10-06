@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 2: T1, dependencias estadísticas y grupo EDA |
+| Fase actual | Semana 2: T2, división y manifiesto |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -311,13 +311,13 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | Campo | Valor |
 |---|---|
 | Fase | Semana 2 |
-| Estado | En curso: T1 |
+| Estado | En curso: T2 |
 | Objetivo | Implementar exclusivamente la especificación 003 aprobada y el plan versionado |
 
 | Tarea | Estado | Commit requerido |
 |---|---|---|
-| T1 | Verificada localmente; CI del commit por confirmar | `build: add stats and EDA dependencies` |
-| T2 | Pendiente | `feat: stratified split with versioned manifest` |
+| T1 | Completada | `build: add stats and EDA dependencies` |
+| T2 | Verificada localmente; CI del commit por confirmar | `feat: stratified split with versioned manifest` |
 | T3 | Pendiente | `feat: statistical helpers with reference tests` |
 | T4 | Pendiente | `feat: preregistered hypothesis tests H1-H6` |
 
@@ -329,6 +329,18 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - Archivos: `pyproject.toml`, `uv.lock` y este registro. El CI sigue usando el grupo de producción y desarrollo: los tests actuales no necesitan gráficos.
 - `uv sync --locked`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run pre-commit run --all-files` y `uv run pytest --cov=churn --cov-fail-under=85`: satisfactorios; 22 tests aprobados y cobertura del 97,35 % sin instalar el grupo `eda`.
 - CI del commit previo T0 confirmado en verde antes del commit de T1. Pendiente: CI del nuevo commit tras la publicación.
+- Commit T1: `e9cdb06`; publicado. CI satisfactorio: https://github.com/darwinjaco/bank-churn-ml/actions/runs/37421692243.
+
+#### T2 — División y manifiesto (6 de octubre de 2026)
+
+- Implementados `make_split`, `build_manifest`, `load_exploration` y el CLI `churn-split` en `src/churn/split.py`.
+- División según el protocolo: 20 % de prueba primero, después 75/25 del resto, estratificación por `Exited` y semilla 42.
+- El manifiesto contiene tamaños, tasas, semilla, SHA-256 del CSV, hashes de los identificadores ordenados por partición y versión de scikit-learn.
+- La exploración selecciona las filas permitidas al leer el CSV y excluye las columnas de auditoría; no hay lector de prueba.
+- Tests de no solapamiento, cobertura de filas, tamaños, estratificación, determinismo, hashes, CLI y exclusión de clientes reservados. Un test con valores no convertibles en filas reservadas comprueba que el lector no las materializa.
+- Comprobación focalizada: `uv run pytest tests/test_split.py --cov=churn --cov-report=term-missing`: 6 aprobados, 1 omitido; cobertura del módulo `split.py` del 100 %. El test real del manifiesto se activará al generar el artefacto en T5, según el orden del plan.
+- `uv sync --locked`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run pre-commit run --all-files` y `uv run pytest --cov=churn --cov-fail-under=85`: satisfactorios; 28 tests aprobados, 1 omitido y cobertura global del 98,10 %.
+- CI de T1 confirmado en verde antes del nuevo commit. Pendiente: CI de T2; la ejecución sobre el CSV real corresponde a T5.
 
 ### S06 — T5–T7: resultados, notebook y conclusiones
 
