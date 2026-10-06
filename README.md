@@ -4,7 +4,7 @@
 
 Proyecto de aprendizaje automático de extremo a extremo para estimar el abandono de clientes (**churn**) y **decidir a quién conviene contactar**, convirtiendo probabilidades calibradas en beneficio esperado bajo supuestos explícitos.
 
-> En desarrollo. Semanas 1–2 implementadas y verificadas; EDA e hipótesis preregistradas listas para revisión. La semana 3 espera esa revisión. El detalle está en el [registro de avance](docs/registro-avance.md).
+> En desarrollo. Semanas 1–2 revisadas; semana 3 implementada y verificada, pendiente de revisión. Las baselines están registradas en MLflow; la selección se reserva para semana 4. El detalle está en el [registro de avance](docs/registro-avance.md).
 
 ## Objetivo de negocio
 
@@ -14,15 +14,15 @@ El dataset no contiene ingresos del banco, valor de vida del cliente (CLV), cost
 
 ## Estado actual
 
-- Implementados: contrato con Pandera, división estratificada, manifiesto, helpers estadísticos, H1–H6, seis figuras y notebook de EDA.
+- Implementados: contrato, división, EDA, figuras corregidas, transformadores sin fuga, pipelines de baselines y CV con MLflow.
 - Configurados: uv, Ruff, pytest, pre-commit y GitHub Actions; cobertura mínima en CI del 85 %.
-- Documentadas: especificaciones 001–003 en español; v1.1 de EDA conserva H1–H6 y fija Freeman–Halton exacto para resolver B-01.
-- Verificados localmente: contrato, manifiesto real, Ruff, formato, pre-commit y 71 tests; cobertura del 98,48 %.
+- Documentadas: especificaciones 001–003; modelado v1.1 fija FS-RAW/FS-EDA y CV exclusiva de entrenamiento. EDA v1.1 conserva H1–H6 y resuelve B-01.
+- Verificados localmente: 90 tests aprobados y cobertura del 98,56 %, además de Ruff, formato y pre-commit.
 - Reglas de trabajo: [AGENTS.md](AGENTS.md), incluidas especificación previa y exclusión permanente de `Gender` de las features.
 - Repositorio público: [darwinjaco/bank-churn-ml](https://github.com/darwinjaco/bank-churn-ml), rama `main`.
-- CI remoto verificado: 69 tests aprobados, 2 omitidos y 98,05 % de cobertura; [ejecución técnica de semana 2](https://github.com/darwinjaco/bank-churn-ml/actions/runs/37487169164).
+- CI remoto verificado: 88 tests aprobados, 2 omitidos y 98,24 % de cobertura; [ejecución técnica de semana 3](https://github.com/darwinjaco/bank-churn-ml/actions/runs/37514109690).
 
-Los dos tests con datos reales se omiten en CI porque el CSV se obtiene por separado. Los resultados locales de Windows y remotos de Linux están registrados en S02–S06.
+Los dos tests con datos reales se omiten en CI porque el CSV se obtiene por separado. Los tests MLflow usan tracking temporal; las tres corridas reales permanecen localmente en `mlruns/`. La evidencia está en S02–S07.
 
 ## Inicio rápido
 
@@ -121,13 +121,36 @@ uv run --group eda python -m churn.plots
 
 El [manifiesto](reports/split_manifest.json) está versionado; `data/processed/split.json` está excluido de Git. El [notebook](notebooks/01_eda.ipynb) carga solo exploración y muestra resultados/figuras, con salidas eliminadas.
 
+### Semana 3: baselines y MLflow
+
+Cinco pliegues estratificados comunes sobre **6.000 filas de entrenamiento**, con mezcla y semilla 42. Media ± desviación estándar muestral (`ddof=1`); hiperparámetros fijos, sin ponderación ni remuestreo.
+
+| Modelo | AP | ROC-AUC | Brier | Log loss |
+|---|---|---|---|---|
+| dummy-raw | 0.203833 ± 0.000456 | 0.500000 ± 0.000000 | 0.162285 ± 0.000270 | 0.505671 ± 0.000622 |
+| logreg-raw | 0.459104 ± 0.029316 | 0.755001 ± 0.012016 | 0.137894 ± 0.003545 | 0.435357 ± 0.009273 |
+| logreg-eda | 0.656790 ± 0.028053 | 0.839331 ± 0.021047 | 0.110680 ± 0.004947 | 0.364184 ± 0.018428 |
+
+FS-RAW es la referencia ingenua. FS-EDA agrupa productos 3–4 antes de one-hot, añade `has_balance` y transforma edad con escala/cuadrática aprendidas dentro de cada pliegue; el salario se conserva hasta E-03. `centered_age()` permanece solo en inferencia de EDA. Se mantiene la lectura conjunta de saldo y geografía de Q-10.
+
+La diferencia de AP media entre las dos LogReg es 0,197686, mayor que ambas desviaciones estándar; es una lectura descriptiva, **sin selección de modelo**. Validación y prueba se reservan para sus fases posteriores. Detalles, procedencia y run IDs en [baselines.md](reports/baselines.md) y [baselines.json](reports/baselines.json).
+
+Después de colocar el CSV y disponer de la división:
+
+```powershell
+uv run churn-baselines
+uv run mlflow ui --backend-store-uri sqlite:///mlruns/mlflow.db --port 5000
+```
+
+La interfaz está en `http://127.0.0.1:5000`; experimento `bank-churn`, tracking por defecto `sqlite:///mlruns/mlflow.db`, configurable con `MLFLOW_TRACKING_URI`. Las corridas usan `stage=baseline`, `final=false` y Dummy `eligible=false`. `mlruns/` está excluido de Git.
+
 ## Estructura del proyecto
 
 ```text
 docs/         Registro de avance por fases y secciones
 specs/        Especificaciones de diseño previas a la implementación
-src/churn/    Contrato, división, estadística, hipótesis y figuras
-tests/        Tests sintéticos, gráficos headless y dos tests opcionales con CSV real
+src/churn/    Contrato, división, EDA, features, pipelines y CV/tracking
+tests/        Tests sintéticos, gráficos, tracking temporal y dos tests opcionales reales
 data/         raw/ y processed/; datos excluidos de Git
 reports/      Reportes generados y evidencia de calidad
 notebooks/    EDA delgado; lógica reutilizable en src/churn/
@@ -138,8 +161,8 @@ notebooks/    EDA delgado; lógica reutilizable en src/churn/
 | N.º | Especificación | Estado |
 |---|---|---|
 | 001 | [Visión general y contrato de datos](specs/001-overview-and-data-contract.md) | Completada: validación local y CI remoto verificados |
-| 002 | [Modelado y evaluación](specs/002-modeling-and-evaluation.md) | Documentada; implementación pendiente |
-| 003 | [EDA e hipótesis preregistradas](specs/003-eda-and-hypotheses.md) | Implementada v1.1; pendiente de revisión |
+| 002 | [Modelado y evaluación](specs/002-modeling-and-evaluation.md) | Baselines v1.1 implementadas; selección/calibración pendientes |
+| 003 | [EDA e hipótesis preregistradas](specs/003-eda-and-hypotheses.md) | Implementada v1.1 y revisada |
 | 004 | Capa de decisión y beneficio esperado | Por redactar antes de la semana 5 |
 | 005 | API y dashboard | Por redactar antes de la semana 7 |
 | 006 | Operación: tests, Docker, CI y monitoreo | Por redactar antes de ampliar operación y serving |
@@ -161,7 +184,7 @@ Plan del **5 de octubre al 29 de noviembre de 2026**, con unas **8 horas por sem
 
 **Prioridad:** la capa de decisión de la semana 5 es el entregable central. Si hay retrasos, se reduce primero el alcance del monitoreo de cambios de distribución de la semana 8.
 
-Estado de cierre: semanas 1–2 verificadas, con la revisión de semana 2 pendiente; semanas 3–8 sin iniciar. La división se adelantó a semana 2 para reservar la prueba antes del EDA.
+Estado de cierre: semanas 1–2 revisadas y semana 3 implementada, pendiente de revisión. Semanas 4–8 sin iniciar. La división se adelantó a semana 2 para reservar la prueba antes del EDA.
 
 ## Publicación y seguimiento
 

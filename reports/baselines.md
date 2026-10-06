@@ -15,6 +15,13 @@ Fuente: [baselines.json](baselines.json), generado por `uv run churn-baselines` 
 | logreg-raw | 0.459104 ± 0.029316 | 0.755001 ± 0.012016 | 0.137894 ± 0.003545 | 0.435357 ± 0.009273 |
 | logreg-eda | 0.656790 ± 0.028053 | 0.839331 ± 0.021047 | 0.110680 ± 0.004947 | 0.364184 ± 0.018428 |
 
+## Lectura descriptiva
+
+- Dummy presenta AP 0,203833, acorde con la prevalencia de entrenamiento, y ROC-AUC 0,5 como referencia mínima.
+- La AP media de LogReg-EDA supera a LogReg-RAW en 0,197686, más que las desviaciones estándar respectivas de 0,028053 y 0,029316; esta comparación es descriptiva, no una prueba de significación.
+- En los mismos pliegues, LogReg-EDA también presenta ROC-AUC mayor y Brier/log loss menores que LogReg-RAW; son resultados de las configuraciones fijadas previamente.
+- Estas métricas pertenecen a CV de entrenamiento: no se elige modelo, no se infiere causalidad y la selección de la semana 4 y la evaluación final reservada siguen pendientes.
+
 Código utilizado para generar las filas, sin recalcular ni introducir resultados manuales:
 
 ```python

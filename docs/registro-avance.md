@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 3: T6, resultados reales de baselines |
+| Fase actual | Semana 3 implementada y verificada; detenida para revisión |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -29,7 +29,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 |---|---|---|---|---|
 | Semana 1 | 5–11 oct | Repo, uv, Ruff, pytest, pre-commit, CI mínimo, specs 001–002 y Pandera | Tests pasan en CI | Completada el 6 de octubre: validación local y CI remoto verificados |
 | Semana 2 | 12–18 oct | EDA, hipótesis y auditoría de productos 3–4 y balance cero | Hipótesis contrastadas con pruebas estadísticas, tamaños de efecto e incertidumbre | Completada y revisada el 6 de octubre; correcciones interpretativas incorporadas |
-| Semana 3 | 19–25 oct | Pipeline, división estratificada, Dummy/LogReg y MLflow | Modelos de referencia registrados en MLflow | En curso: compuerta T0 autorizada |
+| Semana 3 | 19–25 oct | Pipeline, división estratificada, Dummy/LogReg y MLflow | Modelos de referencia registrados en MLflow | Baselines implementadas y registradas; revisión pendiente |
 | Semana 4 | 26 oct–1 nov | RF, XGBoost, validación cruzada y ajuste acotado | Tabla de media ± desviación estándar por modelo | Pendiente |
 | Semana 5 | 2–8 nov | Calibración, umbral monetario, lift y beneficio por decil, sensibilidad | Umbral justificado por beneficio esperado bajo supuestos explícitos | Pendiente |
 | Semana 6 | 9–15 nov | SHAP, errores, segmentos y ficha del modelo | Limitaciones documentadas | Pendiente |
@@ -43,7 +43,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 | Especificación | Tema | Estado | Momento previsto |
 |---|---|---|---|
 | 001 | Visión general y contrato de datos | Completada: verificación local y remota | Semana 1 |
-| 002 | Modelado y evaluación | Enmienda v1.1 de semana 3; implementación pendiente de compuerta T0 | Semanas 3–5 |
+| 002 | Modelado y evaluación | Baselines v1.1 implementadas; selección y calibración pendientes | Semanas 3–5 |
 | 003 | [EDA e hipótesis preregistradas](../specs/003-eda-and-hypotheses.md) | Implementada v1.1 y revisada; H1–H6 congeladas en v1.0 | Semana 2 |
 | 004 | Capa de decisión y beneficio esperado | Pendiente de redacción | Antes de implementar la semana 5 |
 | 005 | API y dashboard | Pendiente de redacción | Antes de implementar la semana 7 |
@@ -477,7 +477,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 |---|---|
 | Fecha de apertura | 6 de octubre de 2026 |
 | Fechas planificadas | 19–25 de octubre de 2026 |
-| Estado | En curso: T6 |
+| Estado | Completada técnicamente; pendiente de revisión |
 | Objetivo | Tres baselines fijas con CV exclusivamente de entrenamiento, transformaciones seguras y trazabilidad MLflow |
 
 | Tarea | Estado | Commit requerido |
@@ -488,8 +488,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T3 | Completada | `feat: leakage-safe feature transformers` |
 | T4 | Completada | `feat: model pipelines for baselines` |
 | T5 | Completada | `feat: cross-validation harness with MLflow tracking` |
-| T6 | Tres corridas generadas y verificadas; comprobaciones completas pendientes | `chore: baseline results` |
-| T7 | Pendiente | `docs: week 3 results and log` |
+| T6 | Completada | `chore: baseline results` |
+| T7 | Lectura y cierre verificados; revisión pendiente | `docs: week 3 results and log` |
 
 #### T0 — Enmienda y compuerta SDD
 
@@ -553,6 +553,22 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - Réplica de CV sin registrar nuevas corridas: métricas e índices exactamente iguales para las tres configuraciones. Se conservan solo tres corridas reales en el tracking.
 - Run IDs: Dummy `67f346cabc794a749c709d298a8a77d8`, RAW `22b313957b96480bbd21f50a4130b1df`, EDA `bef5ae63e7b8421abcfee5f1ad65dd5c`. Código registrado: `c75af93fbfb0dd87f51efeb39fa70071caa4d399`; etiquetas `final=false`.
 - Comprobaciones completas satisfactorias: 90 aprobados y cobertura del 98,56 %. Base MLflow, CSV e índices excluidos de Git verificados con `git check-ignore`. CI previo T5 en verde; pendiente CI de T6 tras publicar.
+- Commit T6: `8e8b309`; CI en verde: https://github.com/darwinjaco/bank-churn-ml/actions/runs/37514109690. Resultado remoto: 88 aprobados, 2 omitidos por ausencia del CSV y cobertura del 98,24 %.
+
+#### T7 — Lectura descriptiva y cierre
+
+- `reports/baselines.md`: cuatro líneas descriptivas, sin elegir modelo ni lenguaje causal. Diferencia de AP EDA−RAW calculada desde JSON: 0,1976860408, mayor que std RAW 0,0293164275 y EDA 0,0280529011; no se presenta como prueba estadística.
+- README: tabla completa de las tres baselines, FS-RAW/FS-EDA, reproducción y ubicación MLflow, hoja de ruta y espera de revisión. La selección/calibración de fases posteriores siguen pendientes.
+- Ubicación local de las corridas: `mlruns/mlflow.db`, experimento `bank-churn`; run IDs consignados en T6 y `reports/baselines.md`. Los tests usan `tmp_path`, no ese tracking real.
+- Evidencia remota del código y resultados publicados antes del cierre documental: https://github.com/darwinjaco/bank-churn-ml/actions/runs/37514109690. El commit de cierre documental tendrá su propia ejecución de CI tras publicar.
+- Comprobaciones finales completas de `AGENTS.md`, con EDA adicional, satisfactorias: 90 aprobados y cobertura del 98,56 %. Ruff, formato y todos los hooks pertinentes en verde. CI previo T6 en verde antes del commit `docs: week 3 results and log`; la publicación documental tendrá su propia ejecución posterior.
+
+**Cierre de S07 y alcance**
+
+- Compuerta SDD respetada: `566a07b` antecede a cambios de código y dependencias; todos los mensajes de T0–T6 corresponden al plan aprobado.
+- Tres configuraciones fijas, mismos cinco pliegues exclusivamente de entrenamiento, métricas y trazabilidad completas; ninguna transformación aprendida usa `config.centered_age()` fuera de sklearn.
+- Rechazo explícito de auditoría en el pipeline, IDs excluidos, sin remuestreo ni ponderación y sin usar validación externa o prueba para métricas.
+- S07 cerrada técnicamente, sin bloqueos pendientes. No se elige modelo ni se avanza a semana 4; la revisión del responsable de diseño es el siguiente paso.
 
 ## 6. Plantilla para nuevas secciones
 
