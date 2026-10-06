@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 2: T2, división y manifiesto |
+| Fase actual | Semana 2: T0–T3 verificadas localmente; avance a T4 bloqueado por B-01 |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -311,15 +311,15 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | Campo | Valor |
 |---|---|
 | Fase | Semana 2 |
-| Estado | En curso: T2 |
+| Estado | T1–T2 completadas; T3 verificada localmente; T4 bloqueada por B-01 |
 | Objetivo | Implementar exclusivamente la especificación 003 aprobada y el plan versionado |
 
 | Tarea | Estado | Commit requerido |
 |---|---|---|
 | T1 | Completada | `build: add stats and EDA dependencies` |
-| T2 | Verificada localmente; CI del commit por confirmar | `feat: stratified split with versioned manifest` |
-| T3 | Pendiente | `feat: statistical helpers with reference tests` |
-| T4 | Pendiente | `feat: preregistered hypothesis tests H1-H6` |
+| T2 | Completada | `feat: stratified split with versioned manifest` |
+| T3 | Verificada localmente; CI del commit por confirmar | `feat: statistical helpers with reference tests` |
+| T4 | Bloqueada: falta definir Fisher para tablas 3×2 | `feat: preregistered hypothesis tests H1-H6` |
 
 #### T1 — Dependencias (6 de octubre de 2026)
 
@@ -341,6 +341,25 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - Comprobación focalizada: `uv run pytest tests/test_split.py --cov=churn --cov-report=term-missing`: 6 aprobados, 1 omitido; cobertura del módulo `split.py` del 100 %. El test real del manifiesto se activará al generar el artefacto en T5, según el orden del plan.
 - `uv sync --locked`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run pre-commit run --all-files` y `uv run pytest --cov=churn --cov-fail-under=85`: satisfactorios; 28 tests aprobados, 1 omitido y cobertura global del 98,10 %.
 - CI de T1 confirmado en verde antes del nuevo commit. Pendiente: CI de T2; la ejecución sobre el CSV real corresponde a T5.
+- Commit T2: `ab73e70`; publicado. CI satisfactorio: https://github.com/darwinjaco/bank-churn-ml/actions/runs/37422050721.
+
+#### T3 — Funciones estadísticas (6 de octubre de 2026)
+
+- Implementadas funciones puras en `src/churn/stats.py`: Wilson, diferencia de riesgo con Newcombe método 10, OR con IC Woolf, V de Cramér, Holm y AUC con IC bootstrap percentil.
+- Añadidos `tests/test_stats.py` con referencias de la especificación y tolerancia `1e-4`, comprobaciones de n=0, tablas con ceros, determinismo del bootstrap y entradas que no permiten inferencia.
+- Wilson, Newcombe, Woolf y Holm utilizan las implementaciones de statsmodels; Pearson usa scipy y AUC usa scikit-learn. No hay I/O en el módulo.
+- Comprobación focalizada: `uv run pytest tests/test_stats.py`: 19 tests aprobados. Ruff detectó un signo menos Unicode ambiguo en un docstring; se cambió por el signo ASCII y las comprobaciones pasaron.
+- `uv sync --locked`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run pre-commit run --all-files` y `uv run pytest --cov=churn --cov-fail-under=85`: satisfactorios; 47 tests aprobados, 1 omitido y cobertura global del 98,62 %. `stats.py` y `split.py` tienen cobertura del 100 %.
+- CI previo T2 confirmado en verde. Pendiente: CI del commit T3 tras la publicación; no se avanza a T4 por B-01.
+
+#### Bloqueo B-01 — T4: Fisher para H2 con tabla 3×2
+
+- La especificación 003 §4 exige Fisher si alguna frecuencia esperada es menor a 5, y H2 (§5) usa una tabla 3×2.
+- El cálculo reproducible del p-valor de Fisher para esa tabla no está fijado: faltan el procedimiento y, si interviene remuestreo, su configuración.
+- Diagnóstico exclusivamente sintético con scipy 1.17.1: dos llamadas a `fisher_exact([[8, 2], [1, 5], [0, 4]])` devolvieron p-valores `0.0093` y `0.0067`. Por tanto, usar el valor por defecto introduce remuestreo no preregistrado.
+- Consultada la [documentación de scipy sobre Fisher](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.fisher_exact.html), que expone métodos de remuestreo para tablas distintas de 2×2.
+- Según el rol de implementador y la regla 6, se detiene el avance a T4–T7. No se ha elegido un método, cambiado H1–H6 ni creado `hypotheses.py`.
+- Para desbloquear: el responsable de diseño debe fijar el procedimiento para el caso 3×2 de H2 en una enmienda versionada de la especificación, con los parámetros necesarios para reproducirlo, antes de implementar T4.
 
 ### S06 — T5–T7: resultados, notebook y conclusiones
 
