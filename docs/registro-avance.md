@@ -583,8 +583,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 |---|---|---|
 | T0 | Completada | `docs: amend spec 002 v1.2 and week 4 plan (SDD gate)` |
 | T1 | Completada (`53d909a`; CI tras push) | `fix: baseline report precision and paired differences` |
-| T2 | Completada (commit local; CI tras push) | `build: add xgboost` |
-| T3 | Pendiente | `feat: tree pipelines and preregistered search spaces` |
+| T2 | Completada (`bd4962c`; CI tras push) | `build: add xgboost` |
+| T3 | Completada (commit local; CI tras push) | `feat: tree pipelines and preregistered search spaces` |
 | T4 | Pendiente; protocolo OOF bloqueado por B-02 | `feat: two-phase tuning and re-evaluation` |
 | T5 | Pendiente | `feat: preregistered model selection rule` |
 | T6 | Pendiente; E-02 bloqueada por B-02 | `feat: model selection and ablation experiments` |
@@ -633,6 +633,14 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 
 - Se usa `xgboost-cpu>=3.2` (misma API `import xgboost`) en lugar de `xgboost`: en Linux, `xgboost` arrastra `nvidia-nccl-cu12` (cientos de MB) sin aportar nada en CPU. `uv.lock` sin paquetes NVIDIA y con ruedas para Windows y Linux.
 - Verificación: `import xgboost` → 3.2.0; Ruff, formato, hooks equivalentes y pytest en verde.
+
+#### T3 — Pipelines de árboles y espacios preregistrados
+
+- `build_pipeline(model, feature_set, exclude=(), params=None)`: `rf`/`xgb` solo con FS-TREE (valores sin escalar, `NumOfProducts` entero, `has_balance`, Geography one-hot); `exclude` admite únicamente `EstimatedSalary` y `NumOfProducts` (E-03/E-02); `params` fija hiperparámetros del clasificador. El `InputGuard` se mantiene.
+- `search_spaces.py`: copia literal de §4 y §5.1 (presupuestos 20/40/40, semillas 42 y 2027, 5×2 pliegues).
+- R3 verificado por test: RF `class_weight=None`; XGBoost `scale_pos_weight=1`, `hist`, `logloss`, sin early stopping.
+- Tests nuevos: espacios idénticos a la spec, rechazo de `Gender`, ausencia de escalado, determinismo de RF/XGBoost, ablaciones y combinaciones inválidas. 105 aprobados, cobertura 98,59 %.
+- Aviso no bloqueante: scikit-learn 1.9 marca `penalty="l2"` como obsoleto (se elimina en 1.10). Se conserva porque la spec lo fija; migrar a `l1_ratio=0` requerirá enmienda.
 
 ## 6. Plantilla para nuevas secciones
 

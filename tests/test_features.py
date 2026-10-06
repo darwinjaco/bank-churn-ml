@@ -13,7 +13,7 @@ from churn.features import HasBalance, ProductsGroup, build_age_transformer
 
 def test_feature_sets_exclude_audit_identifiers_and_target():
     forbidden = set(config.AUDIT_COLUMNS + config.ID_COLUMNS + [config.TARGET])
-    assert set(config.FEATURE_SETS) == {"raw", "eda"}
+    assert set(config.FEATURE_SETS) == {"raw", "eda", "tree"}
     for columns in config.FEATURE_SETS.values():
         assert not forbidden & set(columns)
         assert set(columns) == set(config.MODEL_FEATURES)

@@ -29,7 +29,13 @@ CATEGORICAL_FEATURES = ["Geography"]
 MODEL_FEATURES = NUMERIC_FEATURES + ORDINAL_FEATURES + BINARY_FEATURES + CATEGORICAL_FEATURES
 
 # Ambas variantes reciben columnas originales; las derivadas se crean dentro del Pipeline.
-FEATURE_SETS = {"raw": MODEL_FEATURES.copy(), "eda": MODEL_FEATURES.copy()}
+FEATURE_SETS = {
+    "raw": MODEL_FEATURES.copy(),
+    "eda": MODEL_FEATURES.copy(),
+    "tree": MODEL_FEATURES.copy(),
+}
+# Columnas que pueden excluirse solo en ablaciones preregistradas (spec 002 §7: E-02 y E-03).
+ABLATION_COLUMNS = ("EstimatedSalary", "NumOfProducts")
 BALANCE_POSITIVE_THRESHOLD = 0.0
 PRODUCTS_GROUP_MAX = 3
 
