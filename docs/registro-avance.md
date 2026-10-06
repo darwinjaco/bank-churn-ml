@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 2 revisada y cerrada; semana 3 pendiente de instrucciones |
+| Fase actual | Semana 3: T0, compuerta documental y enmienda 002 v1.1 |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -29,7 +29,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 |---|---|---|---|---|
 | Semana 1 | 5–11 oct | Repo, uv, Ruff, pytest, pre-commit, CI mínimo, specs 001–002 y Pandera | Tests pasan en CI | Completada el 6 de octubre: validación local y CI remoto verificados |
 | Semana 2 | 12–18 oct | EDA, hipótesis y auditoría de productos 3–4 y balance cero | Hipótesis contrastadas con pruebas estadísticas, tamaños de efecto e incertidumbre | Completada y revisada el 6 de octubre; correcciones interpretativas incorporadas |
-| Semana 3 | 19–25 oct | Pipeline, división estratificada, Dummy/LogReg y MLflow | Modelos de referencia registrados en MLflow | Pendiente |
+| Semana 3 | 19–25 oct | Pipeline, división estratificada, Dummy/LogReg y MLflow | Modelos de referencia registrados en MLflow | En curso: compuerta T0 autorizada |
 | Semana 4 | 26 oct–1 nov | RF, XGBoost, validación cruzada y ajuste acotado | Tabla de media ± desviación estándar por modelo | Pendiente |
 | Semana 5 | 2–8 nov | Calibración, umbral monetario, lift y beneficio por decil, sensibilidad | Umbral justificado por beneficio esperado bajo supuestos explícitos | Pendiente |
 | Semana 6 | 9–15 nov | SHAP, errores, segmentos y ficha del modelo | Limitaciones documentadas | Pendiente |
@@ -43,7 +43,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 | Especificación | Tema | Estado | Momento previsto |
 |---|---|---|---|
 | 001 | Visión general y contrato de datos | Completada: verificación local y remota | Semana 1 |
-| 002 | Modelado y evaluación | Documentada en español; implementación pendiente | Semanas 3–5 |
+| 002 | Modelado y evaluación | Enmienda v1.1 de semana 3; implementación pendiente de compuerta T0 | Semanas 3–5 |
 | 003 | [EDA e hipótesis preregistradas](../specs/003-eda-and-hypotheses.md) | Implementada v1.1 y revisada; H1–H6 congeladas en v1.0 | Semana 2 |
 | 004 | Capa de decisión y beneficio esperado | Pendiente de redacción | Antes de implementar la semana 5 |
 | 005 | API y dashboard | Pendiente de redacción | Antes de implementar la semana 7 |
@@ -470,6 +470,35 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - S06 completada y revisada: artefactos, notebook y conclusiones verificados, con evidencia local y remota; correcciones de soporte y composición geográfica incorporadas. Los análisis secundarios quedan separados y sin lenguaje causal.
 - B-01 resuelto. Sin bloqueos pendientes de semana 2; revisión interpretativa cerrada según las correcciones del responsable de diseño.
 - Semana 3 pendiente de nuevas instrucciones. No comenzar entrenamiento ni selección de variables en esta sección documental.
+
+### S07 — Semana 3: pipeline, baselines y MLflow
+
+| Campo | Valor |
+|---|---|
+| Fecha de apertura | 6 de octubre de 2026 |
+| Fechas planificadas | 19–25 de octubre de 2026 |
+| Estado | En curso: T0 |
+| Objetivo | Tres baselines fijas con CV exclusivamente de entrenamiento, transformaciones seguras y trazabilidad MLflow |
+
+| Tarea | Estado | Commit requerido |
+|---|---|---|
+| T0 | Verificada localmente; publicación y CI pendientes | `docs: amend spec 002 v1.1 and week 3 plan (SDD gate)` |
+| T1 | Pendiente | `fix: figure readability (week 2 debt)` |
+| T2 | Pendiente | `build: add mlflow` |
+| T3 | Pendiente | `feat: leakage-safe feature transformers` |
+| T4 | Pendiente | `feat: model pipelines for baselines` |
+| T5 | Pendiente | `feat: cross-validation harness with MLflow tracking` |
+| T6 | Pendiente | `chore: baseline results` |
+| T7 | Pendiente | `docs: week 3 results and log` |
+
+#### T0 — Enmienda y compuerta SDD
+
+- Leídos AGENTS, especificación 002 y estado del repositorio antes de implementar. Árbol limpio y CI de `b83caba` en verde: https://github.com/darwinjaco/bank-churn-ml/actions/runs/37496270556.
+- Creado el plan completo autorizado de T0–T7. Se mantienen las fechas previstas; ejecución anticipada por instrucción del usuario.
+- Enmienda 002 v1.1: FS-RAW/FS-EDA, categorías de productos no monótonas, edad escalada/cuadrática dentro de pliegues, reglas R1–R5, baselines fijas, cuatro métricas con ddof=1 y trazabilidad MLflow.
+- Motivo: H2 desaconseja la codificación ordinal para LogReg informada; H4 requiere no linealidad, y usar `config.centered_age()` fuera de sklearn produciría fuga de las medias del pliegue. Q-10 fija la interpretación conjunta de saldo y geografía.
+- Solo documentación hasta el commit de T0. Sin selección de modelo, acceso a prueba ni uso de validación para entrenamiento.
+- Ejecutadas las comprobaciones de `AGENTS.md`, incluida sincronización adicional `uv sync --locked --all-groups`: 71 aprobados y cobertura del 98,48 %; Ruff, formato y hooks satisfactorios. CI previo confirmado en verde. Pendientes: commit de compuerta y CI de T0.
 
 ## 6. Plantilla para nuevas secciones
 
