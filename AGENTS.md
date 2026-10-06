@@ -31,3 +31,11 @@ La cobertura mínima es del 85 %. No omitir hooks ni ignorar fallos. Los archivo
 ## 5. Registro actualizado en cada sección
 
 Actualizar `docs/registro-avance.md` al finalizar cada sección. Incluir cambios, comandos realmente ejecutados, resultados resumidos, decisiones, bloqueos y siguiente paso. Marcar como completado solo lo verificado; conservar la distinción entre comprobación local y CI remoto.
+
+## 6. Compuerta SDD
+
+No modificar `src/`, `tests/` ni dependencias sin una especificación y un plan con commit previo. Los cambios de diseño se realizan como enmiendas versionadas de la especificación, con el motivo registrado en `docs/registro-avance.md`. Si el trabajo requiere una decisión no especificada, detenerse y registrar el bloqueo.
+
+## 7. Partición de prueba
+
+No crear funciones que carguen la partición de prueba hasta la evaluación final de la especificación 002. Durante la semana 2 solo se carga entrenamiento y validación para exploración; no existe `load_test()`.

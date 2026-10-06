@@ -9,7 +9,7 @@
 
 ## 1. Objetivo
 
-Seleccionar un modelo que **ordene adecuadamente el riesgo y produzca probabilidades calibradas**, como entrada de la futura capa de decisión por beneficio esperado (especificación 003). La selección prioriza calidad de ordenamiento, calibración y simplicidad; el umbral de contacto se justificará mediante beneficio, no mediante F1.
+Seleccionar un modelo que **ordene adecuadamente el riesgo y produzca probabilidades calibradas**, como entrada de la futura capa de decisión por beneficio esperado (especificación 004). La selección prioriza calidad de ordenamiento, calibración y simplicidad; el umbral de contacto se justificará mediante beneficio, no mediante F1.
 
 ## 2. División de datos
 
@@ -76,7 +76,7 @@ La calibración se implementará en la semana 5, una vez seleccionado el modelo:
 1. Con hiperparámetros fijados, generar predicciones fuera de muestra (OOF) en entrenamiento mediante 5 pliegues estratificados. Cada observación se predice con un pipeline que no se ajustó con ella.
 2. Ajustar los calibradores sigmoidal e isotónico con esas predicciones OOF y las etiquetas de entrenamiento. Después, ajustar el pipeline base con todo el entrenamiento.
 3. Comparar la salida sin calibrar y las variantes calibradas en validación mediante Brier y curvas de fiabilidad. Elegir la variante con menor Brier; ante igualdad, preferir sin calibración adicional y luego sigmoidal sobre isotónica.
-4. Fijar en validación el umbral por beneficio esperado según la especificación 003. No ajustar el calibrador con las etiquetas de validación.
+4. Fijar en validación el umbral por beneficio esperado según la especificación 004. No ajustar el calibrador con las etiquetas de validación.
 5. Congelar pipeline, calibrador, supuestos y umbral antes de la evaluación final en prueba. No reajustar con validación antes de esa evaluación.
 
 El uso de validación para elegir calibración y umbral se registrará como selección de desarrollo, no como medición independiente de rendimiento.
@@ -113,4 +113,4 @@ Los experimentos usarán las mismas particiones y semillas. Cada conclusión inc
 
 ## 9. Definición de cierre
 
-Modelo y calibración justificados, experimentos documentados y artefacto cargable por el futuro módulo `predict.py`, con un test de predicción reproducible. La capa de decisión y su umbral monetario deberán satisfacer además la especificación 003. La evidencia y los pendientes se mantendrán en el [registro de avance](../docs/registro-avance.md).
+Modelo y calibración justificados, experimentos documentados y artefacto cargable por el futuro módulo `predict.py`, con un test de predicción reproducible. La capa de decisión y su umbral monetario deberán satisfacer además la especificación 004. La evidencia y los pendientes se mantendrán en el [registro de avance](../docs/registro-avance.md).

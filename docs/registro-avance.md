@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 1 completada; próxima fase: semana 2, EDA y auditoría |
+| Fase actual | Semana 2: T0, compuerta SDD previa a la implementación |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -28,7 +28,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 | Fase | Fechas | Entregable | Criterio de cierre | Estado |
 |---|---|---|---|---|
 | Semana 1 | 5–11 oct | Repo, uv, Ruff, pytest, pre-commit, CI mínimo, specs 001–002 y Pandera | Tests pasan en CI | Completada el 6 de octubre: validación local y CI remoto verificados |
-| Semana 2 | 12–18 oct | EDA, hipótesis y auditoría de productos 3–4 y balance cero | Hipótesis contrastadas con pruebas estadísticas, tamaños de efecto e incertidumbre | Pendiente |
+| Semana 2 | 12–18 oct | EDA, hipótesis y auditoría de productos 3–4 y balance cero | Hipótesis contrastadas con pruebas estadísticas, tamaños de efecto e incertidumbre | En curso; ejecución iniciada el 6 de octubre |
 | Semana 3 | 19–25 oct | Pipeline, división estratificada, Dummy/LogReg y MLflow | Modelos de referencia registrados en MLflow | Pendiente |
 | Semana 4 | 26 oct–1 nov | RF, XGBoost, validación cruzada y ajuste acotado | Tabla de media ± desviación estándar por modelo | Pendiente |
 | Semana 5 | 2–8 nov | Calibración, umbral monetario, lift y beneficio por decil, sensibilidad | Umbral justificado por beneficio esperado bajo supuestos explícitos | Pendiente |
@@ -44,9 +44,10 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 |---|---|---|---|
 | 001 | Visión general y contrato de datos | Completada: verificación local y remota | Semana 1 |
 | 002 | Modelado y evaluación | Documentada en español; implementación pendiente | Semanas 3–5 |
-| 003 | Capa de decisión y beneficio esperado | Pendiente de redacción | Antes de implementar la semana 5 |
-| 004 | API y dashboard | Pendiente de redacción | Antes de implementar la semana 7 |
-| 005 | Operación: tests, Docker, CI y monitoreo | Pendiente de redacción | Antes de ampliar operación y serving |
+| 003 | [EDA e hipótesis preregistradas](../specs/003-eda-and-hypotheses.md) | Aprobada v1.0; H1–H6 congeladas al versionar T0 | Semana 2 |
+| 004 | Capa de decisión y beneficio esperado | Pendiente de redacción | Antes de implementar la semana 5 |
+| 005 | API y dashboard | Pendiente de redacción | Antes de implementar la semana 7 |
+| 006 | Operación: tests, Docker, CI y monitoreo | Pendiente de redacción | Antes de ampliar operación y serving |
 
 ## 4. Punto de partida — 6 de octubre de 2026
 
@@ -271,6 +272,66 @@ S03 completada tras la autorización de publicación y la verificación remota. 
 **Siguiente paso**
 
 Semana 2: definir la sección de EDA, hipótesis y protocolo estadístico en la especificación 001, preservando la reserva del conjunto de prueba, y después implementar la auditoría de calidad.
+
+### S04 — T0: compuerta SDD de la semana 2
+
+| Campo | Valor |
+|---|---|
+| Fecha | 6 de octubre de 2026 |
+| Fase | Semana 2 |
+| Estado | Comprobación local completada; publicación y CI del commit por verificar |
+| Objetivo | Versionar la especificación y el plan aprobados antes de modificar código, tests o dependencias |
+
+**Trabajo realizado**
+
+- Leídos `AGENTS.md`, `specs/003-eda-and-hypotheses.md` y `docs/plan-semana-2.md` antes de comenzar.
+- Añadida `.gitattributes` con normalización LF para texto y PNG binarios.
+- Añadidas las reglas 6 (compuerta SDD) y 7 (partición de prueba); la regla 2 permanece intacta.
+- Renumeradas las especificaciones previstas: 003 EDA, 004 decisión, 005 serving y 006 operación.
+- Actualizadas las referencias de la capa de decisión en la especificación 002; E-01 permanece intacta.
+- Aprobadas la especificación 003 y el plan como v1.0, sin modificar H1–H6.
+- La ejecución se adelanta al 6 de octubre por instrucción del usuario; se mantienen las fechas originales del cronograma.
+
+**Comprobaciones y evidencia**
+
+- Estado inicial: únicamente la especificación 003 y el plan nuevos, todavía sin versionar; sin otros cambios locales.
+- CI previo en verde: https://github.com/darwinjaco/bank-churn-ml/actions/runs/37419719367 (`9051f2e`).
+- `git add --renormalize .`: ejecutado; sin cambios de contenido en código, tests ni reporte de calidad.
+- `uv sync --locked`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run pre-commit run --all-files` y `uv run pytest --cov=churn --cov-fail-under=85`: satisfactorios; 22 tests aprobados y cobertura del 97,35 %.
+- Los archivos nuevos de T0 quedaron incluidos en las comprobaciones de pre-commit.
+
+**Siguiente paso**
+
+Completar T0 con el mensaje `docs: approve spec 003 and week 2 plan (SDD gate)`. Después comenzar T1; la implementación requiere ese commit previo.
+
+### S05 — T1–T4: dependencias, división y contrastes
+
+| Campo | Valor |
+|---|---|
+| Fase | Semana 2 |
+| Estado | Pendiente |
+| Objetivo | Implementar exclusivamente la especificación 003 aprobada y el plan versionado |
+
+| Tarea | Estado | Commit requerido |
+|---|---|---|
+| T1 | Pendiente | `build: add stats and EDA dependencies` |
+| T2 | Pendiente | `feat: stratified split with versioned manifest` |
+| T3 | Pendiente | `feat: statistical helpers with reference tests` |
+| T4 | Pendiente | `feat: preregistered hypothesis tests H1-H6` |
+
+### S06 — T5–T7: resultados, notebook y conclusiones
+
+| Campo | Valor |
+|---|---|
+| Fase | Semana 2 |
+| Estado | Pendiente |
+| Objetivo | Generar los entregables de EDA y detenerse para revisión al terminar T7 |
+
+| Tarea | Estado | Commit requerido |
+|---|---|---|
+| T5 | Pendiente | `chore: generate split manifest, hypothesis results and figures` |
+| T6 | Pendiente | `docs: EDA notebook` |
+| T7 | Pendiente | `docs: week 2 conclusions and log` |
 
 ## 6. Plantilla para nuevas secciones
 
