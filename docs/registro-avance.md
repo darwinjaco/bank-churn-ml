@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 2: B-01 resuelto; continuación con T4 según v1.1 |
+| Fase actual | Semana 2: T4, contrastes preregistrados según v1.1 |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -322,7 +322,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | Campo | Valor |
 |---|---|
 | Fase | Semana 2 |
-| Estado | En curso: B-01 resuelto; T4 pendiente de implementación |
+| Estado | En curso: T4 implementada, verificación completa pendiente |
 | Objetivo | Implementar exclusivamente la especificación 003 aprobada y el plan versionado |
 
 | Tarea | Estado | Commit requerido |
@@ -330,7 +330,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T1 | Completada | `build: add stats and EDA dependencies` |
 | T2 | Completada | `feat: stratified split with versioned manifest` |
 | T3 | Completada | `feat: statistical helpers with reference tests` |
-| T4 | Pendiente; procedimiento exacto aprobado y verificado | `feat: preregistered hypothesis tests H1-H6` |
+| T4 | Verificada localmente; CI del commit por confirmar | `feat: preregistered hypothesis tests H1-H6` |
 
 #### T1 — Dependencias (6 de octubre de 2026)
 
@@ -392,6 +392,16 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - Versionada en este paso la confirmación pendiente del CI de T3. Se mantiene un commit por tarea.
 - Mensaje de este paso: `docs: close B-01 in progress log`. Siguiente tarea: T4 según la especificación v1.1.
 - Comprobaciones locales completas de `AGENTS.md` satisfactorias: 56 aprobados, 1 omitido y cobertura del 98,79 %. CI del paso 2 en verde antes de este commit.
+- Paso 3 publicado: `fc7ef62`. CI en verde: https://github.com/darwinjaco/bank-churn-ml/actions/runs/37424012050.
+
+#### T4 — Contrastes H1–H6 (6 de octubre de 2026)
+
+- Implementada `HypothesisResult`, funciones H1–H6, selector exacto v1.1 en H1/H2/H5, Holm exclusivamente sobre H1–H5 y equivalencia para H6.
+- H3 usa Logit con los tres términos fijados y H4 compara los modelos lineal y cuadrático mediante razón de verosimilitud. Los modelos son inferenciales del protocolo, no modelos predictivos de semana 3.
+- Definiciones de saldo y tramos/centrado de edad en `config.py`; no se modificó la lista de features del modelo.
+- CLI `churn-hypotheses` carga exclusivamente `load_exploration()` y serializa la prueba usada, efectos, IC, p-valores y veredictos.
+- `uv run pytest tests/test_hypotheses.py --cov=churn --cov-report=term-missing`: 12 aprobados; incluye efectos sembrados, ausencia de efecto, coeficientes conocidos de H3/H4, selectores exactos, equivalencia, Holm y restricciones de módulos. Se corrigió el orden de imports señalado por Ruff.
+- Sin contrastes sobre datos reales antes de T5. Comprobaciones completas de `AGENTS.md` satisfactorias: 68 aprobados, 1 omitido y cobertura del 98,76 %. CI del paso 3 confirmado en verde antes del commit; pendiente CI de T4.
 
 ### S06 — T5–T7: resultados, notebook y conclusiones
 
