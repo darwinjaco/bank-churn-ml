@@ -90,7 +90,7 @@ Hallazgos Q-06 en adelante: [reporte de hipótesis](../reports/eda_hypotheses.md
 | Q-07 | Relación no monótona con productos (H2) | Tasas 2 < 1 < 3–4: 7,38 % < 27,98 % < 85,60 %; IC no solapados; n(3–4)=257 | Priorizar E-02 y la auditoría del grupo pequeño; el patrón no prueba origen sintético |
 | Q-08 | Asociación de Alemania persiste tras ajustar por saldo (H3) | OR ajustado 2,1787 [1,9133; 2,4809]; atenuación del log-OR 17,46 % | Documentar segmentos y límites del ajuste; sin interpretación causal |
 | Q-09 | Edad con U invertida en el modelo inferencial fijado (H4) | β cuadrático −0,003429 [−0,003855; −0,003002]; pico puntual 56,58 años | Evaluar `age_band` ya prevista; cualquier incorporación al modelo requiere CV |
-| Q-10 | Saldo cero asociado a menor abandono (H5) | DR −10,62 pp [−12,31; −8,88]; saldo cero en 36,14 % de exploración | Evaluar `has_balance` ya propuesto junto al saldo continuo |
+| Q-10 | Saldo cero asociado a menor abandono (H5); ningún cliente de Alemania tiene `Balance = 0`, posible artefacto de generación; `has_balance` y `Geography` comparten señal | DR cruda −10,62 pp [−12,31; −8,88]; Alemania con saldo cero 0/2.005; sin Alemania, DR descriptiva −4,8984 pp. Cálculo reproducible en [Exploratorio](../reports/eda_hypotheses.md#exploratorio) | Evaluar `has_balance` junto al saldo continuo; reportar SHAP de `has_balance` y `Geography` en conjunto y no interpretar sus coeficientes por separado en la semana 3 |
 | Q-11 | Salario bruto dentro del margen de equivalencia de AUC (H6) | AUC 0,5146 [0,4997; 0,5306] dentro de [0,45; 0,55] | Ejecutar E-03; no descartar utilidad combinada o no lineal por este resultado |
 
 ## 7. Decisiones técnicas

@@ -3,7 +3,7 @@
 ## Protocolo y muestra
 
 - Especificación 003 v1.0 preregistrada en `678004d`; enmienda v1.1 en `9e043df`, antes de observar los contrastes reales. H1–H6, direcciones y umbrales permanecieron sin cambios.
-- Fuente numérica: [hypotheses.json](hypotheses.json). División reproducible: [split_manifest.json](split_manifest.json), semilla 42 y scikit-learn 1.9.1.
+- Fuente numérica de H1–H6: [hypotheses.json](hypotheses.json); revisión estratificada calculada con el código de [Exploratorio](#exploratorio). División reproducible: [split_manifest.json](split_manifest.json), semilla 42 y scikit-learn 1.9.1.
 - Muestra analítica: **8.000 clientes**, entrenamiento (6.000) y validación (2.000); 1.630 abandonos, tasa del 20,375 %. La partición de prueba no se carga para EDA ni contrastes.
 - α = 0,05, bilateral; Holm exclusivamente sobre H1–H5. H6 se evalúa por equivalencia del IC de AUC dentro de [0,45; 0,55], con 2.000 réplicas bootstrap y semilla 42.
 - H1/H2/H5 utilizaron Pearson sin Yates. La frecuencia esperada mínima de H2 es 52,36; el fallback exacto de Freeman–Halton no fue necesario en los contrastes reales, pero pasa sus tests de referencia.
@@ -13,13 +13,15 @@
 
 DR significa diferencia de riesgo; **pp** son puntos porcentuales. En H2 los IC corresponden a las tasas por nivel, no a V de Cramér. El pico de H4 es una estimación puntual; su IC no fue preregistrado.
 
+En esta tabla, los p-valores menores a 10⁻¹⁰ se muestran como «< 10⁻¹⁰»; los valores completos se conservan en `hypotheses.json`.
+
 | Hipótesis | Efecto | IC 95 % | p Holm | Prueba usada | Veredicto |
 |---|---|---|---|---|---|
-| H1: inactivos abandonan más | DR +12,27 pp; OR 2,1610 | DR [10,51; 14,03] pp; OR [1,9314; 2,4178] | 9,024 × 10⁻⁴² | Pearson 2×2 sin Yates | Confirmada |
-| H2: tasa(2) < tasa(1) < tasa(3–4) | V = 0,3875; tasas 7,38 % < 27,98 % < 85,60 % | Nivel 2 [6,58; 8,27] %; nivel 1 [26,62; 29,38] %; nivel 3–4 [80,79; 89,37] % | 7,039 × 10⁻²⁶¹ | Pearson 3×2 sin Yates | Confirmada |
-| H3: asociación de Alemania ajustada por saldo | OR ajustado 2,1787; OR crudo 2,5688 | Ajustado [1,9133; 2,4809]; crudo [2,2881; 2,8840] | 1,414 × 10⁻³¹ | Wald del coeficiente `is_germany` en Logit | Confirmada |
-| H4: edad con U invertida | β cuadrático = −0,003429; pico 56,58 años | β [−0,003855; −0,003002] | 7,742 × 10⁻⁷¹ | Razón de verosimilitud, modelos Logit anidados | Confirmada |
-| H5: saldo cero asociado a menos abandono | DR −10,62 pp | DR [−12,31; −8,88] pp | 9,611 × 10⁻³⁰ | Pearson 2×2 sin Yates | Confirmada |
+| H1: inactivos abandonan más | DR +12,27 pp; OR 2,1610 | DR [10,51; 14,03] pp; OR [1,9314; 2,4178] | < 10⁻¹⁰ | Pearson 2×2 sin Yates | Confirmada |
+| H2: tasa(2) < tasa(1) < tasa(3–4) | V = 0,3875; tasas 7,38 % < 27,98 % < 85,60 % | Nivel 2 [6,58; 8,27] %; nivel 1 [26,62; 29,38] %; nivel 3–4 [80,79; 89,37] % | < 10⁻¹⁰ | Pearson 3×2 sin Yates | Confirmada |
+| H3: asociación de Alemania ajustada por saldo | OR ajustado 2,1787; OR crudo 2,5688 | Ajustado [1,9133; 2,4809]; crudo [2,2881; 2,8840] | < 10⁻¹⁰ | Wald del coeficiente `is_germany` en Logit | Confirmada |
+| H4: edad con U invertida | β cuadrático = −0,003429; pico 56,58 años | β [−0,003855; −0,003002] | < 10⁻¹⁰ | Razón de verosimilitud, modelos Logit anidados | Confirmada |
+| H5: saldo cero asociado a menos abandono | DR −10,62 pp | DR [−12,31; −8,88] pp | < 10⁻¹⁰ | Pearson 2×2 sin Yates | Confirmada |
 | H6: AUC de salario sin señal útil según el margen fijado | AUC = 0,5146 | [0,4997; 0,5306], dentro de [0,45; 0,55] | No aplica | Equivalencia por IC bootstrap percentil | Confirmada |
 
 ### Una conclusión por hipótesis
@@ -28,7 +30,7 @@ DR significa diferencia de riesgo; **pp** son puntos porcentuales. En H2 los IC 
 - **H2:** las tasas de 2, 1 y 3–4 productos siguen el orden fijado y sus IC no se solapan; el grupo 3–4 contiene solo 257 clientes.
 - **H3:** Alemania mantiene una asociación con mayores odds de abandono tras ajustar por saldo; el log-OR se atenúa un 17,46 % y el IC del OR ajustado queda por encima de 1,5.
 - **H4:** el coeficiente cuadrático y todo su IC son negativos, con máximo estimado a los 56,58 años dentro del rango preregistrado.
-- **H5:** quienes tienen saldo cero presentan 13,59 % de abandono frente al 24,21 % con saldo positivo; el IC de la DR queda por debajo de −5 pp.
+- **H5:** quienes tienen saldo cero presentan 13,59 % de abandono frente al 24,21 % con saldo positivo; el IC de la DR queda por debajo de −5 pp; asociación parcialmente confundida con `Geography`, ver Exploratorio.
 - **H6:** el IC de AUC del salario bruto queda dentro del margen de equivalencia; esto no demuestra independencia ni inutilidad en interacciones o transformaciones.
 
 ## Exploratorio
@@ -38,6 +40,47 @@ Estos análisis secundarios son descriptivos, no pertenecen a la familia Holm y 
 - **Saldo positivo:** Mann–Whitney entre abandonos y permanencias, U = 2.433.321,5, p crudo = 0,3941 y AUC = 0,5080. El contraste usa 1.237 abandonos y 3.872 permanencias; no aporta evidencia descriptiva clara de ordenamiento por saldo dentro de este grupo.
 - **Distribución salarial:** KS frente a uniforme en [11,58; 199.992,48], D = 0,00829 y p crudo = 0,6388. Los límites se estimaron de la muestra; ese p no valida una hipótesis confirmatoria de uniformidad ni prueba origen sintético.
 - **Masa en cero:** 2.891 de 8.000 clientes (36,14 %) tienen saldo cero. Es una propiedad descriptiva de la muestra de exploración, distinta del 36,17 % del reporte global de semana 1.
+- **Soporte de H3:** Alemania no tiene clientes con `Balance = 0` (0/2.005). La comparación ajustada de Alemania tiene soporte común solo en clientes con saldo > 0: Alemania 33,1 % (663/2.005) frente a 18,5 % (574/3.104) en Francia + España. No hay observaciones alemanas para contrastar la asociación con saldo cero.
+- **H5 estratificada sin Alemania:** en Francia + España, saldo cero 13,6 % (393/2.891) frente a saldo positivo 18,5 % (574/3.104), DR = −4,8984 pp, aproximadamente −4,9 pp. Parte de la asociación cruda de H5 refleja la composición geográfica; el veredicto preregistrado se mantiene, pero la DR observada dentro de este estrato es menor y queda cerca del umbral práctico de 5 pp. Esta comparación descriptiva no estima un efecto causal atribuible al saldo.
+
+### Código reproducible de la revisión por geografía y saldo
+
+Las cifras de los dos puntos anteriores se calcularon ejecutando este código con `load_exploration()`, sin consultar prueba ni modificar el JSON confirmatorio:
+
+```python
+from churn.split import load_exploration
+
+df = load_exploration()
+germany = df["Geography"].eq("Germany")
+rest = df["Geography"].isin(["France", "Spain"])
+zero = df["Balance"].eq(0)
+masks = {
+    "germany_zero": germany & zero,
+    "germany_positive": germany & ~zero,
+    "rest_zero": rest & zero,
+    "rest_positive": rest & ~zero,
+}
+summary = {}
+for name, mask in masks.items():
+    y = df.loc[mask, "Exited"]
+    summary[name] = {
+        "n": len(y),
+        "k": int(y.sum()),
+        "rate": float(y.mean()) if len(y) else None,
+    }
+summary["germany_total"] = int(germany.sum())
+summary["dr_rest_pp"] = 100 * (summary["rest_zero"]["rate"] - summary["rest_positive"]["rate"])
+print(summary)
+```
+
+| Segmento derivado del código | Clientes | Abandonos | Tasa |
+|---|---|---|---|
+| Alemania, saldo cero | 0 | 0 | No definida |
+| Alemania, saldo positivo | 2.005 | 663 | 33,0673 % |
+| Francia + España, saldo cero | 2.891 | 393 | 13,5939 % |
+| Francia + España, saldo positivo | 3.104 | 574 | 18,4923 % |
+
+La falta de clientes alemanes con saldo cero motiva documentar un posible artefacto de generación y la señal compartida entre `has_balance` y `Geography`. En la interpretación de modelos se reportará SHAP de ambas variables en conjunto y no se interpretarán sus coeficientes por separado en la semana 3.
 
 ## Implicaciones para la semana 3
 

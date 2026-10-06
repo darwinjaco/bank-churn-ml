@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 2 implementada y verificada; detenida para revisión antes de semana 3 |
+| Fase actual | Semana 2 revisada y cerrada; semana 3 pendiente de instrucciones |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -28,7 +28,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 | Fase | Fechas | Entregable | Criterio de cierre | Estado |
 |---|---|---|---|---|
 | Semana 1 | 5–11 oct | Repo, uv, Ruff, pytest, pre-commit, CI mínimo, specs 001–002 y Pandera | Tests pasan en CI | Completada el 6 de octubre: validación local y CI remoto verificados |
-| Semana 2 | 12–18 oct | EDA, hipótesis y auditoría de productos 3–4 y balance cero | Hipótesis contrastadas con pruebas estadísticas, tamaños de efecto e incertidumbre | Entregables implementados el 6 de octubre; revisión pendiente |
+| Semana 2 | 12–18 oct | EDA, hipótesis y auditoría de productos 3–4 y balance cero | Hipótesis contrastadas con pruebas estadísticas, tamaños de efecto e incertidumbre | Completada y revisada el 6 de octubre; correcciones interpretativas incorporadas |
 | Semana 3 | 19–25 oct | Pipeline, división estratificada, Dummy/LogReg y MLflow | Modelos de referencia registrados en MLflow | Pendiente |
 | Semana 4 | 26 oct–1 nov | RF, XGBoost, validación cruzada y ajuste acotado | Tabla de media ± desviación estándar por modelo | Pendiente |
 | Semana 5 | 2–8 nov | Calibración, umbral monetario, lift y beneficio por decil, sensibilidad | Umbral justificado por beneficio esperado bajo supuestos explícitos | Pendiente |
@@ -44,7 +44,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 |---|---|---|---|
 | 001 | Visión general y contrato de datos | Completada: verificación local y remota | Semana 1 |
 | 002 | Modelado y evaluación | Documentada en español; implementación pendiente | Semanas 3–5 |
-| 003 | [EDA e hipótesis preregistradas](../specs/003-eda-and-hypotheses.md) | Implementada v1.1; H1–H6 congeladas en v1.0; revisión pendiente | Semana 2 |
+| 003 | [EDA e hipótesis preregistradas](../specs/003-eda-and-hypotheses.md) | Implementada v1.1 y revisada; H1–H6 congeladas en v1.0 | Semana 2 |
 | 004 | Capa de decisión y beneficio esperado | Pendiente de redacción | Antes de implementar la semana 5 |
 | 005 | API y dashboard | Pendiente de redacción | Antes de implementar la semana 7 |
 | 006 | Operación: tests, Docker, CI y monitoreo | Pendiente de redacción | Antes de ampliar operación y serving |
@@ -409,14 +409,14 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | Campo | Valor |
 |---|---|
 | Fase | Semana 2 |
-| Estado | Completada técnicamente; pendiente de revisión |
+| Estado | Completada y cerrada tras revisión |
 | Objetivo | Generar los entregables de EDA y detenerse para revisión al terminar T7 |
 
 | Tarea | Estado | Commit requerido |
 |---|---|---|
 | T5 | Completada | `chore: generate split manifest, hypothesis results and figures` |
 | T6 | Completada | `docs: EDA notebook` |
-| T7 | Cierre documental verificado; revisión pendiente | `docs: week 2 conclusions and log` |
+| T7 | Completada; revisión interpretativa incorporada | `docs: week 2 conclusions and log` |
 
 #### T5 — Resultados y figuras (6 de octubre de 2026)
 
@@ -449,14 +449,27 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - Criterios de la especificación 003 contrastados con artefactos y tests; H1–H6 y reglas de equidad/prueba permanecen intactas.
 - Evidencia técnica remota antes del cierre documental: https://github.com/darwinjaco/bank-churn-ml/actions/runs/37487169164, correspondiente a `0585806`. Este commit documental tendrá además su propia ejecución de CI al publicarse.
 - Comprobaciones finales completas de `AGENTS.md`, con sincronización adicional de EDA, satisfactorias: 71 tests aprobados y cobertura del 98,48 %; Ruff, formato y todos los hooks pertinentes, incluido `nbstripout`, aprobados. CI de T6 confirmado en verde antes del commit `docs: week 2 conclusions and log`.
+- Commit T7: `4c786ae`; publicado. CI en verde: https://github.com/darwinjaco/bank-churn-ml/actions/runs/37488588746; 69 aprobados, 2 omitidos y cobertura del 98,05 %.
+
+#### Revisión interpretativa y cierre de S06 (6 de octubre de 2026)
+
+- Calculados los segmentos exclusivamente mediante `load_exploration()`, en 8.000 filas de entrenamiento y validación. El código reproducible está incluido y citado en `reports/eda_hypotheses.md`, sección **Exploratorio**.
+- `uv run python -c` para el cálculo y para ejecutar literalmente el bloque Python del reporte: Alemania con saldo cero 0/2.005; Alemania con saldo positivo 663/2.005 (33,0673 %); Francia + España con saldo cero 393/2.891 (13,5939 %) y con saldo positivo 574/3.104 (18,4923 %); DR estratificada −4,8983559001 pp. Cifras y denominadores verificados.
+- Aclarado el soporte común de H3 en saldo positivo y la confusión parcial de H5 con `Geography`. Se conserva el veredicto preregistrado de H5 y se interpreta la DR estratificada como asociación descriptiva, no atribución causal.
+- Ampliado Q-10 existente, sin duplicar identificadores: ausencia de saldo cero en Alemania, posible artefacto y señal compartida. Manejo indicado por la revisión: SHAP de `has_balance` y `Geography` en conjunto y evitar interpretar sus coeficientes por separado en semana 3.
+- P-valores <1e-10 representados como «< 10⁻¹⁰» únicamente en la tabla legible. No se modificaron `src/`, los JSON de resultados/manifiesto ni los veredictos.
+- S06 cerrada con esta revisión; semana 3 no iniciada. Mensaje del commit solicitado: `docs: week 2 review corrections`.
+- `uv sync --locked`, sincronización adicional `uv sync --locked --all-groups`, Ruff, formato, pre-commit y `uv run pytest --cov=churn --cov-report=term-missing --cov-fail-under=85`: satisfactorios; 71 tests aprobados y cobertura del 98,48 %. Ruff solicitó compactar una línea del bloque Python del reporte; corregido antes del commit.
+- `git diff --exit-code -- src tests pyproject.toml uv.lock reports/hypotheses.json reports/split_manifest.json`: sin diferencias, confirmando que código, dependencias, JSON y veredictos no cambiaron.
+- CI previo T7 confirmado en verde: https://github.com/darwinjaco/bank-churn-ml/actions/runs/37488588746. La publicación de esta revisión documental generará su propia ejecución de CI, que se verificará antes de dar por terminada la tarea.
 
 **Cierre de S04–S06 y compuertas**
 
 - S04 completada: spec y plan tuvieron commit antes de código; la enmienda exacta v1.1 precedió a los resultados reales.
 - S05 completada: división reproducible, funciones estadísticas, pruebas exactas y contrastes preregistrados con tests de referencias y efectos conocidos.
-- S06 completada técnicamente: artefactos, notebook y conclusiones verificados, con evidencia local y remota. Ningún resultado se presenta como causal y los análisis secundarios quedan separados.
-- B-01 resuelto. Sin nuevos bloqueos de implementación; queda pendiente la revisión del responsable de diseño.
-- Al terminar y verificar T7, detenerse. No comenzar entrenamiento, selección de variables ni otras tareas de la semana 3 antes de la revisión.
+- S06 completada y revisada: artefactos, notebook y conclusiones verificados, con evidencia local y remota; correcciones de soporte y composición geográfica incorporadas. Los análisis secundarios quedan separados y sin lenguaje causal.
+- B-01 resuelto. Sin bloqueos pendientes de semana 2; revisión interpretativa cerrada según las correcciones del responsable de diseño.
+- Semana 3 pendiente de nuevas instrucciones. No comenzar entrenamiento ni selección de variables en esta sección documental.
 
 ## 6. Plantilla para nuevas secciones
 
