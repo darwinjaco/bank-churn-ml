@@ -699,8 +699,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T0 | Completada (`895f293`) | `docs: spec 004 decision layer, spec 002 v1.5 and week 5 plan (SDD gate)` |
 | T1 | Completada (`8bfd342`) | `fix: canonical split manifest hash` |
 | T2 | Completada (`cc74f95`) | `feat: probability calibration (E-04)` |
-| T3 | Completada (commit local) | `feat: expected-profit decision layer (spec 004)` |
-| T4 | Pendiente | `feat: calibrate, decide and freeze artifact` |
+| T3 | Completada (`fa7472e`) | `feat: expected-profit decision layer (spec 004)` |
+| T4 | Completada (commit local) | `feat: calibrate, decide and freeze artifact` |
 | T5 | Pendiente | `chore: calibration and decision results` |
 | T6 | Pendiente | `docs: week 5 calibration and decision` |
 
@@ -724,6 +724,12 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 
 - Supuestos en `config.py` (V = 1.000 €, c = 50 €, s = 0,30, política aleatoria 20 %). `decision.py`: `threshold()` = c/(s·V) = 1/6, `decide()` con desigualdad estricta (en t* exacto, EB = 0, no se contacta), `realized_benefit()` y `evaluate_policies()` (nadie, todos, aleatoria 20 % como valor esperado analítico, modelo, oráculo), con métricas y matriz de confusión en t*.
 - Tests con valores calculados a mano: t* = 1/6; EB = [−50, 0, 10, 250]; caso de 10 clientes con beneficio de cada política, diferencia frente a la mejor referencia, fracción del oráculo y matriz de confusión.
+
+#### T4 — Orquestación y artefacto
+
+- `decide.py` y CLI `churn-decide`: lee la configuración final de `model_selection.json` (RF, FS-TREE sin `EstimatedSalary`), genera OOF de entrenamiento, ajusta los calibradores, ajusta el pipeline con todo el entrenamiento, compara variantes en validación, elige por Brier y aplica la regla de la spec 004 con la probabilidad calibrada elegida.
+- Artefacto en `models/` (fuera de Git): `model.joblib` (`CalibratedModel`: pipeline + calibrador + columnas) y `metadata.json` (variables, exclusiones, hiperparámetros, calibrador, umbral, supuestos, versiones, procedencia; evaluación final "pendiente"). Copia de la metadata en `reports/model_metadata.json`. Figura `reports/figures/reliability.png`. MLflow `stage=calibration` (etiqueta `experiment=E-04`) y `stage=decision`.
+- Tests de extremo a extremo con datos sintéticos: el artefacto recargado reproduce el número de contactados del reporte; metadata idéntica en ambas copias.
 
 ## 6. Plantilla para nuevas secciones
 

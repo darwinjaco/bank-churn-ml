@@ -111,6 +111,35 @@ def generate_figures(df: pd.DataFrame, results: list[dict], out_dir: Path) -> li
     return paths
 
 
+VARIANT_LABELS = {"none": "Sin calibrar", "sigmoid": "Sigmoide", "isotonic": "Isotónica"}
+VARIANT_STYLES = {"none": "o-", "sigmoid": "s--", "isotonic": "^:"}
+
+
+def reliability_figure(tables: dict[str, list[dict]], chosen: str, path: Path) -> Path:
+    """Curva de fiabilidad en validación (spec 002 v1.5 §5.3.1), una línea por variante."""
+    fig, ax = plt.subplots(figsize=(5.5, 5), constrained_layout=True)
+    ax.plot([0, 1], [0, 1], color="grey", linestyle="--", linewidth=1, label="Calibración perfecta")
+    for name, rows in tables.items():
+        label = VARIANT_LABELS[name] + (" (elegida)" if name == chosen else "")
+        ax.plot(
+            [row["predicted"] for row in rows],
+            [row["observed"] for row in rows],
+            VARIANT_STYLES[name],
+            color=COLOR,
+            alpha=1.0 if name == chosen else 0.45,
+            label=label,
+        )
+    ax.set_xlabel("Probabilidad media predicha")
+    ax.set_ylabel("Tasa observada de abandono")
+    ax.xaxis.set_major_formatter(PercentFormatter(1.0))
+    ax.yaxis.set_major_formatter(PercentFormatter(1.0))
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.set_title("E-04: fiabilidad en validación (10 cuantiles)")
+    ax.legend(loc="upper left", fontsize=8)
+    return _save(fig, path)
+
+
 def main() -> int:
     results = json.loads(HYPOTHESES_FILE.read_text(encoding="utf-8"))
     for path in generate_figures(load_exploration(), results, FIGURES_DIR):
