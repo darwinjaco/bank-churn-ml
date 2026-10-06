@@ -698,8 +698,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 |---|---|---|
 | T0 | Completada (`895f293`) | `docs: spec 004 decision layer, spec 002 v1.5 and week 5 plan (SDD gate)` |
 | T1 | Completada (`8bfd342`) | `fix: canonical split manifest hash` |
-| T2 | Completada (commit local) | `feat: probability calibration (E-04)` |
-| T3 | Pendiente | `feat: expected-profit decision layer (spec 004)` |
+| T2 | Completada (`cc74f95`) | `feat: probability calibration (E-04)` |
+| T3 | Completada (commit local) | `feat: expected-profit decision layer (spec 004)` |
 | T4 | Pendiente | `feat: calibrate, decide and freeze artifact` |
 | T5 | Pendiente | `chore: calibration and decision results` |
 | T6 | Pendiente | `docs: week 5 calibration and decision` |
@@ -719,6 +719,11 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 
 - `calibration.py`: `oof_predictions` (5 pliegues, semilla 42, `clone` por pliegue), calibradores `none`/`sigmoid` (`LogisticRegression(C=np.inf)` sobre p)/`isotonic` (`IsotonicRegression` acotada y recortada), `choose_calibrator` (menor Brier; empate < 1e-4 resuelto sin calibrar > sigmoide > isotónica), `reliability_table` (10 cuantiles), `group_calibration` y `CalibratedModel` (pipeline + calibrador para el artefacto).
 - Tests con una puntuación sintética que subestima el riesgo (score = p²): ambas calibraciones bajan el Brier en datos no vistos, salidas en [0, 1], sigmoide monótona, isotónica recorta fuera de rango; reglas de empate; OOF completa y determinista. Sin advertencias con `-W error`.
+
+#### T3 — Capa de decisión
+
+- Supuestos en `config.py` (V = 1.000 €, c = 50 €, s = 0,30, política aleatoria 20 %). `decision.py`: `threshold()` = c/(s·V) = 1/6, `decide()` con desigualdad estricta (en t* exacto, EB = 0, no se contacta), `realized_benefit()` y `evaluate_policies()` (nadie, todos, aleatoria 20 % como valor esperado analítico, modelo, oráculo), con métricas y matriz de confusión en t*.
+- Tests con valores calculados a mano: t* = 1/6; EB = [−50, 0, 10, 250]; caso de 10 clientes con beneficio de cada política, diferencia frente a la mejor referencia, fracción del oráculo y matriz de confusión.
 
 ## 6. Plantilla para nuevas secciones
 

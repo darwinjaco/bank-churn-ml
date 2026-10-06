@@ -95,3 +95,10 @@ def centered_age(age: pd.Series) -> pd.Series:
 def is_germany(geography: pd.Series) -> pd.Series:
     """Alemania frente a Francia y España juntas."""
     return geography.eq("Germany").astype(int)
+
+
+# Supuestos económicos de la capa de decisión (spec 004 §2). Ilustrativos, no datos reales.
+CUSTOMER_VALUE_EUR = 1_000.0  # V: valor de un cliente retenido.
+CONTACT_COST_EUR = 50.0  # c: costo de contactar a un cliente.
+RETENTION_SUCCESS_RATE = 0.30  # s: probabilidad de retener a quien iba a irse.
+RANDOM_POLICY_SHARE = 0.20  # Política aleatoria de referencia (spec 001 §1).
