@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 3: T4, pipelines de baselines |
+| Fase actual | Semana 3: T5, CV y tracking MLflow |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -477,7 +477,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 |---|---|
 | Fecha de apertura | 6 de octubre de 2026 |
 | Fechas planificadas | 19–25 de octubre de 2026 |
-| Estado | En curso: T4 |
+| Estado | En curso: T5 |
 | Objetivo | Tres baselines fijas con CV exclusivamente de entrenamiento, transformaciones seguras y trazabilidad MLflow |
 
 | Tarea | Estado | Commit requerido |
@@ -486,8 +486,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T1 | Completada | `fix: figure readability (week 2 debt)` |
 | T2 | Completada | `build: add mlflow` |
 | T3 | Completada | `feat: leakage-safe feature transformers` |
-| T4 | Pipelines y tests focalizados aprobados; comprobación completa pendiente | `feat: model pipelines for baselines` |
-| T5 | Pendiente | `feat: cross-validation harness with MLflow tracking` |
+| T4 | Completada | `feat: model pipelines for baselines` |
+| T5 | Arnés y tracking temporal verificados; comprobación completa pendiente | `feat: cross-validation harness with MLflow tracking` |
 | T6 | Pendiente | `chore: baseline results` |
 | T7 | Pendiente | `docs: week 3 results and log` |
 
@@ -532,6 +532,16 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - `uv run pytest tests/test_pipeline.py --cov=churn --cov-report=term-missing`: siete aprobados y módulo pipeline al 100 %.
 - Scikit-learn 1.9.1 avisa que el argumento `penalty` se deprecará; la configuración L2 aprobada es válida en la versión bloqueada y se conserva, sin suprimir advertencias ni cambiar hiperparámetros.
 - Comprobaciones completas satisfactorias: 84 aprobados y cobertura del 98,72 %; cuatro advertencias de deprecación documentadas. CI previo T3 en verde; pendiente CI de T4 tras publicar.
+- Commit T4: `8d31299`; CI en verde: https://github.com/darwinjaco/bank-churn-ml/actions/runs/37511264883.
+
+#### T5 — CV y MLflow
+
+- `load_training()` filtra inmediatamente entrenamiento; CV clona el pipeline en cada uno de los cinco pliegues fijos. Métricas AP, ROC-AUC, Brier y log loss, media y desviación muestral ddof=1.
+- Se registran hashes de índices de ajuste/puntuación por pliegue para verificar que los modelos usan las mismas particiones, sin publicar CustomerId.
+- MLflow: experimento `bank-churn`, URI de entorno o SQLite local aprobado, hiperparámetros, métricas agregadas y por step, y todas las etiquetas exigidas. CLI `churn-baselines` ejecuta únicamente las tres configuraciones aprobadas.
+- Tests con URI SQLite temporal y directorio de trabajo `tmp_path`; no se creó `mlruns/` en el proyecto. Incluyen prevalencia/ROC de Dummy, determinismo, mismos pliegues, exclusión de IDs de validación/prueba y campos/historiales de MLflow.
+- `uv run pytest tests/test_train.py --cov=churn --cov-report=term-missing`: seis aprobados, módulo train al 97 %. Advertencias de deprecación de sklearn/SQLAlchemy observadas, sin suprimirlas ni alterar configuraciones.
+- Comprobaciones completas satisfactorias: 90 aprobados y cobertura del 98,56 %; 25 advertencias de bibliotecas documentadas. CI previo T4 en verde; pendiente CI de T5. Todavía no se han ejecutado baselines reales.
 
 ## 6. Plantilla para nuevas secciones
 
