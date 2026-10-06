@@ -696,8 +696,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 
 | Tarea | Estado | Commit requerido |
 |---|---|---|
-| T0 | Completada (commit local) | `docs: spec 004 decision layer, spec 002 v1.5 and week 5 plan (SDD gate)` |
-| T1 | Pendiente | `fix: canonical split manifest hash` |
+| T0 | Completada (`895f293`) | `docs: spec 004 decision layer, spec 002 v1.5 and week 5 plan (SDD gate)` |
+| T1 | Completada (commit local) | `fix: canonical split manifest hash` |
 | T2 | Pendiente | `feat: probability calibration (E-04)` |
 | T3 | Pendiente | `feat: expected-profit decision layer (spec 004)` |
 | T4 | Pendiente | `feat: calibrate, decide and freeze artifact` |
@@ -709,6 +709,11 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - Semana 4 publicada: `a868641..7013dfc`, CI #26 en verde. Copia temporal de Claude eliminada.
 - Decisión del responsable: **solo opción A** (umbral analítico c/(s·V) = 1/6 con V = 1.000 €, c = 50 €, s = 30 %). Opciones B (presupuesto/deciles) y C (umbral robusto/sensibilidad) excluidas y registradas como trabajo futuro; el cronograma de la semana 5 se ajusta en consecuencia.
 - Spec 004 v1.0 redactada; spec 002 v1.5 fija el detalle de E-04 (OOF 5 pliegues semilla 42, sigmoide `LogisticRegression(C=np.inf)`, isotónica, empate de Brier < 1e-4), el artefacto y el hash canónico del manifiesto (hallazgo de la semana 4). Todo antes de calibrar.
+
+#### T1 — Hash canónico del manifiesto
+
+- `tracking.manifest_sha256()`: SHA-256 de `json.dumps(contenido, sort_keys=True, separators=(",", ":"))`; lo usan `tracking.provenance()` y `train.main()`. Valor actual: `09ee6a9697dc…`. Los hashes históricos sobre bytes de las semanas 3 (`978161d4…`, CRLF) y 4 (`4354b7e0…`, LF) corresponden al mismo contenido.
+- Tests: mismo hash con LF, CRLF y claves reordenadas; hash distinto si cambia el contenido; `provenance()` usa el hash canónico.
 
 ## 6. Plantilla para nuevas secciones
 

@@ -17,6 +17,7 @@ from sklearn.model_selection import StratifiedKFold
 from churn.config import FEATURE_SETS, PROJECT_ROOT, RANDOM_SEED, TARGET
 from churn.pipeline import build_pipeline
 from churn.split import MANIFEST_FILE, load_exploration
+from churn.tracking import manifest_sha256
 
 N_FOLDS = 5
 EXPERIMENT = "bank-churn"
@@ -111,12 +112,11 @@ def log_run(model: str, feature_set: str, pipeline, metrics: dict, provenance: d
 
 def main() -> int:
     training = load_training()
-    manifest_bytes = MANIFEST_FILE.read_bytes()
-    manifest = json.loads(manifest_bytes)
+    manifest = json.loads(MANIFEST_FILE.read_text(encoding="utf-8"))
     provenance = {
         "git_commit": _git_commit(),
         "csv_sha256": manifest["csv_sha256"],
-        "split_manifest_sha256": hashlib.sha256(manifest_bytes).hexdigest(),
+        "split_manifest_sha256": manifest_sha256(),
     }
     runs = []
     for model, feature_set in BASELINE_RUNS:

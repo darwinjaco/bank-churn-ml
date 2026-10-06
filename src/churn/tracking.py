@@ -17,16 +17,22 @@ EXPERIMENT = "bank-churn"
 DEFAULT_TRACKING_URI = "sqlite:///mlruns/mlflow.db"
 
 
+def manifest_sha256(path=MANIFEST_FILE) -> str:
+    """SHA-256 del manifiesto canónico (spec 002 v1.5): independiente del fin de línea."""
+    content = json.loads(path.read_text(encoding="utf-8"))
+    canonical = json.dumps(content, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
+
+
 def provenance() -> dict:
-    """Commit de Git y hashes del CSV y del manifiesto de división."""
+    """Commit de Git, hash del CSV y hash canónico del manifiesto de división."""
     commit = subprocess.run(
         ["git", "rev-parse", "HEAD"], cwd=PROJECT_ROOT, check=True, capture_output=True, text=True
     ).stdout.strip()
-    manifest_bytes = MANIFEST_FILE.read_bytes()
     return {
         "git_commit": commit,
-        "csv_sha256": json.loads(manifest_bytes)["csv_sha256"],
-        "split_manifest_sha256": hashlib.sha256(manifest_bytes).hexdigest(),
+        "csv_sha256": json.loads(MANIFEST_FILE.read_text(encoding="utf-8"))["csv_sha256"],
+        "split_manifest_sha256": manifest_sha256(),
     }
 
 
