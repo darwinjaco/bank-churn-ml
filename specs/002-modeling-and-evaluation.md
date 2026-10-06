@@ -2,10 +2,10 @@
 
 | Campo | Valor |
 |---|---|
-| Estado | En implementación: semanas 3–4 completadas; calibración (semana 5) pendiente |
+| Estado | En implementación: semanas 3–4 completadas; semana 5 (calibración y artefacto) en curso |
 | Responsable | Darwin Jacome Cuenca |
 | Dependencia | [Especificación 001](001-overview-and-data-contract.md) |
-| Versión | v1.4 — aclaración previa a resultados: origen de las OOF de E-02 y ajuste de Dummy en validación; §6 y umbral de E-03 sin cambios |
+| Versión | v1.5 — semana 5: detalle de calibración (E-04), artefacto y hash canónico del manifiesto; §6 y experimentos sin cambios |
 | Última revisión documental | 6 de octubre de 2026 |
 
 ## 1. Objetivo
@@ -103,6 +103,20 @@ La calibración se implementará en la semana 5, una vez seleccionado el modelo:
 
 El uso de validación para elegir calibración y umbral se registrará como selección de desarrollo, no como medición independiente de rendimiento.
 
+#### 5.3.1. Detalle de implementación (v1.5, fijado antes de calibrar)
+
+- **Configuración calibrada:** la final de la semana 4 (Random Forest, FS-TREE sin `EstimatedSalary`, hiperparámetros de FASE A).
+- **OOF de entrenamiento:** `StratifiedKFold(5, shuffle=True, random_state=42)` sobre las 6.000 filas de entrenamiento; cada cliente recibe una predicción de un pipeline que no lo vio.
+- **Sigmoide (Platt):** `LogisticRegression(C=np.inf)` con la probabilidad OOF como única variable.
+- **Isotónica:** `IsotonicRegression(y_min=0, y_max=1, increasing=True, out_of_bounds="clip")` sobre la probabilidad OOF.
+- **Pipeline base:** se ajusta con todo el entrenamiento; los calibradores se aplican a su salida.
+- **Comparación en validación:** Brier de sin calibrar, sigmoide e isotónica. Se elige el menor; se consideran iguales si difieren en menos de 1·10⁻⁴, y entonces se prefiere sin calibrar, luego sigmoide y luego isotónica. Se reportan también log loss y AP (la AP solo cambia si el calibrador altera el orden; la sigmoide no lo altera y la isotónica puede crear empates).
+- **Curva de fiabilidad:** 10 intervalos por cuantiles de la probabilidad en validación, para las tres variantes, en `reports/figures/reliability.png`.
+- **Informativo (hallazgo E-02 c):** probabilidad media predicha frente a tasa observada en el grupo de 3–4 productos de validación, por variante. No interviene en la elección.
+- **Umbral:** el de la spec 004 (analítico); no se ajusta con validación.
+- **Artefacto congelado:** en `models/` (fuera de Git) el pipeline base ajustado y el calibrador elegido (`joblib`), más `models/metadata.json` con variables, exclusiones, hiperparámetros, calibrador, supuestos y umbral de la spec 004, versiones (Python, scikit-learn, XGBoost), hashes de datos y commit. Copia de la metadata, sin binarios, en `reports/model_metadata.json`.
+- **MLflow:** `stage ∈ {calibration, decision}`, `final=false`.
+
 ### 5.4. Trazabilidad en MLflow
 
 - Tracking URI desde `MLFLOW_TRACKING_URI`; por defecto `sqlite:///mlruns/mlflow.db` (`mlruns/` fuera de Git). Experimento: `bank-churn`.
@@ -110,6 +124,7 @@ El uso de validación para elegir calibración y umbral se registrará como sele
 - Métricas: media y desviación de cada métrica, más las métricas por pliegue con `step` igual al número de pliegue.
 - Etiquetas: `stage=baseline` para semana 3 y `stage ∈ {tuning, reevaluation, experiment, selection}` para semana 4, `git_commit`, `csv_sha256`, `split_manifest_sha256`, `eligible` (`false` para Dummy) y `final=false`. En experimentos, etiqueta `experiment=E-02` o `experiment=E-03` donde corresponda. El puntaje de búsqueda se marca como optimista.
 - Los tests usan tracking URI temporal en `tmp_path` y no escriben en el directorio `mlruns/` del proyecto.
+- **Hash del manifiesto (v1.5):** desde la semana 5, `split_manifest_sha256` se calcula sobre el JSON canónico (`json.dumps(..., sort_keys=True, separators=(",", ":"))` del contenido), independiente del fin de línea. Los reportes de las semanas 3 y 4 conservan el hash histórico sobre bytes: `978161d4…` (copia CRLF) y `4354b7e0…` (LF), ambos del mismo contenido.
 
 ## 6. Regla de selección del modelo, fijada antes de entrenar
 

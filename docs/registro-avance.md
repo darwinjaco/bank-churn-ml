@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 4 implementada (T0–T7); pendiente de revisión y publicación |
+| Fase actual | Semana 5: calibración y capa de decisión (opción A) |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -31,7 +31,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 | Semana 2 | 12–18 oct | EDA, hipótesis y auditoría de productos 3–4 y balance cero | Hipótesis contrastadas con pruebas estadísticas, tamaños de efecto e incertidumbre | Completada y revisada el 6 de octubre; correcciones interpretativas incorporadas |
 | Semana 3 | 19–25 oct | Pipeline, división estratificada, Dummy/LogReg y MLflow | Modelos de referencia registrados en MLflow | Baselines implementadas y registradas; revisión pendiente |
 | Semana 4 | 26 oct–1 nov | RF, XGBoost, validación cruzada y ajuste acotado | Tabla de media ± desviación estándar por modelo | Compuerta documental en curso; bloqueo B-02 antes de entrenar |
-| Semana 5 | 2–8 nov | Calibración, umbral monetario, lift y beneficio por decil, sensibilidad | Umbral justificado por beneficio esperado bajo supuestos explícitos | Pendiente |
+| Semana 5 | 2–8 nov | Calibración (E-04) y umbral monetario analítico (opción A); deciles y sensibilidad excluidos por decisión del responsable | Umbral justificado por beneficio esperado bajo supuestos explícitos | En curso |
 | Semana 6 | 9–15 nov | SHAP, errores, segmentos y ficha del modelo | Limitaciones documentadas | Pendiente |
 | Semana 7 | 16–22 nov | FastAPI, Streamlit, tests de API y Docker Compose | `docker compose up` funciona desde cero | Pendiente |
 | Semana 8 | 23–29 nov | Cambio de distribución simulado, despliegue y README final | URL pública y reproducibilidad verificadas | Pendiente |
@@ -45,7 +45,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 | 001 | Visión general y contrato de datos | Completada: verificación local y remota | Semana 1 |
 | 002 | Modelado y evaluación | Baselines implementadas; protocolo de semana 4 v1.2 y bloqueo B-02 | Semanas 3–5 |
 | 003 | [EDA e hipótesis preregistradas](../specs/003-eda-and-hypotheses.md) | Implementada v1.1 y revisada; H1–H6 congeladas en v1.0 | Semana 2 |
-| 004 | Capa de decisión y beneficio esperado | Pendiente de redacción | Antes de implementar la semana 5 |
+| 004 | Capa de decisión y beneficio esperado | Aprobada v1.0 (opción A) | Semana 5 |
 | 005 | API y dashboard | Pendiente de redacción | Antes de implementar la semana 7 |
 | 006 | Operación: tests, Docker, CI y monitoreo | Pendiente de redacción | Antes de ampliar operación y serving |
 
@@ -588,7 +588,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T4 | Completada (`365185e`; CI tras push) | `feat: two-phase tuning and re-evaluation` |
 | T5 | Completada (`bb5e4d0`; CI tras push) | `feat: preregistered model selection rule` |
 | T6 | Completada (`e0b5c7b` código, `cfca063` resultados) | `feat: model selection and ablation experiments` |
-| T7 | Completada; pendiente de revisión y CI tras push | `docs: week 4 model selection and experiments` |
+| T7 | Completada; publicada (`7013dfc`, CI #26 en verde) | `docs: week 4 model selection and experiments` |
 
 #### T0 — Enmienda v1.2 y observaciones de semana 3
 
@@ -684,6 +684,31 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - La procedencia `split_manifest_sha256` se calcula sobre los bytes del archivo y depende del final de línea: copia CRLF de Windows `978161d4…` (semana 3) frente a LF de Git `4354b7e0…` (semana 4). El contenido es idéntico. Propuesta para la T0 de la semana 5: calcular el hash sobre el JSON canónico o tras normalizar a LF.
 - scikit-learn 1.9 advierte que `penalty="l2"` se eliminará en 1.10; migrar a `l1_ratio=0` requiere enmienda.
 - La salida `criterio_fallido` del paso 4 de §6 es inalcanzable por construcción (documentado en T5).
+
+### S09 — Semana 5: calibración y capa de decisión
+
+| Campo | Valor |
+|---|---|
+| Fecha de apertura | 6 de octubre de 2026 |
+| Fechas planificadas | 2–8 de noviembre de 2026 |
+| Estado | En curso: T0 |
+| Objetivo | Calibrar el Random Forest final (E-04), aplicar el umbral analítico de la spec 004 y congelar el artefacto, sin consultar prueba |
+
+| Tarea | Estado | Commit requerido |
+|---|---|---|
+| T0 | Completada (commit local) | `docs: spec 004 decision layer, spec 002 v1.5 and week 5 plan (SDD gate)` |
+| T1 | Pendiente | `fix: canonical split manifest hash` |
+| T2 | Pendiente | `feat: probability calibration (E-04)` |
+| T3 | Pendiente | `feat: expected-profit decision layer (spec 004)` |
+| T4 | Pendiente | `feat: calibrate, decide and freeze artifact` |
+| T5 | Pendiente | `chore: calibration and decision results` |
+| T6 | Pendiente | `docs: week 5 calibration and decision` |
+
+#### T0 — Compuerta
+
+- Semana 4 publicada: `a868641..7013dfc`, CI #26 en verde. Copia temporal de Claude eliminada.
+- Decisión del responsable: **solo opción A** (umbral analítico c/(s·V) = 1/6 con V = 1.000 €, c = 50 €, s = 30 %). Opciones B (presupuesto/deciles) y C (umbral robusto/sensibilidad) excluidas y registradas como trabajo futuro; el cronograma de la semana 5 se ajusta en consecuencia.
+- Spec 004 v1.0 redactada; spec 002 v1.5 fija el detalle de E-04 (OOF 5 pliegues semilla 42, sigmoide `LogisticRegression(C=np.inf)`, isotónica, empate de Brier < 1e-4), el artefacto y el hash canónico del manifiesto (hallazgo de la semana 4). Todo antes de calibrar.
 
 ## 6. Plantilla para nuevas secciones
 

@@ -163,7 +163,7 @@ notebooks/    EDA delgado; lógica reutilizable en src/churn/
 | 001 | [Visión general y contrato de datos](specs/001-overview-and-data-contract.md) | Completada: validación local y CI remoto verificados |
 | 002 | [Modelado y evaluación](specs/002-modeling-and-evaluation.md) | v1.4: baselines y selección implementadas (Random Forest); calibración pendiente |
 | 003 | [EDA e hipótesis preregistradas](specs/003-eda-and-hypotheses.md) | Implementada v1.1 y revisada |
-| 004 | Capa de decisión y beneficio esperado | Por redactar antes de la semana 5 |
+| 004 | [Capa de decisión y beneficio esperado](specs/004-decision-layer.md) | Aprobada v1.0 (opción A: umbral analítico) |
 | 005 | API y dashboard | Por redactar antes de la semana 7 |
 | 006 | Operación: tests, Docker, CI y monitoreo | Por redactar antes de ampliar operación y serving |
 
@@ -177,7 +177,7 @@ Plan del **5 de octubre al 29 de noviembre de 2026**, con unas **8 horas por sem
 | 2 | 12–18 oct | EDA, hipótesis y auditoría de productos 3–4 y balance cero | Hipótesis contrastadas con pruebas estadísticas, tamaños de efecto e incertidumbre |
 | 3 | 19–25 oct | Pipeline, división estratificada, Dummy/LogReg y MLflow | Modelos de referencia registrados en MLflow |
 | 4 | 26 oct–1 nov | Random Forest, XGBoost, validación cruzada y ajuste acotado | Tabla de media ± desviación estándar por modelo |
-| 5 | 2–8 nov | Calibración, umbral por beneficio esperado, lift y beneficio por decil, sensibilidad | Umbral justificado en dinero bajo supuestos explícitos |
+| 5 | 2–8 nov | Calibración y umbral analítico por beneficio esperado (opción A) | Umbral justificado en dinero bajo supuestos explícitos |
 | 6 | 9–15 nov | SHAP, errores, segmentos y ficha del modelo (model card) | Limitaciones documentadas |
 | 7 | 16–22 nov | FastAPI, Streamlit, tests de API y Docker Compose | `docker compose up` funciona desde cero |
 | 8 | 23–29 nov | Cambio de distribución simulado con Evidently, despliegue y README con resultados | URL pública y reproducibilidad verificadas |
