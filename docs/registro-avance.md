@@ -700,8 +700,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T1 | Completada (`8bfd342`) | `fix: canonical split manifest hash` |
 | T2 | Completada (`cc74f95`) | `feat: probability calibration (E-04)` |
 | T3 | Completada (`fa7472e`) | `feat: expected-profit decision layer (spec 004)` |
-| T4 | Completada (commit local) | `feat: calibrate, decide and freeze artifact` |
-| T5 | Pendiente | `chore: calibration and decision results` |
+| T4 | Completada (`f2796d5`) | `feat: calibrate, decide and freeze artifact` |
+| T5 | Completada (commit local) | `chore: calibration and decision results` |
 | T6 | Pendiente | `docs: week 5 calibration and decision` |
 
 #### T0 — Compuerta
@@ -730,6 +730,14 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - `decide.py` y CLI `churn-decide`: lee la configuración final de `model_selection.json` (RF, FS-TREE sin `EstimatedSalary`), genera OOF de entrenamiento, ajusta los calibradores, ajusta el pipeline con todo el entrenamiento, compara variantes en validación, elige por Brier y aplica la regla de la spec 004 con la probabilidad calibrada elegida.
 - Artefacto en `models/` (fuera de Git): `model.joblib` (`CalibratedModel`: pipeline + calibrador + columnas) y `metadata.json` (variables, exclusiones, hiperparámetros, calibrador, umbral, supuestos, versiones, procedencia; evaluación final "pendiente"). Copia de la metadata en `reports/model_metadata.json`. Figura `reports/figures/reliability.png`. MLflow `stage=calibration` (etiqueta `experiment=E-04`) y `stage=decision`.
 - Tests de extremo a extremo con datos sintéticos: el artefacto recargado reproduce el número de contactados del reporte; metadata idéntica en ambas copias.
+
+#### T5 — Resultados reales y verificación independiente
+
+- `uv run churn-decide` (≈14 s) en el entorno enlazado, con el código de `f2796d5`; corridas añadidas a `mlruns/mlflow.db` (copia previa conservada fuera del repositorio).
+- E-04 en validación: Brier sin calibrar 0,1026, **sigmoide 0,1010**, isotónica 0,1013 → sigmoide (diferencia > 1e-4). La sigmoide conserva la AP (0,696); la isotónica la reduce a 0,673 por empates. Grupo 3–4 de validación (n = 56): observado 80,4 %; predicho sin calibrar 73,4 %, con sigmoide 84,1 %.
+- Decisión (t* = 1/6, 2.000 clientes, 407 abandonos): el modelo contacta a 621 (31,1 %), captura 310 abandonos y obtiene **61.950 €**; contactar a todos 22.100 €; aleatoria 20 % 4.420 €; nadie 0 €; oráculo 101.750 €. Diferencia frente a la mejor referencia: +39.850 €; 60,9 % del oráculo. Precisión 0,499; recall 0,762; F1 0,603.
+- Verificación independiente (script sin importar `churn`): Brier 0,1026 / 0,1010 / 0,1013; 621 contactados, 310 capturados, 61.950 €, 22.100 € y 101.750 €. Coincide con `decision.json`.
+- Figura de fiabilidad revisada: sin calibrar subestima el decil de mayor riesgo (≈71 % predicho frente a ≈82 % observado); la sigmoide lo corrige.
 
 ## 6. Plantilla para nuevas secciones
 
