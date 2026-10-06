@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 3: T0, compuerta documental y enmienda 002 v1.1 |
+| Fase actual | Semana 3: T1, corrección de presentación de figuras |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -477,13 +477,13 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 |---|---|
 | Fecha de apertura | 6 de octubre de 2026 |
 | Fechas planificadas | 19–25 de octubre de 2026 |
-| Estado | En curso: T0 |
+| Estado | En curso: T1 |
 | Objetivo | Tres baselines fijas con CV exclusivamente de entrenamiento, transformaciones seguras y trazabilidad MLflow |
 
 | Tarea | Estado | Commit requerido |
 |---|---|---|
-| T0 | Verificada localmente; publicación y CI pendientes | `docs: amend spec 002 v1.1 and week 3 plan (SDD gate)` |
-| T1 | Pendiente | `fix: figure readability (week 2 debt)` |
+| T0 | Completada | `docs: amend spec 002 v1.1 and week 3 plan (SDD gate)` |
+| T1 | Figuras regeneradas y revisadas visualmente; comprobaciones completas pendientes | `fix: figure readability (week 2 debt)` |
 | T2 | Pendiente | `build: add mlflow` |
 | T3 | Pendiente | `feat: leakage-safe feature transformers` |
 | T4 | Pendiente | `feat: model pipelines for baselines` |
@@ -499,6 +499,15 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - Motivo: H2 desaconseja la codificación ordinal para LogReg informada; H4 requiere no linealidad, y usar `config.centered_age()` fuera de sklearn produciría fuga de las medias del pliegue. Q-10 fija la interpretación conjunta de saldo y geografía.
 - Solo documentación hasta el commit de T0. Sin selección de modelo, acceso a prueba ni uso de validación para entrenamiento.
 - Ejecutadas las comprobaciones de `AGENTS.md`, incluida sincronización adicional `uv sync --locked --all-groups`: 71 aprobados y cobertura del 98,48 %; Ruff, formato y hooks satisfactorios. CI previo confirmado en verde. Pendientes: commit de compuerta y CI de T0.
+- Compuerta publicada: `566a07b`; CI en verde: https://github.com/darwinjaco/bank-churn-ml/actions/runs/37508772980, antes de cambios en `src/`, tests o dependencias de semana 3.
+
+#### T1 — Presentación de figuras
+
+- `plots.py`: miles en ejes numéricos, `constrained_layout=True` para los dos paneles de saldo, color único de barras/puntos, IDs H1–H6 y tasas con `PercentFormatter`.
+- Alemania: umbral práctico OR=1,5 con etiqueta y figura más compacta; se conserva la referencia OR=1.
+- `uv run --group eda python -m churn.plots`: seis PNG regenerados, de 17.094 a 26.795 bytes; todos <200 KB.
+- Revisadas visualmente las seis imágenes: sin solapamientos de títulos, etiquetas o paneles. Datos, intervalos, histograma y resultados confirmatorios sin cambios (`git diff --exit-code` de hypotheses.json y split_manifest.json satisfactorio).
+- Comprobaciones completas de `AGENTS.md`, con instalación adicional de EDA, satisfactorias: 71 aprobados y cobertura del 98,51 %. CI previo T0 en verde; pendiente CI de T1 tras publicar.
 
 ## 6. Plantilla para nuevas secciones
 

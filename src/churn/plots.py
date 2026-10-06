@@ -11,12 +11,15 @@ matplotlib.use("Agg")
 
 import matplotlib.pyplot as plt
 import pandas as pd
+from matplotlib.ticker import FuncFormatter, PercentFormatter
 
 from churn.config import AGE_LABELS, PROJECT_ROOT, has_balance
 from churn.hypotheses import HYPOTHESES_FILE
 from churn.split import load_exploration
 
 FIGURES_DIR = PROJECT_ROOT / "reports" / "figures"
+COLOR = "#287a9e"
+THOUSANDS = FuncFormatter(lambda value, position: f"{value / 1000:g}k")
 
 
 def _save(fig, path: Path) -> Path:
@@ -35,8 +38,9 @@ def _rates_plot(rates, levels, labels, title, path: Path) -> Path:
         [rates[level]["rate"] - rates[level]["ic_low"] for level in levels],
         [rates[level]["ic_high"] - rates[level]["rate"] for level in levels],
     ]
-    ax.bar(labels, values, yerr=errors, capsize=5, color="#287a9e")
+    ax.bar(labels, values, yerr=errors, capsize=5, color=COLOR, error_kw={"ecolor": COLOR})
     ax.set(title=title, ylabel="Tasa de abandono (IC 95 % Wilson)", ylim=(0, 1))
+    ax.yaxis.set_major_formatter(PercentFormatter(xmax=1))
     return _save(fig, path)
 
 
@@ -48,53 +52,59 @@ def generate_figures(df: pd.DataFrame, results: list[dict], out_dir: Path) -> li
             indexed["H2"]["detalles"]["rates"],
             ("1", "2", "3-4"),
             ("1", "2", "3-4"),
-            "Abandono por número de productos (H2)",
+            "H2: abandono por número de productos",
             out_dir / "churn_products.png",
         ),
         _rates_plot(
             indexed["H4"]["detalles"]["rates"],
             AGE_LABELS,
             AGE_LABELS,
-            "Abandono por tramo de edad",
+            "H4: abandono por tramo de edad",
             out_dir / "churn_age.png",
         ),
     ]
     germany = indexed["H3"]["detalles"]
     estimates = [germany["or_crudo"], germany["or_ajustado"]]
-    fig, ax = plt.subplots(figsize=(6, 4))
+    fig, ax = plt.subplots(figsize=(6, 2.6))
     values = [estimate["estimate"] for estimate in estimates]
     errors = [
         [value - estimate["ic_low"] for value, estimate in zip(values, estimates, strict=True)],
         [estimate["ic_high"] - value for value, estimate in zip(values, estimates, strict=True)],
     ]
-    ax.errorbar(values, [0, 1], xerr=errors, fmt="o", capsize=5)
+    ax.errorbar(values, [0, 1], xerr=errors, fmt="o", capsize=5, color=COLOR)
     ax.axvline(1, color="gray", linestyle="--")
+    ax.axvline(1.5, color=COLOR, linestyle="--", label="umbral práctico")
+    ax.legend(loc="lower left")
     ax.set(
         yticks=[0, 1],
         yticklabels=["Crudo", "Ajustado por saldo"],
         xlabel="Odds ratio (IC 95 %)",
-        title="Alemania frente a Francia y España",
+        title="H3: Alemania frente a Francia y España",
+        ylim=(-0.35, 1.35),
     )
     paths.append(_save(fig, out_dir / "germany_or.png"))
 
     rates = indexed["H5"]["detalles"]["rates"]
-    fig, axes = plt.subplots(1, 2, figsize=(8, 4))
-    axes[0].bar(["Saldo cero", "Saldo positivo"], [rates["0"]["n"], rates["1"]["n"]])
+    fig, axes = plt.subplots(1, 2, figsize=(8, 4), constrained_layout=True)
+    fig.suptitle("H5: distribución del saldo")
+    axes[0].bar(["Saldo cero", "Saldo positivo"], [rates["0"]["n"], rates["1"]["n"]], color=COLOR)
     axes[0].set(title="Masa puntual en cero", ylabel="Clientes")
-    axes[1].hist(df.loc[has_balance(df["Balance"]) == 1, "Balance"], bins=40)
+    axes[1].hist(df.loc[has_balance(df["Balance"]) == 1, "Balance"], bins=40, color=COLOR)
     axes[1].set(title="Distribución del saldo positivo", xlabel="Balance", ylabel="Clientes")
+    axes[1].xaxis.set_major_formatter(THOUSANDS)
     paths.append(_save(fig, out_dir / "balance_distribution.png"))
 
     fig, ax = plt.subplots(figsize=(6, 4))
-    ax.hist(df["EstimatedSalary"], bins=40, color="#287a9e")
-    ax.set(title="Distribución de EstimatedSalary", xlabel="EstimatedSalary", ylabel="Clientes")
+    ax.hist(df["EstimatedSalary"], bins=40, color=COLOR)
+    ax.set(title="H6: distribución de EstimatedSalary", xlabel="EstimatedSalary", ylabel="Clientes")
+    ax.xaxis.set_major_formatter(THOUSANDS)
     paths.append(_save(fig, out_dir / "salary_distribution.png"))
     paths.append(
         _rates_plot(
             indexed["H1"]["detalles"]["rates"],
             ("0", "1"),
             ("Inactivo", "Activo"),
-            "Abandono por actividad",
+            "H1: abandono por actividad",
             out_dir / "churn_activity.png",
         )
     )
