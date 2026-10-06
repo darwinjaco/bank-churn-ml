@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 2: T0, compuerta SDD previa a la implementación |
+| Fase actual | Semana 2: T1, dependencias estadísticas y grupo EDA |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -279,7 +279,7 @@ Semana 2: definir la sección de EDA, hipótesis y protocolo estadístico en la 
 |---|---|
 | Fecha | 6 de octubre de 2026 |
 | Fase | Semana 2 |
-| Estado | Comprobación local completada; publicación y CI del commit por verificar |
+| Estado | Completada |
 | Objetivo | Versionar la especificación y el plan aprobados antes de modificar código, tests o dependencias |
 
 **Trabajo realizado**
@@ -299,25 +299,36 @@ Semana 2: definir la sección de EDA, hipótesis y protocolo estadístico en la 
 - `git add --renormalize .`: ejecutado; sin cambios de contenido en código, tests ni reporte de calidad.
 - `uv sync --locked`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run pre-commit run --all-files` y `uv run pytest --cov=churn --cov-fail-under=85`: satisfactorios; 22 tests aprobados y cobertura del 97,35 %.
 - Los archivos nuevos de T0 quedaron incluidos en las comprobaciones de pre-commit.
+- Commit T0: `678004d` — `docs: approve spec 003 and week 2 plan (SDD gate)`; publicado en `main` antes de modificar dependencias, código o tests.
+- CI T0 en verde: https://github.com/darwinjaco/bank-churn-ml/actions/runs/37421500954.
 
 **Siguiente paso**
 
-Completar T0 con el mensaje `docs: approve spec 003 and week 2 plan (SDD gate)`. Después comenzar T1; la implementación requiere ese commit previo.
+Compuerta satisfecha; continuar con T1 según el plan versionado.
 
 ### S05 — T1–T4: dependencias, división y contrastes
 
 | Campo | Valor |
 |---|---|
 | Fase | Semana 2 |
-| Estado | Pendiente |
+| Estado | En curso: T1 |
 | Objetivo | Implementar exclusivamente la especificación 003 aprobada y el plan versionado |
 
 | Tarea | Estado | Commit requerido |
 |---|---|---|
-| T1 | Pendiente | `build: add stats and EDA dependencies` |
+| T1 | Verificada localmente; CI del commit por confirmar | `build: add stats and EDA dependencies` |
 | T2 | Pendiente | `feat: stratified split with versioned manifest` |
 | T3 | Pendiente | `feat: statistical helpers with reference tests` |
 | T4 | Pendiente | `feat: preregistered hypothesis tests H1-H6` |
+
+#### T1 — Dependencias (6 de octubre de 2026)
+
+- Añadidas a producción `scikit-learn`, `scipy` y `statsmodels`; creado el grupo `eda` con `matplotlib` e `ipykernel`.
+- Ejecutados `uv add --no-sync scikit-learn scipy statsmodels`, `uv add --no-sync --group eda matplotlib ipykernel`, `uv lock` y `uv sync --locked --all-groups`.
+- Resueltas 82 dependencias; instalación completa satisfactoria. Versiones estadísticas bloqueadas: scikit-learn 1.9.1, scipy 1.17.1 y statsmodels 0.15.0.
+- Archivos: `pyproject.toml`, `uv.lock` y este registro. El CI sigue usando el grupo de producción y desarrollo: los tests actuales no necesitan gráficos.
+- `uv sync --locked`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run pre-commit run --all-files` y `uv run pytest --cov=churn --cov-fail-under=85`: satisfactorios; 22 tests aprobados y cobertura del 97,35 % sin instalar el grupo `eda`.
+- CI del commit previo T0 confirmado en verde antes del commit de T1. Pendiente: CI del nuevo commit tras la publicación.
 
 ### S06 — T5–T7: resultados, notebook y conclusiones
 
