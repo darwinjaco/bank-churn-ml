@@ -96,14 +96,16 @@ Figuras previstas: abandono por `NumOfProducts` con IC; abandono por tramo de ed
 
 ## 8. Criterios de aceptación
 
-- [ ] Esta especificación tiene commit **antes** de cualquier cambio en `src/` o `tests/`.
-- [ ] La división reproduce el manifiesto: tamaños 6.000 / 2.000 / 2.000 (±1), sin solapamiento, tasa de abandono por conjunto a ≤ 1 pp de la global.
-- [ ] Las funciones estadísticas tienen tests con valores de referencia conocidos (sección 9).
-- [ ] Los contrastes detectan un efecto sembrado en datos sintéticos y no rechazan H₀ cuando no hay efecto (semilla fija).
-- [ ] `reports/hypotheses.json` contiene, por hipótesis: estadístico, p crudo, p Holm, efecto, IC y veredicto (`confirmada`, `detectable sin relevancia`, `no confirmada`).
-- [ ] `reports/eda_hypotheses.md` tiene una conclusión de una línea por hipótesis y sus implicaciones para la semana 3.
-- [ ] Ningún módulo de esta semana usa `Gender` ni carga la partición de prueba (test que lo comprueba).
-- [ ] CI en verde y cobertura ≥ 85 %.
+Evidencia: [registro S04–S06](../docs/registro-avance.md), [resultados](../reports/hypotheses.json), [conclusiones](../reports/eda_hypotheses.md) y [CI técnico](https://github.com/darwinjaco/bank-churn-ml/actions/runs/37487169164). La revisión del responsable de diseño sigue pendiente.
+
+- [x] Esta especificación tiene commit **antes** de cualquier cambio en `src/` o `tests/`.
+- [x] La división reproduce el manifiesto: tamaños 6.000 / 2.000 / 2.000 (±1), sin solapamiento, tasa de abandono por conjunto a ≤ 1 pp de la global.
+- [x] Las funciones estadísticas tienen tests con valores de referencia conocidos (sección 9).
+- [x] Los contrastes detectan un efecto sembrado en datos sintéticos y no rechazan H₀ cuando no hay efecto (semilla fija).
+- [x] `reports/hypotheses.json` contiene, por hipótesis: estadístico, p crudo, p Holm, efecto, IC y veredicto (`confirmada`, `detectable sin relevancia`, `no confirmada`).
+- [x] `reports/eda_hypotheses.md` tiene una conclusión de una línea por hipótesis y sus implicaciones para la semana 3.
+- [x] Ningún módulo de esta semana usa `Gender` ni carga la partición de prueba (test que lo comprueba).
+- [x] CI en verde y cobertura ≥ 85 %.
 
 ## 9. Valores de referencia para tests
 

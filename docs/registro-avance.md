@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 2: T6, notebook narrativo |
+| Fase actual | Semana 2 implementada y verificada; detenida para revisión antes de semana 3 |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -28,7 +28,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 | Fase | Fechas | Entregable | Criterio de cierre | Estado |
 |---|---|---|---|---|
 | Semana 1 | 5–11 oct | Repo, uv, Ruff, pytest, pre-commit, CI mínimo, specs 001–002 y Pandera | Tests pasan en CI | Completada el 6 de octubre: validación local y CI remoto verificados |
-| Semana 2 | 12–18 oct | EDA, hipótesis y auditoría de productos 3–4 y balance cero | Hipótesis contrastadas con pruebas estadísticas, tamaños de efecto e incertidumbre | En curso; ejecución iniciada el 6 de octubre |
+| Semana 2 | 12–18 oct | EDA, hipótesis y auditoría de productos 3–4 y balance cero | Hipótesis contrastadas con pruebas estadísticas, tamaños de efecto e incertidumbre | Entregables implementados el 6 de octubre; revisión pendiente |
 | Semana 3 | 19–25 oct | Pipeline, división estratificada, Dummy/LogReg y MLflow | Modelos de referencia registrados en MLflow | Pendiente |
 | Semana 4 | 26 oct–1 nov | RF, XGBoost, validación cruzada y ajuste acotado | Tabla de media ± desviación estándar por modelo | Pendiente |
 | Semana 5 | 2–8 nov | Calibración, umbral monetario, lift y beneficio por decil, sensibilidad | Umbral justificado por beneficio esperado bajo supuestos explícitos | Pendiente |
@@ -44,7 +44,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 |---|---|---|---|
 | 001 | Visión general y contrato de datos | Completada: verificación local y remota | Semana 1 |
 | 002 | Modelado y evaluación | Documentada en español; implementación pendiente | Semanas 3–5 |
-| 003 | [EDA e hipótesis preregistradas](../specs/003-eda-and-hypotheses.md) | Aprobada v1.0; H1–H6 congeladas al versionar T0 | Semana 2 |
+| 003 | [EDA e hipótesis preregistradas](../specs/003-eda-and-hypotheses.md) | Implementada v1.1; H1–H6 congeladas en v1.0; revisión pendiente | Semana 2 |
 | 004 | Capa de decisión y beneficio esperado | Pendiente de redacción | Antes de implementar la semana 5 |
 | 005 | API y dashboard | Pendiente de redacción | Antes de implementar la semana 7 |
 | 006 | Operación: tests, Docker, CI y monitoreo | Pendiente de redacción | Antes de ampliar operación y serving |
@@ -409,14 +409,14 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | Campo | Valor |
 |---|---|
 | Fase | Semana 2 |
-| Estado | En curso: T6 |
+| Estado | Completada técnicamente; pendiente de revisión |
 | Objetivo | Generar los entregables de EDA y detenerse para revisión al terminar T7 |
 
 | Tarea | Estado | Commit requerido |
 |---|---|---|
 | T5 | Completada | `chore: generate split manifest, hypothesis results and figures` |
-| T6 | Verificado localmente; CI del commit por confirmar | `docs: EDA notebook` |
-| T7 | Pendiente | `docs: week 2 conclusions and log` |
+| T6 | Completada | `docs: EDA notebook` |
+| T7 | Cierre documental verificado; revisión pendiente | `docs: week 2 conclusions and log` |
 
 #### T5 — Resultados y figuras (6 de octubre de 2026)
 
@@ -438,6 +438,25 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - `uv run ruff format notebooks/01_eda.ipynb`, `uv run ruff check notebooks/01_eda.ipynb` y `uv run pre-commit run nbstripout --files notebooks/01_eda.ipynb`: satisfactorios tras ordenar los imports.
 - Validación con `uv run --group eda python -c`: ejecutadas las cuatro celdas, AST sin definiciones de funciones y carga de 8.000 filas únicamente de entrenamiento/validación. Confirmados `outputs=[]` y `execution_count=null` en el archivo.
 - Comprobaciones locales completas de `AGENTS.md`, con instalación adicional del grupo EDA, satisfactorias: 71 aprobados y cobertura del 98,48 %; `nbstripout` incluido y aprobado. CI de T5 en verde antes del commit; pendiente CI de T6 tras publicar.
+- Commit T6: `0585806`; publicado. CI en verde: https://github.com/darwinjaco/bank-churn-ml/actions/runs/37487169164; 69 aprobados, 2 omitidos por ausencia del CSV y cobertura del 98,05 %.
+
+#### T7 — Conclusiones y cierre (6 de octubre de 2026)
+
+- Creado `reports/eda_hypotheses.md`: tabla H1–H6 con efectos, IC, Holm, prueba usada y veredicto; una conclusión por hipótesis, sin lenguaje causal.
+- Secundarios Mann–Whitney y KS en sección **Exploratorio**, sin veredictos confirmatorios. H6 no tiene p Holm; H2 presenta IC Wilson por nivel, no un IC inexistente de V.
+- Implicaciones limitadas a las candidatas y auditorías ya previstas (`has_balance`, `age_band`, E-02 y E-03); no se cambió la selección de features ni se implementó semana 3.
+- Añadidos Q-06–Q-11 a la especificación 001, con muestra de 8.000 filas explícita. README actualizado con resultados, reproducción, grupo EDA y renumeración de specs 003–006.
+- Criterios de la especificación 003 contrastados con artefactos y tests; H1–H6 y reglas de equidad/prueba permanecen intactas.
+- Evidencia técnica remota antes del cierre documental: https://github.com/darwinjaco/bank-churn-ml/actions/runs/37487169164, correspondiente a `0585806`. Este commit documental tendrá además su propia ejecución de CI al publicarse.
+- Comprobaciones finales completas de `AGENTS.md`, con sincronización adicional de EDA, satisfactorias: 71 tests aprobados y cobertura del 98,48 %; Ruff, formato y todos los hooks pertinentes, incluido `nbstripout`, aprobados. CI de T6 confirmado en verde antes del commit `docs: week 2 conclusions and log`.
+
+**Cierre de S04–S06 y compuertas**
+
+- S04 completada: spec y plan tuvieron commit antes de código; la enmienda exacta v1.1 precedió a los resultados reales.
+- S05 completada: división reproducible, funciones estadísticas, pruebas exactas y contrastes preregistrados con tests de referencias y efectos conocidos.
+- S06 completada técnicamente: artefactos, notebook y conclusiones verificados, con evidencia local y remota. Ningún resultado se presenta como causal y los análisis secundarios quedan separados.
+- B-01 resuelto. Sin nuevos bloqueos de implementación; queda pendiente la revisión del responsable de diseño.
+- Al terminar y verificar T7, detenerse. No comenzar entrenamiento, selección de variables ni otras tareas de la semana 3 antes de la revisión.
 
 ## 6. Plantilla para nuevas secciones
 

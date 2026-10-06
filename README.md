@@ -4,7 +4,7 @@
 
 Proyecto de aprendizaje automático de extremo a extremo para estimar el abandono de clientes (**churn**) y **decidir a quién conviene contactar**, convirtiendo probabilidades calibradas en beneficio esperado bajo supuestos explícitos.
 
-> En desarrollo. Semana 1 de 8 completada: repositorio publicado, validación local y CI remoto verificados. Siguiente fase: EDA y auditoría de calidad. El detalle de cada sección está en el [registro de avance](docs/registro-avance.md).
+> En desarrollo. Semanas 1–2 implementadas y verificadas; EDA e hipótesis preregistradas listas para revisión. La semana 3 espera esa revisión. El detalle está en el [registro de avance](docs/registro-avance.md).
 
 ## Objetivo de negocio
 
@@ -14,15 +14,15 @@ El dataset no contiene ingresos del banco, valor de vida del cliente (CLV), cost
 
 ## Estado actual
 
-- Implementados: carga del CSV, contrato de datos con Pandera, reporte de calidad y tests.
+- Implementados: contrato con Pandera, división estratificada, manifiesto, helpers estadísticos, H1–H6, seis figuras y notebook de EDA.
 - Configurados: uv, Ruff, pytest, pre-commit y GitHub Actions; cobertura mínima en CI del 85 %.
-- Documentadas: especificaciones 001 y 002 en español.
-- Verificados localmente: contrato del CSV, Ruff, formato, pre-commit y 22 tests; cobertura del 97,35 %.
+- Documentadas: especificaciones 001–003 en español; v1.1 de EDA conserva H1–H6 y fija Freeman–Halton exacto para resolver B-01.
+- Verificados localmente: contrato, manifiesto real, Ruff, formato, pre-commit y 71 tests; cobertura del 98,48 %.
 - Reglas de trabajo: [AGENTS.md](AGENTS.md), incluidas especificación previa y exclusión permanente de `Gender` de las features.
 - Repositorio público: [darwinjaco/bank-churn-ml](https://github.com/darwinjaco/bank-churn-ml), rama `main`.
-- CI remoto verificado: 21 tests aprobados, 1 omitido y 95,58 % de cobertura; [ejecución de cierre técnico](https://github.com/darwinjaco/bank-churn-ml/actions/runs/37419500890).
+- CI remoto verificado: 69 tests aprobados, 2 omitidos y 98,05 % de cobertura; [ejecución técnica de semana 2](https://github.com/darwinjaco/bank-churn-ml/actions/runs/37487169164).
 
-El test con datos reales se omite en CI porque el CSV se obtiene por separado. Los resultados locales de Windows y remotos de Linux están registrados en S02 y S03.
+Los dos tests con datos reales se omiten en CI porque el CSV se obtiene por separado. Los resultados locales de Windows y remotos de Linux están registrados en S02–S06.
 
 ## Inicio rápido
 
@@ -38,9 +38,9 @@ Set-Location bank-churn-ml
 Desde la raíz del proyecto:
 
 ```powershell
-uv sync --locked             # Crea .venv e instala las dependencias del archivo de bloqueo
+uv sync --locked --all-groups # Incluye el grupo eda, necesario para los tests gráficos
 uv run pre-commit install    # Instala las comprobaciones previas a cada commit
-uv run pytest                # Usa datos sintéticos; omite el test real si falta el CSV
+uv run pytest                # Usa datos sintéticos; omite los tests reales si falta el CSV
 ```
 
 Comprobaciones de calidad (lint, formato y tests también se ejecutan en CI):
@@ -95,16 +95,42 @@ Los patrones de productos y salarios motivan una auditoría de posible origen si
 
 `RowNumber`, `CustomerId` y `Surname` están excluidos de las entradas del modelo. `Gender` se conserva exclusivamente para auditoría y nunca se usa como feature, tampoco en experimentos. `EstimatedSalary` sigue como candidata en la configuración; su exclusión se decidirá mediante el experimento E-03, no solo por su AUC individual.
 
+### Semana 2: hipótesis preregistradas
+
+Las seis hipótesis cumplieron sus criterios sobre **8.000 clientes de entrenamiento + validación**, con IC del 95 % y Holm solo sobre H1–H5. La evaluación final del conjunto de prueba sigue reservada.
+
+| Hipótesis | Resultado principal |
+|---|---|
+| H1: inactividad | DR +12,27 pp [10,51; 14,03] |
+| H2: productos no monótonos | Tasas 2 < 1 < 3–4: 7,38 % < 27,98 % < 85,60 %, IC no solapados |
+| H3: Alemania ajustada por saldo | OR 2,1787 [1,9133; 2,4809] |
+| H4: edad en U invertida | β cuadrático −0,003429; pico puntual 56,58 años |
+| H5: saldo cero | DR −10,62 pp [−12,31; −8,88] |
+| H6: equivalencia de AUC salarial | AUC 0,5146 [0,4997; 0,5306], dentro del margen [0,45; 0,55] |
+
+Estas asociaciones no prueban causalidad, origen sintético ni utilidad predictiva del modelo. H6 no descarta interacciones del salario. El [reporte completo](reports/eda_hypotheses.md) contiene p-valores, pruebas usadas, límites e implicaciones para E-02/E-03.
+
+Reproducir EDA, después de colocar el CSV:
+
+```powershell
+uv sync --locked --all-groups
+uv run churn-split
+uv run churn-hypotheses
+uv run --group eda python -m churn.plots
+```
+
+El [manifiesto](reports/split_manifest.json) está versionado; `data/processed/split.json` está excluido de Git. El [notebook](notebooks/01_eda.ipynb) carga solo exploración y muestra resultados/figuras, con salidas eliminadas.
+
 ## Estructura del proyecto
 
 ```text
 docs/         Registro de avance por fases y secciones
 specs/        Especificaciones de diseño previas a la implementación
-src/churn/    Paquete: configuración, carga y validación de datos
-tests/        Tests con datos sintéticos y un test opcional con el CSV real
+src/churn/    Contrato, división, estadística, hipótesis y figuras
+tests/        Tests sintéticos, gráficos headless y dos tests opcionales con CSV real
 data/         raw/ y processed/; datos excluidos de Git
 reports/      Reportes generados y evidencia de calidad
-notebooks/    Exploración; la lógica reutilizable se implementará en src/churn/
+notebooks/    EDA delgado; lógica reutilizable en src/churn/
 ```
 
 ## Especificaciones previstas
@@ -113,9 +139,10 @@ notebooks/    Exploración; la lógica reutilizable se implementará en src/chur
 |---|---|---|
 | 001 | [Visión general y contrato de datos](specs/001-overview-and-data-contract.md) | Completada: validación local y CI remoto verificados |
 | 002 | [Modelado y evaluación](specs/002-modeling-and-evaluation.md) | Documentada; implementación pendiente |
-| 003 | Capa de decisión y beneficio esperado | Por redactar antes de la semana 5 |
-| 004 | API y dashboard | Por redactar antes de la semana 7 |
-| 005 | Operación: tests, Docker, CI y monitoreo | Por redactar antes de ampliar operación y serving |
+| 003 | [EDA e hipótesis preregistradas](specs/003-eda-and-hypotheses.md) | Implementada v1.1; pendiente de revisión |
+| 004 | Capa de decisión y beneficio esperado | Por redactar antes de la semana 5 |
+| 005 | API y dashboard | Por redactar antes de la semana 7 |
+| 006 | Operación: tests, Docker, CI y monitoreo | Por redactar antes de ampliar operación y serving |
 
 ## Cronograma
 
@@ -133,6 +160,8 @@ Plan del **5 de octubre al 29 de noviembre de 2026**, con unas **8 horas por sem
 | 8 | 23–29 nov | Cambio de distribución simulado con Evidently, despliegue y README con resultados | URL pública y reproducibilidad verificadas |
 
 **Prioridad:** la capa de decisión de la semana 5 es el entregable central. Si hay retrasos, se reduce primero el alcance del monitoreo de cambios de distribución de la semana 8.
+
+Estado de cierre: semanas 1–2 verificadas, con la revisión de semana 2 pendiente; semanas 3–8 sin iniciar. La división se adelantó a semana 2 para reservar la prueba antes del EDA.
 
 ## Publicación y seguimiento
 

@@ -22,7 +22,7 @@ El éxito se medirá mediante el **beneficio esperado frente a políticas de ref
 - Fuente declarada: *Churn Modelling* de Kaggle (`shrutimechlearn/churn-modelling`), descrito como 10.000 clientes de un banco europeo, con 14 columnas.
 - La versión esperada no tiene `Complain`; el caso de fuga asociado a esa columna no aplica a este archivo.
 - Los patrones de productos y salarios suscitan una **hipótesis de origen sintético**, pendiente de verificar con la procedencia y la auditoría de datos (§6).
-- El dataset no contiene ingresos del banco, CLV, costos de campaña ni datos de tratamiento. Los valores monetarios y la eficacia de contacto serán **supuestos explícitos**, sujetos a sensibilidad en la futura especificación 003.
+- El dataset no contiene ingresos del banco, CLV, costos de campaña ni datos de tratamiento. Los valores monetarios y la eficacia de contacto serán **supuestos explícitos**, sujetos a sensibilidad en la futura especificación 004.
 - Los resultados serán evidencia de este ejercicio de modelado; no demostrarán impacto causal ni beneficio real de una campaña bancaria.
 
 ## 3. Alcance
@@ -81,6 +81,17 @@ Evidencia: [reporte de calidad](../reports/data_quality.json), reproducido con e
 | Q-03 | Abandono muy alto con 3–4 productos en un grupo pequeño | 82,71 % en 266 clientes con 3 productos; 100 % en 60 con 4 | Auditar incertidumbre y dependencia del modelo; experimento E-02. El patrón no demuestra por sí solo un origen sintético |
 | Q-04 | Señal individual débil de `EstimatedSalary` y valores bajos | AUC de 0,5087; 59 valores menores a 1.000 | Revisar distribución, unidades y contexto en EDA; medir su aporte combinado mediante E-03 antes de excluirla |
 | Q-05 | Sin alarma en el análisis univariado disponible | Máximo de `max(AUC, 1 − AUC)`: `Age`, 0,7321 | Revisar procedencia, disponibilidad de variables y separación de datos; repetir controles después de crear variables |
+
+Hallazgos Q-06 en adelante: [reporte de hipótesis](../reports/eda_hypotheses.md) y [JSON](../reports/hypotheses.json), calculados exclusivamente en 8.000 filas de entrenamiento + validación bajo la especificación 003 v1.1. H1–H5 usan Holm; H6 se evalúa por equivalencia. Son asociaciones, no efectos causales.
+
+| ID | Hallazgo | Evidencia de exploración (IC 95 %) | Tratamiento previsto |
+|---|---|---|---|
+| Q-06 | Inactividad asociada a mayor abandono (H1) | DR +12,27 pp [10,51; 14,03]; OR 2,1610 | Conservar la evaluación de `IsActiveMember` en el pipeline previsto |
+| Q-07 | Relación no monótona con productos (H2) | Tasas 2 < 1 < 3–4: 7,38 % < 27,98 % < 85,60 %; IC no solapados; n(3–4)=257 | Priorizar E-02 y la auditoría del grupo pequeño; el patrón no prueba origen sintético |
+| Q-08 | Asociación de Alemania persiste tras ajustar por saldo (H3) | OR ajustado 2,1787 [1,9133; 2,4809]; atenuación del log-OR 17,46 % | Documentar segmentos y límites del ajuste; sin interpretación causal |
+| Q-09 | Edad con U invertida en el modelo inferencial fijado (H4) | β cuadrático −0,003429 [−0,003855; −0,003002]; pico puntual 56,58 años | Evaluar `age_band` ya prevista; cualquier incorporación al modelo requiere CV |
+| Q-10 | Saldo cero asociado a menor abandono (H5) | DR −10,62 pp [−12,31; −8,88]; saldo cero en 36,14 % de exploración | Evaluar `has_balance` ya propuesto junto al saldo continuo |
+| Q-11 | Salario bruto dentro del margen de equivalencia de AUC (H6) | AUC 0,5146 [0,4997; 0,5306] dentro de [0,45; 0,55] | Ejecutar E-03; no descartar utilidad combinada o no lineal por este resultado |
 
 ## 7. Decisiones técnicas
 
