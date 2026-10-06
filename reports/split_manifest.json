@@ -1,0 +1,22 @@
+{
+  "seed": 42,
+  "csv_sha256": "3996cd1fa372e0db0cd9c0ebac35bbd4e8e3c65fb942bb010c826e7b1eeef0a0",
+  "sklearn_version": "1.9.1",
+  "partitions": {
+    "train": {
+      "n_rows": 6000,
+      "churn_rate": 0.20383333333333334,
+      "customer_ids_sha256": "11cedba55b68eab2f33b40589156b5ec1211ec351d84ff2c865a201a3ba3032b"
+    },
+    "validation": {
+      "n_rows": 2000,
+      "churn_rate": 0.2035,
+      "customer_ids_sha256": "1f76a487e0f2d305a95b8b4f76695e61de54ec1ee51e7d1917470eb4d0363854"
+    },
+    "test": {
+      "n_rows": 2000,
+      "churn_rate": 0.2035,
+      "customer_ids_sha256": "42bf47bd52889165eab9b34960f0ab87cbe87d40a5ee7024d02969fd16d2eac6"
+    }
+  }
+}

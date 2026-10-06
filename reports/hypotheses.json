@@ -1,0 +1,259 @@
+[
+  {
+    "id": "H1",
+    "prueba": "independencia_2x2",
+    "prueba_usada": "chi2_pearson",
+    "estadistico": 185.52918652555692,
+    "p_raw": 3.0079655935669154e-42,
+    "p_holm": 9.023896780700746e-42,
+    "efecto": 0.12273175026972308,
+    "ic_low": 0.10513869139422935,
+    "ic_high": 0.1402849293917448,
+    "umbral": "DR >= 0.05",
+    "direccion_ok": true,
+    "veredicto": "confirmada",
+    "detalles": {
+      "rates": {
+        "0": {
+          "n": 3881,
+          "k": 1036,
+          "rate": 0.26694150992012367,
+          "ic_low": 0.2532596827871658,
+          "ic_high": 0.2810842488313071
+        },
+        "1": {
+          "n": 4119,
+          "k": 594,
+          "rate": 0.1442097596504006,
+          "ic_low": 0.133812787332467,
+          "ic_high": 0.15526974730412096
+        }
+      },
+      "or": {
+        "estimate": 2.160977081890966,
+        "ic_low": 1.931396883051879,
+        "ic_high": 2.417846890732793
+      },
+      "practico_ok": true
+    }
+  },
+  {
+    "id": "H2",
+    "prueba": "independencia_3x2",
+    "prueba_usada": "chi2_pearson",
+    "estadistico": 1201.265353452987,
+    "p_raw": 1.4078061137515758e-261,
+    "p_holm": 7.039030568757879e-261,
+    "efecto": 0.3875024763554723,
+    "ic_low": null,
+    "ic_high": null,
+    "umbral": "IC Wilson no solapados: tasa(2) < tasa(1) < tasa(3-4)",
+    "direccion_ok": true,
+    "veredicto": "confirmada",
+    "detalles": {
+      "rates": {
+        "1": {
+          "n": 4071,
+          "k": 1139,
+          "rate": 0.27978383689511177,
+          "ic_low": 0.26620713974992316,
+          "ic_high": 0.2937757410272557
+        },
+        "2": {
+          "n": 3672,
+          "k": 271,
+          "rate": 0.07380174291938998,
+          "ic_low": 0.06578350349066393,
+          "ic_high": 0.08271078412635814
+        },
+        "3-4": {
+          "n": 257,
+          "k": 220,
+          "rate": 0.8560311284046692,
+          "ic_low": 0.8078634758967922,
+          "ic_high": 0.8937121126901302
+        }
+      },
+      "practico_ok": true,
+      "nota_ic": "IC por nivel; V sin IC preregistrado"
+    }
+  },
+  {
+    "id": "H3",
+    "prueba": "wald_is_germany",
+    "prueba_usada": "wald_logit",
+    "estadistico": 11.749891163476526,
+    "p_raw": 7.070986051146079e-32,
+    "p_holm": 1.4141972102292157e-31,
+    "efecto": 2.1787036316869455,
+    "ic_low": 1.9133055905670435,
+    "ic_high": 2.480915509852819,
+    "umbral": "OR ajustado >= 1.5",
+    "direccion_ok": true,
+    "veredicto": "confirmada",
+    "detalles": {
+      "rates": {
+        "1": {
+          "n": 2005,
+          "k": 663,
+          "rate": 0.3306733167082294,
+          "ic_low": 0.3104217442925767,
+          "ic_high": 0.3515724877467142
+        },
+        "0": {
+          "n": 5995,
+          "k": 967,
+          "rate": 0.16130108423686404,
+          "ic_low": 0.1522078839241386,
+          "ic_high": 0.17082806762135405
+        }
+      },
+      "or_crudo": {
+        "estimate": 2.5687971309548945,
+        "ic_low": 2.2880710872996244,
+        "ic_high": 2.883965772142983
+      },
+      "or_ajustado": {
+        "estimate": 2.1787036316869455,
+        "ic_low": 1.9133055905670435,
+        "ic_high": 2.480915509852819
+      },
+      "atenuacion_log_or_pct": 17.458249036157355,
+      "coeficientes": {
+        "const": -1.8494360788162618,
+        "is_germany": 0.7787300355542309,
+        "has_balance": 0.2214891938175814,
+        "balance_10k": 0.012043318791221674
+      },
+      "practico_ok": true
+    }
+  },
+  {
+    "id": "H4",
+    "prueba": "razon_verosimilitud",
+    "prueba_usada": "likelihood_ratio_logit",
+    "estadistico": 319.42191620565063,
+    "p_raw": 1.9356229230804695e-71,
+    "p_holm": 7.742491692321878e-71,
+    "efecto": -0.003428572226293506,
+    "ic_low": -0.003855166831508634,
+    "ic_high": -0.0030019776210783783,
+    "umbral": "coeficiente cuadratico < 0 y pico entre 18 y 92",
+    "direccion_ok": true,
+    "veredicto": "confirmada",
+    "detalles": {
+      "rates": {
+        "18-29": {
+          "n": 1310,
+          "k": 104,
+          "rate": 0.07938931297709924,
+          "ic_low": 0.06594921306036594,
+          "ic_high": 0.09528900742541727
+        },
+        "30-39": {
+          "n": 3486,
+          "k": 381,
+          "rate": 0.10929432013769363,
+          "ic_low": 0.09936377375804356,
+          "ic_high": 0.12008500861715676
+        },
+        "40-49": {
+          "n": 2079,
+          "k": 635,
+          "rate": 0.30543530543530545,
+          "ic_low": 0.2860104530958942,
+          "ic_high": 0.32557784299167464
+        },
+        "50-59": {
+          "n": 699,
+          "k": 389,
+          "rate": 0.5565092989985694,
+          "ic_low": 0.5194710919503583,
+          "ic_high": 0.5929297902237739
+        },
+        "60+": {
+          "n": 426,
+          "k": 121,
+          "rate": 0.284037558685446,
+          "ic_low": 0.24329279086410568,
+          "ic_high": 0.328642404719821
+        }
+      },
+      "peak_age": 56.58106509210427,
+      "mean_age": 38.946625,
+      "coeficientes": {
+        "const": -1.2722733530158634,
+        "age_c": 0.1209219030520508,
+        "age_c2": -0.003428572226293506
+      },
+      "practico_ok": true
+    }
+  },
+  {
+    "id": "H5",
+    "prueba": "independencia_2x2",
+    "prueba_usada": "chi2_pearson",
+    "estadistico": 128.3080355769226,
+    "p_raw": 9.610721282394845e-30,
+    "p_holm": 9.610721282394845e-30,
+    "efecto": -0.10618262452726346,
+    "ic_low": -0.12311657786179804,
+    "ic_high": -0.08881018694615961,
+    "umbral": "DR <= -0.05",
+    "direccion_ok": true,
+    "veredicto": "confirmada",
+    "detalles": {
+      "rates": {
+        "0": {
+          "n": 2891,
+          "k": 393,
+          "rate": 0.13593912141127637,
+          "ic_low": 0.12392812987079235,
+          "ic_high": 0.14891633158115228
+        },
+        "1": {
+          "n": 5109,
+          "k": 1237,
+          "rate": 0.24212174593853983,
+          "ic_low": 0.23057213106547075,
+          "ic_high": 0.25405886693778484
+        }
+      },
+      "mann_whitney_saldo_positivo": {
+        "u": 2433321.5,
+        "p_raw": 0.3940783272652336,
+        "auc": 0.5080359499121442,
+        "n_churn": 1237,
+        "n_retained": 3872,
+        "confirmatorio": false
+      },
+      "practico_ok": true
+    }
+  },
+  {
+    "id": "H6",
+    "prueba": "equivalencia_auc",
+    "prueba_usada": "bootstrap_percentil",
+    "estadistico": 0.5145818686134199,
+    "p_raw": null,
+    "p_holm": null,
+    "efecto": 0.5145818686134199,
+    "ic_low": 0.4997385324764813,
+    "ic_high": 0.5305574828224705,
+    "umbral": "IC AUC dentro de [0.45, 0.55]",
+    "direccion_ok": true,
+    "veredicto": "confirmada",
+    "detalles": {
+      "ks_uniforme": {
+        "statistic": 0.008287295499220249,
+        "p_raw": 0.6388050869520768,
+        "minimum": 11.58,
+        "maximum": 199992.48,
+        "confirmatorio": false
+      },
+      "practico_ok": true,
+      "n_boot": 2000,
+      "seed": 42
+    }
+  }
+]

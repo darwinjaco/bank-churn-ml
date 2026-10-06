@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 2: T4, contrastes preregistrados según v1.1 |
+| Fase actual | Semana 2: T5, resultados reales y figuras |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -322,7 +322,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | Campo | Valor |
 |---|---|
 | Fase | Semana 2 |
-| Estado | En curso: T4 implementada, verificación completa pendiente |
+| Estado | Completada: T1–T4 verificadas |
 | Objetivo | Implementar exclusivamente la especificación 003 aprobada y el plan versionado |
 
 | Tarea | Estado | Commit requerido |
@@ -330,7 +330,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T1 | Completada | `build: add stats and EDA dependencies` |
 | T2 | Completada | `feat: stratified split with versioned manifest` |
 | T3 | Completada | `feat: statistical helpers with reference tests` |
-| T4 | Verificada localmente; CI del commit por confirmar | `feat: preregistered hypothesis tests H1-H6` |
+| T4 | Completada | `feat: preregistered hypothesis tests H1-H6` |
 
 #### T1 — Dependencias (6 de octubre de 2026)
 
@@ -402,20 +402,33 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - CLI `churn-hypotheses` carga exclusivamente `load_exploration()` y serializa la prueba usada, efectos, IC, p-valores y veredictos.
 - `uv run pytest tests/test_hypotheses.py --cov=churn --cov-report=term-missing`: 12 aprobados; incluye efectos sembrados, ausencia de efecto, coeficientes conocidos de H3/H4, selectores exactos, equivalencia, Holm y restricciones de módulos. Se corrigió el orden de imports señalado por Ruff.
 - Sin contrastes sobre datos reales antes de T5. Comprobaciones completas de `AGENTS.md` satisfactorias: 68 aprobados, 1 omitido y cobertura del 98,76 %. CI del paso 3 confirmado en verde antes del commit; pendiente CI de T4.
+- Commit T4: `f7e853e`; publicado. CI en verde: https://github.com/darwinjaco/bank-churn-ml/actions/runs/37485327713.
 
 ### S06 — T5–T7: resultados, notebook y conclusiones
 
 | Campo | Valor |
 |---|---|
 | Fase | Semana 2 |
-| Estado | Pendiente |
+| Estado | En curso: T5 |
 | Objetivo | Generar los entregables de EDA y detenerse para revisión al terminar T7 |
 
 | Tarea | Estado | Commit requerido |
 |---|---|---|
-| T5 | Pendiente | `chore: generate split manifest, hypothesis results and figures` |
+| T5 | Verificada localmente; CI del commit por confirmar | `chore: generate split manifest, hypothesis results and figures` |
 | T6 | Pendiente | `docs: EDA notebook` |
 | T7 | Pendiente | `docs: week 2 conclusions and log` |
+
+#### T5 — Resultados y figuras (6 de octubre de 2026)
+
+- Ejecutados `uv run churn-split`, `uv run churn-hypotheses` y `uv run --group eda python -m churn.plots`, después de la enmienda v1.1 y de T4.
+- División real: 6.000 / 2.000 / 2.000; tasas 0,203833 / 0,2035 / 0,2035. Exploración: 8.000 filas; el manifiesto registra hashes y versión, y los índices permanecen fuera de Git.
+- H1–H6 cumplen los criterios preregistrados. H1 DR 0,122732; H2 V 0,387502; H3 OR ajustado 2,178704; H4 coeficiente -0,003429 y pico 56,58 años; H5 DR -0,106183; H6 AUC 0,514582 con IC [0,499739; 0,530557]. Los p-valores Holm corresponden solo a H1–H5.
+- Seis PNG generados: productos (H2, agrupación 3–4), edad, OR de Alemania, balance con masa cero, salario y actividad. Tamaños: 17.190, 17.701, 18.214, 21.522, 16.503 y 15.831 bytes; todos <200.000 bytes.
+- `plots.py` no contiene inferencia: dibuja IC y efectos del JSON y distribuciones descriptivas. No se excluye de cobertura: se prueba con Matplotlib headless y los tamaños reales de PNG.
+- `uv run pytest tests/test_plots.py`: 2 aprobados. Se retiraron comentarios `noqa` innecesarios detectados por Ruff.
+- El CI pasa a `uv sync --locked --all-groups` porque los nuevos tests gráficos necesitan el grupo `eda`; no se añadieron dependencias adicionales.
+- Comprobaciones locales de `AGENTS.md` y sincronización adicional `uv sync --locked --all-groups` satisfactorias: 71 tests aprobados, incluido `realdata` del manifiesto; cobertura global del 98,48 %, sin exclusiones de cobertura.
+- `git check-ignore -v -- data/processed/split.json data/raw/Churn_Modelling.csv`: ambos excluidos. CI de T4 en verde antes del commit; pendiente CI de T5 tras publicar.
 
 ## 6. Plantilla para nuevas secciones
 
