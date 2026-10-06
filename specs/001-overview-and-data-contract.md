@@ -1,94 +1,108 @@
-# Spec 001 — Project overview & data contract
+# Especificación 001 — Visión general y contrato de datos
 
-| Field  | Value |
-|--------|-------|
-| Status | Accepted |
-| Owner  | Darwin Jacome Cuenca |
-| Week   | 1 |
-
-## 1. Objective
-
-Build a **retention decision system**, not only a churn classifier. For each customer, the system must answer:
-
-1. What is the probability that this customer leaves? (calibrated probability)
-2. Is it worth contacting them, given campaign cost and customer value? (expected profit)
-3. Why did the model score them this way? (local explanation)
-
-Success is measured in **expected profit vs. baseline policies** ("contact nobody", "contact everyone", "contact random 20 %"), not by accuracy or F1 alone.
-
-## 2. Context
-
-- Dataset: *Churn Modelling* (Kaggle), 10,000 customers of a European bank, 14 columns.
-- Public, anonymised and partly **synthetic** (see §6). Results must not be presented as real banking evidence.
-- The dataset has no revenue or cost data. All monetary values are **explicit assumptions** with sensitivity analysis (spec 003).
-
-## 3. Scope
-
-| In scope | Out of scope |
+| Campo | Valor |
 |---|---|
-| Binary churn prediction, calibration, profit-based threshold | Survival / time-to-churn modelling |
-| Global and local explainability (SHAP) | Causal / uplift claims (no treatment data) |
-| Segment and fairness audit | Real customer data of any institution |
-| API, dashboard, Docker, CI, drift simulation | Production-grade auth, scaling, SLAs |
+| Estado | Diseño documentado; validación del cierre pendiente |
+| Responsable | Darwin Jacome Cuenca |
+| Semana | 1 |
+| Última revisión documental | 6 de octubre de 2026 |
 
-## 4. Data contract
+## 1. Objetivo
 
-**Source file:** `data/raw/Churn_Modelling.csv` (not committed, see README > Data).
-**Grain:** one row = one customer. **Primary key:** `CustomerId`.
+Construir un **sistema de decisiones de retención**. Para cada cliente, el sistema debe responder:
 
-| Column | Type | Allowed values | Role | Description |
+1. ¿Cuál es la probabilidad de que abandone el banco? Probabilidad calibrada.
+2. ¿Conviene contactarlo, considerando el costo de campaña, su valor y la eficacia supuesta de la retención? Beneficio esperado.
+3. ¿Qué variables explican la predicción? Explicación local.
+
+El éxito se medirá mediante el **beneficio esperado frente a políticas de referencia**: no contactar a nadie, contactar a todos y contactar a un 20 % al azar. La comparación respetará las mismas restricciones presupuestarias cuando correspondan; la exactitud y F1 serán métricas complementarias.
+
+## 2. Contexto
+
+- Fuente declarada: *Churn Modelling* de Kaggle (`shrutimechlearn/churn-modelling`), descrito como 10.000 clientes de un banco europeo, con 14 columnas.
+- La versión esperada no tiene `Complain`; el caso de fuga asociado a esa columna no aplica a este archivo.
+- Los patrones de productos y salarios suscitan una **hipótesis de origen sintético**, pendiente de verificar con la procedencia y la auditoría de datos (§6).
+- El dataset no contiene ingresos del banco, CLV, costos de campaña ni datos de tratamiento. Los valores monetarios y la eficacia de contacto serán **supuestos explícitos**, sujetos a sensibilidad en la futura especificación 003.
+- Los resultados serán evidencia de este ejercicio de modelado; no demostrarán impacto causal ni beneficio real de una campaña bancaria.
+
+## 3. Alcance
+
+| Incluido | Fuera del alcance |
+|---|---|
+| Predicción binaria de abandono, calibración y umbral por beneficio | Supervivencia o tiempo hasta el abandono |
+| Explicabilidad global y local con SHAP | Afirmaciones causales o de efecto incremental (uplift) sin datos de tratamiento |
+| Auditoría de segmentos y equidad | Incorporación de datos privados de una institución |
+| API, dashboard, Docker, CI y cambio de distribución simulado | Autenticación, escalado y acuerdos de servicio de nivel productivo |
+
+## 4. Contrato de datos
+
+**Archivo de origen:** `data/raw/Churn_Modelling.csv`, excluido de Git; instrucciones en el [README](../README.md#datos).
+
+**Unidad de observación:** una fila representa un cliente. **Clave primaria:** `CustomerId`. Ninguna columna admite nulos.
+
+| Columna | Tipo | Valores permitidos | Rol | Descripción |
 |---|---|---|---|---|
-| RowNumber | int | ≥ 1, unique | ID (dropped) | File row index |
-| CustomerId | int | unique | ID (dropped) | Customer key |
-| Surname | string | non-empty | ID (dropped) | Last name |
-| CreditScore | int | 300–900 | Feature | Credit score |
-| Geography | string | France, Germany, Spain | Feature | Country |
-| Gender | string | Female, Male | **Audit only** | Used for fairness checks, not as input |
-| Age | int | 18–100 | Feature | Age in years |
-| Tenure | int | 0–10 | Feature | Years as customer |
-| Balance | float | ≥ 0 | Feature | Account balance |
-| NumOfProducts | int | 1–4 | Feature | Number of bank products |
-| HasCrCard | int | {0, 1} | Feature | Has credit card |
-| IsActiveMember | int | {0, 1} | Feature | Active member flag |
-| EstimatedSalary | float | > 0 | Feature | Estimated salary |
-| **Exited** | int | {0, 1} | **Target** | 1 = customer left the bank |
+| `RowNumber` | int | ≥ 1, único | Identificador excluido | Índice de fila del archivo |
+| `CustomerId` | int | Único | Identificador excluido | Clave del cliente |
+| `Surname` | string | No vacío | Identificador excluido | Apellido |
+| `CreditScore` | int | 300–900 | Variable candidata | Puntaje crediticio |
+| `Geography` | string | France, Germany, Spain | Variable candidata | País |
+| `Gender` | string | Female, Male | **Solo auditoría** | Auditoría de equidad; excluido de las entradas |
+| `Age` | int | 18–100 | Variable candidata | Edad en años |
+| `Tenure` | int | 0–10 | Variable candidata | Años como cliente |
+| `Balance` | float | ≥ 0 | Variable candidata | Saldo de cuenta |
+| `NumOfProducts` | int | 1–4 | Variable candidata | Número de productos bancarios |
+| `HasCrCard` | int | {0, 1} | Variable candidata | Indicador de tarjeta de crédito |
+| `IsActiveMember` | int | {0, 1} | Variable candidata | Indicador de actividad |
+| `EstimatedSalary` | float | > 0 | Variable candidata; evaluar en E-03 | Salario estimado del cliente; no equivale a ingresos del banco |
+| **`Exited`** | int | {0, 1} | **Variable objetivo** | 1 = el cliente abandonó el banco |
 
-**Model input:** the 9 *Feature* columns. **Model output:** `churn_probability ∈ [0, 1]`, `contact: bool`, `expected_profit`, `top_reasons`.
+**Entradas candidatas:** las 9 columnas de variables declaradas en `MODEL_FEATURES`, en `src/churn/config.py`. Su selección final se justificará con los experimentos de la [especificación 002](002-modeling-and-evaluation.md).
 
-## 5. Validation rules
+**Salida prevista del sistema:** `churn_probability ∈ [0, 1]`, `contact: bool`, `expected_profit` y `top_reasons`. El modelo aportará la probabilidad, la capa de decisión calculará el contacto y beneficio, y la capa de explicación aportará las razones. Estas salidas aún no están implementadas.
 
-Implemented in `src/churn/validation.py`.
+## 5. Reglas de validación
 
-- **Hard checks (pipeline stops):** exact column set, dtypes, ranges and categories in §4, unique `CustomerId`, binary target. Errors are collected lazily, so all violations are reported at once.
-- **Soft checks (logged in `reports/data_quality.json`):** duplicated rows, class balance, `Balance = 0` share, churn by `NumOfProducts`, implausible salaries, and **single-feature AUC ≥ 0.90 as a leakage alarm**.
+Implementadas en `src/churn/data.py` y `src/churn/validation.py`.
 
-## 6. Known data issues (week 1 findings)
+- **Comprobaciones obligatorias:** columnas exactas, tipos, ausencia de nulos, rangos y categorías de §4, unicidad de `RowNumber` y `CustomerId`, y objetivo binario. Una infracción detiene la validación. Pandera recopila los errores del esquema con `lazy=True`; los errores de cabecera o conversión de tipos pueden detener antes la carga del CSV.
+- **Comprobaciones informativas:** duplicados ignorando `RowNumber`, proporción de abandono, fracción de `Balance = 0`, abandono por `NumOfProducts`, salarios menores a 1.000, cardinalidad de apellidos y AUC de variables numéricas individuales.
+- **Alarma de posible fuga:** `max(AUC, 1 − AUC) ≥ 0,90`, incluyendo relaciones inversas. Es una señal para investigar, no una prueba concluyente de presencia o ausencia de fuga.
+- El reporte se escribe en `reports/data_quality.json` al usar `--out`. Sus advertencias no detienen el proceso y deben interpretarse junto con la auditoría documental.
 
-| ID | Finding | Evidence | Handling |
+## 6. Hallazgos y limitaciones de los datos
+
+Evidencia: [reporte de calidad existente](../reports/data_quality.json). Su reproducción en este entorno está pendiente. Las interpretaciones de origen sintético del reporte son hipótesis por contrastar.
+
+| ID | Hallazgo | Evidencia registrada | Tratamiento previsto |
 |---|---|---|---|
-| Q-01 | Class imbalance | churn rate 20.4 % | Stratified splits; PR-AUC as primary metric |
-| Q-02 | Point mass at `Balance = 0` | 36.2 % of rows | Add `has_balance` flag (week 3) |
-| Q-03 | `NumOfProducts ≥ 3` churn 83–100 % on 326 rows | report | Likely synthetic. Audit model reliance; run ablation without this signal |
-| Q-04 | `EstimatedSalary` has no signal | single-feature AUC 0.509; 59 rows < 1,000 | Test for uniform distribution in EDA; candidate to drop |
-| Q-05 | No leakage detected | max single-feature AUC = Age 0.732 | Re-check after feature engineering |
+| Q-01 | Clases desbalanceadas | Abandono del 20,37 % | Divisiones estratificadas; precisión promedio como métrica principal |
+| Q-02 | Masa puntual en `Balance = 0` | 36,17 % de las filas | Evaluar el indicador `has_balance` en la semana 3 |
+| Q-03 | Abandono muy alto con 3–4 productos en un grupo pequeño | 82,71 % en 266 clientes con 3 productos; 100 % en 60 con 4 | Auditar incertidumbre y dependencia del modelo; experimento E-02. El patrón no demuestra por sí solo un origen sintético |
+| Q-04 | Señal individual débil de `EstimatedSalary` y valores bajos | AUC de 0,5087; 59 valores menores a 1.000 | Revisar distribución, unidades y contexto en EDA; medir su aporte combinado mediante E-03 antes de excluirla |
+| Q-05 | Sin alarma en el análisis univariado disponible | Máximo de `max(AUC, 1 − AUC)`: `Age`, 0,7321 | Revisar procedencia, disponibilidad de variables y separación de datos; repetir controles después de crear variables |
 
-## 7. Technical decisions
+## 7. Decisiones técnicas
 
-| ID | Decision | Rationale |
+| ID | Decisión | Justificación |
 |---|---|---|
-| D-01 | Drop `RowNumber`, `CustomerId`, `Surname` | Identifiers. `Surname` (2,932 values) overfits and can proxy nationality/ethnicity |
-| D-02 | `Gender` excluded from model inputs, kept for audit | Avoid direct use of a protected attribute. Cost of exclusion is measured in week 4 and reported |
-| D-03 | Raw data never committed nor edited | Licence not verified for redistribution; reproducibility via `load_raw()` |
-| D-04 | CI runs on synthetic fixtures | CI must not depend on the dataset. Real-data tests are marked `realdata` and skip if absent |
-| D-05 | `pandera` for schema validation | Declarative, readable contract; lazy mode reports all errors |
+| D-01 | Excluir `RowNumber`, `CustomerId` y `Surname` | Son identificadores. `Surname` tiene 2.932 valores y puede favorecer sobreajuste o actuar como proxy de nacionalidad u origen |
+| D-02 | Excluir `Gender` de las entradas y conservarlo para auditoría | Evitar uso directo de este atributo; medir el efecto de la exclusión con E-01 en la semana 4. La exclusión no garantiza equidad |
+| D-03 | Conservar el CSV original sin modificaciones y fuera de Git | Datos obtenidos por separado bajo las condiciones de su fuente; carga reproducible mediante `load_raw()` |
+| D-04 | Ejecutar CI con muestras sintéticas | CI independiente del dataset; el test `realdata` se omite si falta el archivo |
+| D-05 | Validar el esquema con Pandera | Contrato declarativo y recopilación de infracciones |
+| D-06 | Mantener `EstimatedSalary` como candidata hasta E-03 | La AUC individual no mide interacciones ni demuestra ausencia de utilidad predictiva |
 
-## 8. Acceptance criteria
+## 8. Criterios de aceptación
 
-- [ ] `uv sync && uv run pytest` passes on a clean clone (real-data tests skipped).
-- [ ] `uv run churn-validate` passes on the real file and writes `reports/data_quality.json`.
-- [ ] Any contract violation (bad range, unknown category, missing or extra column) makes validation fail, with tests for each case.
-- [ ] CI is green on `main`.
+Estos criterios siguen pendientes de verificación en este entorno. La evidencia se incorporará al [registro de avance](../docs/registro-avance.md).
 
-## 9. Definition of Done
+- [ ] `uv sync --locked` y `uv run pytest` pasan en una copia limpia; el test real se omite si falta el CSV.
+- [ ] `uv run churn-validate --out reports/data_quality.json` pasa con el archivo real y reproduce el reporte.
+- [ ] Las infracciones de contrato se rechazan: rangos, categorías, unicidad, nulos, tipos y columnas faltantes o adicionales; la cobertura pertinente queda verificada.
+- [ ] Ruff y las comprobaciones de pre-commit pasan.
+- [ ] CI pasa en `main` con cobertura de al menos 85 % y se registra el enlace de la ejecución.
 
-Code merged, tests and lint green in CI, this spec updated with real findings, README explains how to get the data.
+## 9. Definición de cierre
+
+Implementación versionada, comprobaciones locales y CI satisfactorios, hallazgos contrastados con el CSV y documentación de adquisición de datos reproducible. Los criterios se marcan únicamente cuando hay evidencia; el cierre de una sección documental no implica el cierre técnico de la semana 1.

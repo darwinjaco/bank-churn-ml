@@ -1,76 +1,144 @@
-# Bank Churn → Retention Decisions
+# Abandono bancario → Decisiones de retención
 
-[![CI](https://github.com/<your-user>/bank-churn-ml/actions/workflows/ci.yml/badge.svg)](https://github.com/<your-user>/bank-churn-ml/actions/workflows/ci.yml)
+Proyecto de aprendizaje automático de extremo a extremo para estimar el abandono de clientes (**churn**) y **decidir a quién conviene contactar**, convirtiendo probabilidades calibradas en beneficio esperado bajo supuestos explícitos.
 
-End-to-end ML system that predicts customer churn **and decides who is worth contacting**, by turning calibrated probabilities into expected profit.
+> En desarrollo. Semana 1 de 8: base del repositorio implementada; verificación local y CI remoto pendientes. El detalle de cada sección está en el [registro de avance](docs/registro-avance.md).
 
-> 🚧 Work in progress. Week 1 of 8: repository, data contract and validation.
+## Objetivo de negocio
 
-## Why this project is different
+La pregunta central es: *con un presupuesto de retención, ¿a qué clientes debemos contactar y qué beneficio esperamos frente a no contactar a nadie, contactar a todos o seleccionar clientes al azar?*
 
-Most churn projects stop at "XGBoost got 0.86 AUC". This one answers the business question:
-*given a retention budget, which customers should we call, and how much money does that save compared with calling nobody or everyone?*
+El dataset no contiene ingresos del banco, valor de vida del cliente (CLV), costos de campaña ni resultados de intervenciones. Estas cantidades y la eficacia de la retención serán **supuestos documentados**, con análisis de sensibilidad. El beneficio será una estimación por escenarios, no un resultado económico observado ni una estimación causal.
 
-## Quickstart
+## Estado actual
 
-Requirements: Python 3.11, [uv](https://docs.astral.sh/uv/).
+- Implementados: carga del CSV, contrato de datos con Pandera, reporte de calidad y tests.
+- Configurados: uv, Ruff, pytest, pre-commit y GitHub Actions; cobertura mínima en CI del 85 %.
+- Documentadas: especificaciones 001 y 002 en español.
+- Pendiente: ejecutar las comprobaciones en este entorno y validar el CSV local.
+- Publicación pendiente: la rama local es `master`, el CI de push espera `main` y todavía no hay remoto de GitHub.
 
-```bash
-git clone https://github.com/<your-user>/bank-churn-ml.git
-cd bank-churn-ml
-uv sync                      # creates .venv and installs locked dependencies
-uv run pre-commit install    # lint/format hooks on every commit
-uv run pytest                # runs on synthetic data, no dataset needed
+Las cifras históricas de 22 tests y 97 % de cobertura aún deben reproducirse en este entorno. Los criterios de cierre se marcarán con evidencia en el registro de avance.
+
+## Inicio rápido
+
+Requisitos: Git y [uv](https://docs.astral.sh/uv/). La versión de referencia es Python 3.11, fijada en `.python-version`; el paquete admite Python `>=3.11,<3.13`.
+
+Desde la raíz del proyecto, en PowerShell:
+
+```powershell
+uv sync --locked             # Crea .venv e instala las dependencias del archivo de bloqueo
+uv run pre-commit install    # Instala las comprobaciones previas a cada commit
+uv run pytest                # Usa datos sintéticos; omite el test real si falta el CSV
 ```
 
-## Data
+Comprobaciones de calidad (lint, formato y tests también se ejecutan en CI):
 
-The dataset is **not** included in this repository.
+```powershell
+uv run ruff check .
+uv run ruff format --check .
+uv run pytest --cov=churn --cov-report=term-missing --cov-fail-under=85
+uv run pre-commit run --all-files
+```
 
-1. Download *Churn Modelling* from Kaggle (`shrutimechlearn/churn-modelling`), for example:
-   ```bash
+## Datos
+
+El CSV no se distribuye en el repositorio. La versión esperada de *Churn Modelling* tiene 14 columnas, incluida `Exited`, y **no contiene `Complain`**.
+
+1. Obtén `Churn_Modelling.csv` desde [Kaggle](https://www.kaggle.com/datasets/shrutimechlearn/churn-modelling).
+2. Coloca una copia en `data/raw/Churn_Modelling.csv`. Si ya está en Descargas, desde la raíz del proyecto en PowerShell:
+
+   ```powershell
+   Copy-Item -LiteralPath "$HOME\Downloads\Churn_Modelling.csv" -Destination "data/raw/Churn_Modelling.csv"
+   ```
+
+   Si tienes la CLI de Kaggle instalada y configurada, también puedes descargarlo así:
+
+   ```powershell
    kaggle datasets download -d shrutimechlearn/churn-modelling -p data/raw --unzip
    ```
-2. Check that the file is at `data/raw/Churn_Modelling.csv`.
-3. Validate it:
-   ```bash
+
+3. Ejecuta la validación:
+
+   ```powershell
    uv run churn-validate --out reports/data_quality.json
    ```
 
-The data contract (columns, types, ranges, roles) is defined in [`specs/001`](specs/001-overview-and-data-contract.md).
+El [contrato de datos](specs/001-overview-and-data-contract.md) define columnas, tipos, rangos y roles. `.gitignore` excluye los datos originales y procesados; la carga no modifica el CSV.
 
-## Week 1 findings
+### Hallazgos del reporte existente
 
-| Check | Result |
+Estos valores proceden de [`reports/data_quality.json`](reports/data_quality.json), incluido en la base del proyecto. Su reproducción con el CSV local está pendiente.
+
+| Comprobación | Resultado registrado |
 |---|---|
-| Rows / duplicates / nulls | 10,000 / 0 / 0 |
-| Churn rate | 20.4 % (imbalanced) |
-| `Balance = 0` | 36.2 % of customers (point mass) |
-| Churn with 3–4 products | 83–100 % on only 326 customers (likely synthetic artefact) |
-| Leakage scan | No single feature above AUC 0.90 (max: Age, 0.73) |
+| Filas / duplicados según el reporte | 10.000 / 0 |
+| Tasa de abandono | 20,37 %: clases desbalanceadas |
+| `Balance = 0` | 36,17 %: masa puntual en cero |
+| Abandono con 3 productos | 82,71 % en 266 clientes |
+| Abandono con 4 productos | 100 % en 60 clientes |
+| `EstimatedSalary` | AUC individual de 0,5087; 59 valores menores a 1.000 |
+| Alarma de fuga por AUC individual | Ninguna variable numérica alcanza `max(AUC, 1 − AUC) ≥ 0,90`; máximo: `Age`, 0,7321 |
 
-## Project structure
+Los patrones de productos y salarios motivan una auditoría de posible origen sintético, pero no lo demuestran. La alarma univariada tampoco descarta todas las formas de fuga de información. El contrato rechaza nulos; su cumplimiento se comprobará al validar el CSV.
+
+`RowNumber`, `CustomerId` y `Surname` están excluidos de las entradas del modelo. `Gender` se conserva para auditoría. `EstimatedSalary` sigue como candidata en la configuración; su exclusión se decidirá mediante el experimento E-03, no solo por su AUC individual.
+
+## Estructura del proyecto
 
 ```text
-specs/        Design specs, written before code (SDD)
-src/churn/    Package: config, data loading, validation
-tests/        Pytest suite (synthetic fixtures + optional real-data tests)
-data/         raw/ and processed/ (git-ignored)
-reports/      Generated reports
-notebooks/    Exploration only, no business logic
+docs/         Registro de avance por fases y secciones
+specs/        Especificaciones de diseño previas a la implementación
+src/churn/    Paquete: configuración, carga y validación de datos
+tests/        Tests con datos sintéticos y un test opcional con el CSV real
+data/         raw/ y processed/; datos excluidos de Git
+reports/      Reportes generados y evidencia de calidad
+notebooks/    Exploración; la lógica reutilizable se implementará en src/churn/
 ```
 
-## Roadmap
+## Especificaciones previstas
 
-- [x] Week 1: repo, CI, data contract, validation
-- [ ] Week 2: EDA and hypotheses
-- [ ] Week 3: pipeline, split, baselines, MLflow
-- [ ] Week 4: RF / XGBoost, CV, tuning
-- [ ] Week 5: calibration and profit-based decision layer
-- [ ] Week 6: SHAP, error and segment analysis, model card
-- [ ] Week 7: FastAPI + Streamlit + Docker
-- [ ] Week 8: drift monitoring, deployment, final README
+| N.º | Especificación | Estado |
+|---|---|---|
+| 001 | [Visión general y contrato de datos](specs/001-overview-and-data-contract.md) | Documentada; cierre técnico pendiente |
+| 002 | [Modelado y evaluación](specs/002-modeling-and-evaluation.md) | Documentada; implementación pendiente |
+| 003 | Capa de decisión y beneficio esperado | Por redactar antes de la semana 5 |
+| 004 | API y dashboard | Por redactar antes de la semana 7 |
+| 005 | Operación: tests, Docker, CI y monitoreo | Por redactar antes de ampliar operación y serving |
 
-## License
+## Cronograma
 
-MIT. The dataset keeps its original Kaggle licence and is not redistributed here.
+Plan del **5 de octubre al 29 de noviembre de 2026**, con unas **8 horas por semana**. Las fechas son objetivos; los cierres reales se registran en [docs/registro-avance.md](docs/registro-avance.md).
+
+| Semana | Fechas | Entregable | Criterio de cierre |
+|---|---|---|---|
+| 1 | 5–11 oct | Repo, uv, Ruff, pytest, pre-commit, CI mínimo, specs 001–002 y validación con Pandera | Tests pasan en CI |
+| 2 | 12–18 oct | EDA, hipótesis y auditoría de productos 3–4 y balance cero | Hipótesis contrastadas con pruebas estadísticas, tamaños de efecto e incertidumbre |
+| 3 | 19–25 oct | Pipeline, división estratificada, Dummy/LogReg y MLflow | Modelos de referencia registrados en MLflow |
+| 4 | 26 oct–1 nov | Random Forest, XGBoost, validación cruzada y ajuste acotado | Tabla de media ± desviación estándar por modelo |
+| 5 | 2–8 nov | Calibración, umbral por beneficio esperado, lift y beneficio por decil, sensibilidad | Umbral justificado en dinero bajo supuestos explícitos |
+| 6 | 9–15 nov | SHAP, errores, segmentos y ficha del modelo (model card) | Limitaciones documentadas |
+| 7 | 16–22 nov | FastAPI, Streamlit, tests de API y Docker Compose | `docker compose up` funciona desde cero |
+| 8 | 23–29 nov | Cambio de distribución simulado con Evidently, despliegue y README con resultados | URL pública y reproducibilidad verificadas |
+
+**Prioridad:** la capa de decisión de la semana 5 es el entregable central. Si hay retrasos, se reduce primero el alcance del monitoreo de cambios de distribución de la semana 8.
+
+## Preparación para GitHub
+
+Una vez verificadas las comprobaciones locales y versionados los cambios que se publicarán:
+
+1. Crea en GitHub un repositorio vacío llamado `bank-churn-ml`.
+2. Alinea la rama local con el CI y configura el remoto. Sustituye `TU_USUARIO` por tu usuario real:
+
+   ```powershell
+   git branch -m main
+   git remote add origin https://github.com/TU_USUARIO/bank-churn-ml.git
+   git push -u origin main
+   ```
+
+3. Comprueba la ejecución de GitHub Actions y registra su enlace como evidencia.
+4. Añade al README los enlaces definitivos del repositorio y la insignia de CI.
+
+## Licencia
+
+El código y la documentación están bajo [licencia MIT](LICENSE). El dataset está sujeto a las condiciones de su fuente original en Kaggle y se obtiene por separado.
