@@ -28,6 +28,11 @@ CATEGORICAL_FEATURES = ["Geography"]
 
 MODEL_FEATURES = NUMERIC_FEATURES + ORDINAL_FEATURES + BINARY_FEATURES + CATEGORICAL_FEATURES
 
+# Ambas variantes reciben columnas originales; las derivadas se crean dentro del Pipeline.
+FEATURE_SETS = {"raw": MODEL_FEATURES.copy(), "eda": MODEL_FEATURES.copy()}
+BALANCE_POSITIVE_THRESHOLD = 0.0
+PRODUCTS_GROUP_MAX = 3
+
 EXPECTED_COLUMNS = [
     "RowNumber",
     "CustomerId",

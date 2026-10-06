@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 3: T2, dependencia MLflow |
+| Fase actual | Semana 3: T3, transformadores sin fuga |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -477,15 +477,15 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 |---|---|
 | Fecha de apertura | 6 de octubre de 2026 |
 | Fechas planificadas | 19–25 de octubre de 2026 |
-| Estado | En curso: T2 |
+| Estado | En curso: T3 |
 | Objetivo | Tres baselines fijas con CV exclusivamente de entrenamiento, transformaciones seguras y trazabilidad MLflow |
 
 | Tarea | Estado | Commit requerido |
 |---|---|---|
 | T0 | Completada | `docs: amend spec 002 v1.1 and week 3 plan (SDD gate)` |
 | T1 | Completada | `fix: figure readability (week 2 debt)` |
-| T2 | MLflow instalado; comprobaciones completas pendientes | `build: add mlflow` |
-| T3 | Pendiente | `feat: leakage-safe feature transformers` |
+| T2 | Completada | `build: add mlflow` |
+| T3 | Transformadores y tests focalizados aprobados; comprobación completa pendiente | `feat: leakage-safe feature transformers` |
 | T4 | Pendiente | `feat: model pipelines for baselines` |
 | T5 | Pendiente | `feat: cross-validation harness with MLflow tracking` |
 | T6 | Pendiente | `chore: baseline results` |
@@ -515,6 +515,14 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - `uv add --no-sync mlflow`, `uv lock` y `uv sync --locked --all-groups`: satisfactorios; MLflow completo 3.16.1, con 144 paquetes resueltos.
 - Archivos modificados: `pyproject.toml`, `uv.lock` y registro. Se conserva el tracking temporal en los tests que se implementarán en T5.
 - Comprobaciones locales de `AGENTS.md`, con EDA adicional, satisfactorias: 71 aprobados y cobertura del 98,51 %. CI previo T1 en verde. Pendiente CI de T2; si el tamaño impide CI, se registrará el bloqueo sin sustituir la dependencia.
+- Commit T2: `83b1e69`; CI en verde: https://github.com/darwinjaco/bank-churn-ml/actions/runs/37509729792. La dependencia completa no bloqueó CI.
+
+#### T3 — Transformadores
+
+- `features.py`: `HasBalance` y `ProductsGroup` sin estado y con nombres de salida; fábrica de edad con `StandardScaler` seguido de `PolynomialFeatures` de grado 2 sin bias.
+- `FEATURE_SETS` contiene solo las nueve entradas originales permitidas; las derivadas se generan en el pipeline. Constantes de umbral y clip fijadas en config.
+- `uv run pytest tests/test_features.py`: seis aprobados, incluida la prueba A→B que conserva la media de A y prohíbe usar `config.centered_age()`.
+- Ruff pidió nombres de argumentos en minúscula; corregidos sin omitir reglas. Comprobaciones completas satisfactorias: 77 aprobados, cobertura global del 98,61 % y `features.py` al 100 %. CI previo T2 en verde; pendiente CI de T3 tras publicar.
 
 ## 6. Plantilla para nuevas secciones
 
