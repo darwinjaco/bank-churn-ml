@@ -586,8 +586,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T2 | Completada (`bd4962c`; CI tras push) | `build: add xgboost` |
 | T3 | Completada (`14b3e01`; CI tras push) | `feat: tree pipelines and preregistered search spaces` |
 | T4 | Completada (`365185e`; CI tras push) | `feat: two-phase tuning and re-evaluation` |
-| T5 | Completada (commit local; CI tras push) | `feat: preregistered model selection rule` |
-| T6 | Pendiente; E-02 bloqueada por B-02 | `feat: model selection and ablation experiments` |
+| T5 | Completada (`bb5e4d0`; CI tras push) | `feat: preregistered model selection rule` |
+| T6 | Código completado; ejecución real en curso | `feat: model selection and ablation experiments` |
 | T7 | Pendiente | `docs: week 4 model selection and experiments` |
 
 #### T0 — Enmienda v1.2 y observaciones de semana 3
@@ -660,6 +660,13 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 
 - La v1.3 no fijaba si las OOF de E-02 (b)/(c) correspondían a la configuración con salario (FASE B original) o a la final tras E-03. Se fija la configuración final, porque E-02 audita el modelo que se desplegará y §6 ordena E-02 después de E-03. También se explicita que Dummy usa FS-RAW en validación.
 - Se versiona antes de ejecutar `churn-select` sobre datos reales; la búsqueda de FASE A/B (`churn-tune`) no depende de esta aclaración.
+
+#### T6 — Código de selección y experimentos
+
+- `experiments.py`: orden fijo de §6 (pasos 1–2 con FASE B → E-03 → E-02 sobre la configuración final → ajuste con todo el entrenamiento → validación, pasos 3–5). `load_validation()` es la primera lectura de validación; no existe cargador de prueba. CLI `churn-select` → `reports/model_selection.json`; corridas MLflow `stage=experiment` (E-02, E-03) y `stage=selection`.
+- Funciones puras con tests: Δ pareada por (repetición, pliegue); umbral E-03 inclusivo en −0,005; AP por repetición con la referencia B-02 (0,833333; 0,583333; media 0,708333); segmentos de E-02 con error si un cliente se repite dentro de una repetición.
+- Comprobaciones con `pre-commit` real (disponible en el entorno en la nube): todos los hooks en verde; 130 aprobados, cobertura 98 %.
+- El código se versiona antes de la ejecución real para que la procedencia de las corridas apunte a este commit; los resultados van en un commit aparte.
 
 ## 6. Plantilla para nuevas secciones
 

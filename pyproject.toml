@@ -23,6 +23,7 @@ churn-split = "churn.split:main"
 churn-hypotheses = "churn.hypotheses:main"
 churn-baselines = "churn.train:main"
 churn-tune = "churn.tune:main"
+churn-select = "churn.experiments:main"
 
 [build-system]
 requires = ["uv_build>=0.8.17,<0.9.0"]
