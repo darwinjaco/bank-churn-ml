@@ -585,8 +585,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T1 | Completada (`53d909a`; CI tras push) | `fix: baseline report precision and paired differences` |
 | T2 | Completada (`bd4962c`; CI tras push) | `build: add xgboost` |
 | T3 | Completada (`14b3e01`; CI tras push) | `feat: tree pipelines and preregistered search spaces` |
-| T4 | Completada (commit local; CI tras push) | `feat: two-phase tuning and re-evaluation` |
-| T5 | Pendiente | `feat: preregistered model selection rule` |
+| T4 | Completada (`365185e`; CI tras push) | `feat: two-phase tuning and re-evaluation` |
+| T5 | Completada (commit local; CI tras push) | `feat: preregistered model selection rule` |
 | T6 | Pendiente; E-02 bloqueada por B-02 | `feat: model selection and ablation experiments` |
 | T7 | Pendiente | `docs: week 4 model selection and experiments` |
 
@@ -648,6 +648,13 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - `tracking.py`: procedencia (commit, hash del CSV y del manifiesto) y registro genérico en MLflow con `stage ∈ {tuning, reevaluation}`.
 - Corrección de robustez sin efecto en resultados: el one-hot de `NumOfProducts` en FS-EDA usa categorías fijas {1, 2, 3} (R2) en vez de aprenderlas en cada pliegue; con pliegues sin clientes 3–4 fallaba. Baseline `logreg-eda` reproducida: diferencia máxima por métrica 1,1·10⁻¹⁶ (redondeo de coma flotante).
 - Tests: pliegues de FASE B idénticos entre llamadas y distintos de FASE A; cada cliente una vez por repetición; parámetros fijos y muestreados presentes; registro MLflow en URI temporal; CLI con salida JSON y parquet. 113 aprobados, cobertura 98,19 %.
+
+#### T5 — Regla de selección
+
+- `selection.py`: `select_candidate` (pasos 1–2 con AP media y std de FASE B; cercano = diferencia < std del mejor o media igual; orden LogReg > RF > XGBoost) y `validate_choice` (pasos 3–5; "superar" = AP estrictamente mayor). Funciones puras, sin E/S.
+- Tests por rama: candidato claramente mejor, cercanos → el más simple, frontera estricta (diferencia = std no es cercano), medias iguales, fallo frente a Dummy, complejo que supera a LogReg, LogReg conservada, empates en validación y rama LogReg.
+- Observación: la salida `criterio_fallido` del paso 4 es lógicamente inalcanzable (si el candidato supera a Dummy y LogReg ≥ candidato, LogReg supera a Dummy). Se mantiene por fidelidad literal a §6 y se excluye de cobertura.
+- Desde T5, el cómputo pesado se ejecuta en el entorno en la nube de Claude: los procesos en segundo plano no sobreviven en el entorno enlazado y la búsqueda supera el límite por llamada. Se usa un clon exacto (bundle de Git del mismo commit), el mismo CSV (SHA-256 `3996cd1f…`), el mismo `uv.lock` y una copia de `mlruns/mlflow.db`, que se devuelve al repositorio con las nuevas corridas.
 
 ## 6. Plantilla para nuevas secciones
 
