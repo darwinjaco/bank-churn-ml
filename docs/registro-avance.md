@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 3: T1, corrección de presentación de figuras |
+| Fase actual | Semana 3: T2, dependencia MLflow |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -477,14 +477,14 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 |---|---|
 | Fecha de apertura | 6 de octubre de 2026 |
 | Fechas planificadas | 19–25 de octubre de 2026 |
-| Estado | En curso: T1 |
+| Estado | En curso: T2 |
 | Objetivo | Tres baselines fijas con CV exclusivamente de entrenamiento, transformaciones seguras y trazabilidad MLflow |
 
 | Tarea | Estado | Commit requerido |
 |---|---|---|
 | T0 | Completada | `docs: amend spec 002 v1.1 and week 3 plan (SDD gate)` |
-| T1 | Figuras regeneradas y revisadas visualmente; comprobaciones completas pendientes | `fix: figure readability (week 2 debt)` |
-| T2 | Pendiente | `build: add mlflow` |
+| T1 | Completada | `fix: figure readability (week 2 debt)` |
+| T2 | MLflow instalado; comprobaciones completas pendientes | `build: add mlflow` |
 | T3 | Pendiente | `feat: leakage-safe feature transformers` |
 | T4 | Pendiente | `feat: model pipelines for baselines` |
 | T5 | Pendiente | `feat: cross-validation harness with MLflow tracking` |
@@ -508,6 +508,13 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - `uv run --group eda python -m churn.plots`: seis PNG regenerados, de 17.094 a 26.795 bytes; todos <200 KB.
 - Revisadas visualmente las seis imágenes: sin solapamientos de títulos, etiquetas o paneles. Datos, intervalos, histograma y resultados confirmatorios sin cambios (`git diff --exit-code` de hypotheses.json y split_manifest.json satisfactorio).
 - Comprobaciones completas de `AGENTS.md`, con instalación adicional de EDA, satisfactorias: 71 aprobados y cobertura del 98,51 %. CI previo T0 en verde; pendiente CI de T1 tras publicar.
+- Commit T1: `a8b8506`; CI en verde: https://github.com/darwinjaco/bank-churn-ml/actions/runs/37509243601.
+
+#### T2 — MLflow
+
+- `uv add --no-sync mlflow`, `uv lock` y `uv sync --locked --all-groups`: satisfactorios; MLflow completo 3.16.1, con 144 paquetes resueltos.
+- Archivos modificados: `pyproject.toml`, `uv.lock` y registro. Se conserva el tracking temporal en los tests que se implementarán en T5.
+- Comprobaciones locales de `AGENTS.md`, con EDA adicional, satisfactorias: 71 aprobados y cobertura del 98,51 %. CI previo T1 en verde. Pendiente CI de T2; si el tamaño impide CI, se registrará el bloqueo sin sustituir la dependencia.
 
 ## 6. Plantilla para nuevas secciones
 

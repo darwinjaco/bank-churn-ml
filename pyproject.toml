@@ -7,6 +7,7 @@ license = "MIT"
 authors = [{ name = "Darwin Jacome Cuenca" }]
 requires-python = ">=3.11,<3.13"
 dependencies = [
+    "mlflow>=3.16.1",
     "numpy>=2.4.6",
     "pandas>=3.0.6",
     "pandera>=0.24",
