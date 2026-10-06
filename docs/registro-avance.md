@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 2: T0–T3 verificadas localmente; avance a T4 bloqueado por B-01 |
+| Fase actual | Semana 2: enmienda v1.1 autorizada para resolver B-01 antes de T4 |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -306,19 +306,29 @@ Semana 2: definir la sección de EDA, hipótesis y protocolo estadístico en la 
 
 Compuerta satisfecha; continuar con T1 según el plan versionado.
 
+#### Enmienda v1.1 — B-01 (6 de octubre de 2026)
+
+- El responsable de diseño fijó Freeman–Halton por enumeración completa para tablas R×C con marginales fijos, con inclusión de probabilidades ≤ p_obs × (1 + 1e-7); para tablas 2×2 se mantiene Fisher bilateral exacto de scipy.
+- Motivo: scipy utiliza remuestreo sin semilla en tablas distintas de 2×2. Se descarta Monte Carlo con semilla por ser aproximado y depender de la versión de scipy.
+- Añadidos los dos valores de referencia aprobados a la especificación 003 §9. El procedimiento se implementará para tablas de dos columnas, como exige la resolución.
+- Enmienda aplicada antes de T5 y de observar resultados reales de H1–H6. Las hipótesis, direcciones, umbrales y familia Holm permanecen congeladas desde v1.0.
+- La frecuencia esperada aproximada de 53 en el grupo 3–4 es una previsión del responsable de diseño; no se ha ejecutado el contraste real. El fallback es una regla de robustez.
+- Paso 1 solo documental, con mensaje `docs: amend spec 003 v1.1 (B-01 exact RxC test)`. Comprobaciones locales de `AGENTS.md` satisfactorias: 47 tests aprobados, 1 omitido y cobertura del 98,62 %. CI previo T3 en verde; pendiente la verificación remota de la enmienda tras publicar.
+- La confirmación pendiente del CI de T3 se versionará en el paso 3 de la resolución, junto al cierre de B-01.
+
 ### S05 — T1–T4: dependencias, división y contrastes
 
 | Campo | Valor |
 |---|---|
 | Fase | Semana 2 |
-| Estado | T1–T2 completadas; T3 verificada localmente; T4 bloqueada por B-01 |
+| Estado | Bloqueada en T4 por B-01; T1–T3 completadas |
 | Objetivo | Implementar exclusivamente la especificación 003 aprobada y el plan versionado |
 
 | Tarea | Estado | Commit requerido |
 |---|---|---|
 | T1 | Completada | `build: add stats and EDA dependencies` |
 | T2 | Completada | `feat: stratified split with versioned manifest` |
-| T3 | Verificada localmente; CI del commit por confirmar | `feat: statistical helpers with reference tests` |
+| T3 | Completada | `feat: statistical helpers with reference tests` |
 | T4 | Bloqueada: falta definir Fisher para tablas 3×2 | `feat: preregistered hypothesis tests H1-H6` |
 
 #### T1 — Dependencias (6 de octubre de 2026)

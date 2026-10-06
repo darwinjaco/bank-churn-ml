@@ -2,11 +2,11 @@
 
 | Campo | Valor |
 |---|---|
-| Estado | Aprobada v1.0 |
+| Estado | Aprobada v1.1 |
 | Responsable | Darwin Jacome Cuenca |
 | Semana | 2 (12–18 de octubre de 2026) |
 | Dependencias | [001](001-overview-and-data-contract.md) (contrato), [002](002-modeling-and-evaluation.md) §2 (división) |
-| Versión | v1.0 — las hipótesis H1–H6 quedan **congeladas** al hacer commit de esta versión |
+| Versión | v1.1 — enmienda B-01: procedimiento exacto R×C; H1–H6 sin cambios (v1.0 congeló las hipótesis) |
 
 ## 1. Objetivo
 
@@ -41,7 +41,9 @@ Entender los datos y contrastar hipótesis de negocio **definidas antes de ver l
   3. el IC 95 % del efecto supera el **umbral de relevancia práctica** de la tabla.
   Si se cumple 1 pero no 3: "estadísticamente detectable, sin relevancia práctica".
 - Intervalos: Wilson para proporciones; Newcombe (método 10) para diferencias de riesgo; Woolf (log) para odds ratios crudos; Wald del modelo para odds ratios ajustados; bootstrap percentil con 2.000 réplicas y semilla 42 para AUC.
-- χ² de Pearson sin corrección de Yates (n grande). Fisher exacto si alguna frecuencia esperada es < 5.
+- χ² de Pearson sin corrección de Yates (n grande). Si alguna frecuencia esperada es < 5:
+  - tabla 2×2: Fisher exacto (`scipy.stats.fisher_exact`, bilateral);
+  - tabla R×C: test exacto de Freeman–Halton por enumeración completa de las tablas con marginales fijos; p = suma de las probabilidades ≤ p_obs × (1 + 1e-7). Prohibido usar remuestreo Monte Carlo o permutaciones en pruebas confirmatorias.
 - Cualquier análisis no listado en H1–H6 se etiqueta **exploratorio** y no puede reportarse como confirmado.
 
 ## 5. Hipótesis preregistradas
@@ -112,6 +114,8 @@ Figuras previstas: abandono por `NumOfProducts` con IC; abandono por tramo de ed
 | OR con IC de Woolf | tabla [[20, 80], [10, 90]] | OR 2,25; IC [0,9943 ; 5,0915] |
 | Holm | p = [0,01; 0,04; 0,03; 0,005] | [0,03; 0,06; 0,06; 0,02] |
 | V de Cramér | [[50, 0], [0, 50]] | 1,0 |
+| Freeman–Halton | [[8, 2], [1, 5], [0, 4]] | p = 0,008764 |
+| Freeman–Halton | [[3, 1], [1, 3], [0, 0]] | p = 0,485714 (igual a Fisher 2×2) |
 
 ## 10. Definición de cierre
 
