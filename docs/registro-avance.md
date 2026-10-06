@@ -584,8 +584,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T0 | Completada | `docs: amend spec 002 v1.2 and week 4 plan (SDD gate)` |
 | T1 | Completada (`53d909a`; CI tras push) | `fix: baseline report precision and paired differences` |
 | T2 | Completada (`bd4962c`; CI tras push) | `build: add xgboost` |
-| T3 | Completada (commit local; CI tras push) | `feat: tree pipelines and preregistered search spaces` |
-| T4 | Pendiente; protocolo OOF bloqueado por B-02 | `feat: two-phase tuning and re-evaluation` |
+| T3 | Completada (`14b3e01`; CI tras push) | `feat: tree pipelines and preregistered search spaces` |
+| T4 | Completada (commit local; CI tras push) | `feat: two-phase tuning and re-evaluation` |
 | T5 | Pendiente | `feat: preregistered model selection rule` |
 | T6 | Pendiente; E-02 bloqueada por B-02 | `feat: model selection and ablation experiments` |
 | T7 | Pendiente | `docs: week 4 model selection and experiments` |
@@ -641,6 +641,13 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - R3 verificado por test: RF `class_weight=None`; XGBoost `scale_pos_weight=1`, `hist`, `logloss`, sin early stopping.
 - Tests nuevos: espacios idénticos a la spec, rechazo de `Gender`, ausencia de escalado, determinismo de RF/XGBoost, ablaciones y combinaciones inválidas. 105 aprobados, cobertura 98,59 %.
 - Aviso no bloqueante: scikit-learn 1.9 marca `penalty="l2"` como obsoleto (se elimina en 1.10). Se conserva porque la spec lo fija; migrar a `l1_ratio=0` requerirá enmienda.
+
+#### T4 — Ajuste en dos fases
+
+- `tune.py`: `tune_family` (FASE A, `RandomizedSearchCV` con `StratifiedKFold(5, shuffle=True, 42)`, AP, `refit=False`, semilla 42; puntaje marcado como optimista) y `reevaluate` (FASE B, `RepeatedStratifiedKFold(5, 2, 2027)`, idéntica para todas las familias). OOF con `CustomerId`, `repeat`, `fold`, `y`, `proba` en `data/processed/oof_phaseB.parquet` (fuera de Git). CLI `churn-tune` → `reports/tuning.json`.
+- `tracking.py`: procedencia (commit, hash del CSV y del manifiesto) y registro genérico en MLflow con `stage ∈ {tuning, reevaluation}`.
+- Corrección de robustez sin efecto en resultados: el one-hot de `NumOfProducts` en FS-EDA usa categorías fijas {1, 2, 3} (R2) en vez de aprenderlas en cada pliegue; con pliegues sin clientes 3–4 fallaba. Baseline `logreg-eda` reproducida: diferencia máxima por métrica 1,1·10⁻¹⁶ (redondeo de coma flotante).
+- Tests: pliegues de FASE B idénticos entre llamadas y distintos de FASE A; cada cliente una vez por repetición; parámetros fijos y muestreados presentes; registro MLflow en URI temporal; CLI con salida JSON y parquet. 113 aprobados, cobertura 98,19 %.
 
 ## 6. Plantilla para nuevas secciones
 

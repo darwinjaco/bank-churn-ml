@@ -20,6 +20,7 @@ from churn.config import (
     BINARY_FEATURES,
     FEATURE_SETS,
     NUMERIC_FEATURES,
+    PRODUCT_GROUPS,
     RANDOM_SEED,
 )
 from churn.features import HasBalance, ProductsGroup, build_age_transformer
@@ -98,7 +99,13 @@ def _linear_transformers(model: str, feature_set: str, exclude: tuple[str, ...])
                     Pipeline(
                         [
                             ("group", ProductsGroup()),
-                            ("encode", OneHotEncoder(handle_unknown="error")),
+                            # Categorías fijas {1, 2, 3-4} (R2): no dependen del pliegue.
+                            (
+                                "encode",
+                                OneHotEncoder(
+                                    categories=[list(PRODUCT_GROUPS)], handle_unknown="error"
+                                ),
+                            ),
                         ]
                     ),
                     ["NumOfProducts"],

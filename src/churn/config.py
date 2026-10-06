@@ -38,6 +38,7 @@ FEATURE_SETS = {
 ABLATION_COLUMNS = ("EstimatedSalary", "NumOfProducts")
 BALANCE_POSITIVE_THRESHOLD = 0.0
 PRODUCTS_GROUP_MAX = 3
+PRODUCT_GROUPS = (1.0, 2.0, 3.0)  # 3.0 representa el grupo 3-4 (H2)
 
 EXPECTED_COLUMNS = [
     "RowNumber",
