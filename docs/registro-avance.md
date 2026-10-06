@@ -582,8 +582,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | Tarea | Estado | Commit requerido |
 |---|---|---|
 | T0 | Completada | `docs: amend spec 002 v1.2 and week 4 plan (SDD gate)` |
-| T1 | Completada (commit local; CI tras push) | `fix: baseline report precision and paired differences` |
-| T2 | Pendiente | `build: add xgboost` |
+| T1 | Completada (`53d909a`; CI tras push) | `fix: baseline report precision and paired differences` |
+| T2 | Completada (commit local; CI tras push) | `build: add xgboost` |
 | T3 | Pendiente | `feat: tree pipelines and preregistered search spaces` |
 | T4 | Pendiente; protocolo OOF bloqueado por B-02 | `feat: two-phase tuning and re-evaluation` |
 | T5 | Pendiente | `feat: preregistered model selection rule` |
@@ -628,6 +628,11 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - Corregidos signos Unicode ambiguos y longitud de cadenas señalados por Ruff, sin omitir reglas. Comprobaciones completas satisfactorias: 92 aprobados, cobertura del 98,49 %, hooks/lint/formato en verde. CI previo de v1.3 en verde; pendiente CI de T1 tras publicar.
 - Cambio de rol a petición del responsable: desde T1, Claude implementa T1–T7 además de planificar. Entorno Linux aislado (`UV_PROJECT_ENVIRONMENT` fuera del repo, sin tocar `.venv` de Windows). Los hooks de `pre-commit` no pueden descargarse desde GitHub en ese entorno; se ejecutan sus equivalentes de PyPI (`pre-commit-hooks==5.0.0`, `nbstripout==0.8.1`) con los mismos argumentos. Commits locales; el push y el CI quedan a cargo del responsable. El hook instalado en `.git/hooks/pre-commit` apunta al intérprete de Windows y no es ejecutable desde Linux; por eso los commits de Claude usan `core.hooksPath` vacío tras ejecutar los hooks equivalentes y quedan validados por CI al publicar.
 - Verificación de T1 por Claude: Ruff y formato en verde; hooks equivalentes en verde; 92 aprobados, cobertura 98,49 %.
+
+#### T2 — Dependencia XGBoost
+
+- Se usa `xgboost-cpu>=3.2` (misma API `import xgboost`) en lugar de `xgboost`: en Linux, `xgboost` arrastra `nvidia-nccl-cu12` (cientos de MB) sin aportar nada en CPU. `uv.lock` sin paquetes NVIDIA y con ruedas para Windows y Linux.
+- Verificación: `import xgboost` → 3.2.0; Ruff, formato, hooks equivalentes y pytest en verde.
 
 ## 6. Plantilla para nuevas secciones
 
