@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 2: enmienda v1.1 autorizada para resolver B-01 antes de T4 |
+| Fase actual | Semana 2: B-01 resuelto; continuación con T4 según v1.1 |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -322,7 +322,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | Campo | Valor |
 |---|---|
 | Fase | Semana 2 |
-| Estado | Bloqueada en T4 por B-01; T1–T3 completadas |
+| Estado | En curso: B-01 resuelto; T4 pendiente de implementación |
 | Objetivo | Implementar exclusivamente la especificación 003 aprobada y el plan versionado |
 
 | Tarea | Estado | Commit requerido |
@@ -330,7 +330,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T1 | Completada | `build: add stats and EDA dependencies` |
 | T2 | Completada | `feat: stratified split with versioned manifest` |
 | T3 | Completada | `feat: statistical helpers with reference tests` |
-| T4 | Bloqueada: falta definir Fisher para tablas 3×2 | `feat: preregistered hypothesis tests H1-H6` |
+| T4 | Pendiente; procedimiento exacto aprobado y verificado | `feat: preregistered hypothesis tests H1-H6` |
 
 #### T1 — Dependencias (6 de octubre de 2026)
 
@@ -362,8 +362,11 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - Comprobación focalizada: `uv run pytest tests/test_stats.py`: 19 tests aprobados. Ruff detectó un signo menos Unicode ambiguo en un docstring; se cambió por el signo ASCII y las comprobaciones pasaron.
 - `uv sync --locked`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run pre-commit run --all-files` y `uv run pytest --cov=churn --cov-fail-under=85`: satisfactorios; 47 tests aprobados, 1 omitido y cobertura global del 98,62 %. `stats.py` y `split.py` tienen cobertura del 100 %.
 - CI previo T2 confirmado en verde. Pendiente: CI del commit T3 tras la publicación; no se avanza a T4 por B-01.
+- Confirmación del CI de T3 versionada en el paso 3: `cd3350f` publicado, https://github.com/darwinjaco/bank-churn-ml/actions/runs/37422604079 satisfactorio; 46 tests aprobados, 2 omitidos y cobertura del 97,70 %.
 
 #### Bloqueo B-01 — T4: Fisher para H2 con tabla 3×2
+
+**Estado: resuelto el 6 de octubre de 2026.** El texto siguiente conserva el diagnóstico original; la resolución y su evidencia figuran después.
 
 - La especificación 003 §4 exige Fisher si alguna frecuencia esperada es menor a 5, y H2 (§5) usa una tabla 3×2.
 - El cálculo reproducible del p-valor de Fisher para esa tabla no está fijado: faltan el procedimiento y, si interviene remuestreo, su configuración.
@@ -380,6 +383,15 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - Tests de los dos valores de referencia (`1e-6`), determinismo, fila nula, invalidación de entradas y selección de las tres pruebas.
 - `uv run pytest tests/test_stats.py`: 28 aprobados. Ruff señaló `zip` sin `strict`; corregido, lint y formato satisfactorios.
 - Comprobaciones locales de `AGENTS.md` satisfactorias: 56 aprobados, 1 omitido, cobertura global del 98,79 % y `stats.py` al 100 %. CI previo de la enmienda confirmado en verde; pendiente el CI del commit `feat: exact Freeman-Halton test (B-01)` tras publicar.
+- Paso 2 publicado: `4a3e4a6`. CI en verde: https://github.com/darwinjaco/bank-churn-ml/actions/runs/37423861559.
+
+#### Resolución B-01 — Paso 3: cierre documental
+
+- Enmienda v1.1: `9e043df`; implementación exacta: `4a3e4a6`. Ambas publicadas y con CI satisfactorio.
+- B-01 resuelto con el procedimiento definido por el responsable de diseño, sin alterar H1–H6 ni ejecutar T5 antes de la enmienda.
+- Versionada en este paso la confirmación pendiente del CI de T3. Se mantiene un commit por tarea.
+- Mensaje de este paso: `docs: close B-01 in progress log`. Siguiente tarea: T4 según la especificación v1.1.
+- Comprobaciones locales completas de `AGENTS.md` satisfactorias: 56 aprobados, 1 omitido y cobertura del 98,79 %. CI del paso 2 en verde antes de este commit.
 
 ### S06 — T5–T7: resultados, notebook y conclusiones
 
