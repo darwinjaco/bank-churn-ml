@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 1: documentación y preparación de la verificación técnica |
+| Fase actual | Semana 1: CI inicial en verde; publicación de cambios de S02/S03 en curso |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -27,7 +27,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 
 | Fase | Fechas | Entregable | Criterio de cierre | Estado |
 |---|---|---|---|---|
-| Semana 1 | 5–11 oct | Repo, uv, Ruff, pytest, pre-commit, CI mínimo, specs 001–002 y Pandera | Tests pasan en CI | En curso; base implementada y cierre técnico pendiente |
+| Semana 1 | 5–11 oct | Repo, uv, Ruff, pytest, pre-commit, CI mínimo, specs 001–002 y Pandera | Tests pasan en CI | CI inicial verificado; cierre de la publicación en curso |
 | Semana 2 | 12–18 oct | EDA, hipótesis y auditoría de productos 3–4 y balance cero | Hipótesis contrastadas con pruebas estadísticas, tamaños de efecto e incertidumbre | Pendiente |
 | Semana 3 | 19–25 oct | Pipeline, división estratificada, Dummy/LogReg y MLflow | Modelos de referencia registrados en MLflow | Pendiente |
 | Semana 4 | 26 oct–1 nov | RF, XGBoost, validación cruzada y ajuste acotado | Tabla de media ± desviación estándar por modelo | Pendiente |
@@ -42,7 +42,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 
 | Especificación | Tema | Estado | Momento previsto |
 |---|---|---|---|
-| 001 | Visión general y contrato de datos | Documentada en español; cierre técnico pendiente | Semana 1 |
+| 001 | Visión general y contrato de datos | Documentada y verificada localmente; cierre remoto pendiente | Semana 1 |
 | 002 | Modelado y evaluación | Documentada en español; implementación pendiente | Semanas 3–5 |
 | 003 | Capa de decisión y beneficio esperado | Pendiente de redacción | Antes de implementar la semana 5 |
 | 004 | API y dashboard | Pendiente de redacción | Antes de implementar la semana 7 |
@@ -60,15 +60,17 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 - [Reporte de calidad existente](../reports/data_quality.json): 20,37 % de abandono, 36,17 % de balances cero y 326 clientes con 3–4 productos.
 - Resultados del contexto anterior: 22 tests, cobertura del 97 % y comprobaciones de Ruff/pre-commit satisfactorias. **Pendientes de reproducción local y de confirmación en CI.**
 
-### Pendientes de cierre de la semana 1
+### Criterios de cierre de la semana 1 — estado tras S02/S03
 
-- [ ] Sincronizar el entorno con `uv sync --locked`.
-- [ ] Copiar el CSV a `data/raw/Churn_Modelling.csv` y ejecutar `churn-validate`.
-- [ ] Verificar tests, cobertura mínima del 85 %, Ruff y pre-commit.
-- [ ] Revisar cobertura de las infracciones del contrato indicadas en la especificación 001.
-- [ ] Alinear la rama con `main`, completar la preparación para GitHub y configurar el remoto.
+- [x] Sincronizar el entorno con `uv sync --locked`.
+- [x] Copiar el CSV a `data/raw/Churn_Modelling.csv` y ejecutar `churn-validate`.
+- [x] Verificar tests, cobertura mínima del 85 %, Ruff y pre-commit.
+- [x] Revisar cobertura de las infracciones del contrato; completar la evidencia de nulos, tipos y `RowNumber` con comprobaciones complementarias.
+- [x] Versionar S01 con el mensaje solicitado y alinear la rama con `main`.
+- [x] Crear `AGENTS.md` y alinear las especificaciones con sus reglas.
+- [x] Crear el repositorio público y configurar el remoto con autorización del usuario.
 - [ ] Publicar cuando se indique y registrar una ejecución satisfactoria de CI.
-- [ ] Actualizar los criterios de aceptación con la evidencia obtenida.
+- [x] Actualizar los criterios de aceptación con la evidencia local obtenida.
 
 ## 5. Historial de secciones
 
@@ -112,33 +114,151 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 - `git diff --no-index --check -- /dev/null docs/registro-avance.md`: satisfactorio, sin errores de espacios en el documento nuevo.
 - Revisión manual de enlaces relativos y del ancla `README.md#datos`: destinos existentes y referencias coherentes.
 - Revisión de cifras contra `reports/data_quality.json` y consistencia entre README, especificaciones y cronograma: satisfactoria.
-- Las comprobaciones de ejecución del proyecto corresponden a S02 y siguen pendientes.
+- Commit solicitado: `3104886` — `docs: translate specs/README, add progress log`. Incluye los cuatro archivos de S01; se eliminó la ruta absoluta del CSV antes de versionar.
+- Antes de este commit se ejecutaron `uv sync --locked`, `uv run ruff check .`, `uv run ruff format --check .` y `uv run pytest --cov=churn --cov-report=term-missing --cov-fail-under=85`: 21 tests aprobados, 1 omitido por ausencia del CSV y cobertura del 95,58 %. Pre-commit se verificó posteriormente en S02.
+- CI remoto no verificable al crear el commit por ausencia de remoto. La evidencia anterior es local, no una ejecución de GitHub Actions.
 
 **Siguiente paso**
 
-Comenzar S02: entorno, CSV y verificación local de la semana 1. El cierre de S01 corresponde a documentación; la fase completa sigue en curso.
+S01 versionada; la evidencia de ejecución se amplió en S02. La fase completa conserva el pendiente remoto de S03.
 
 ### S02 — Entorno, CSV y verificación local
 
 | Campo | Valor |
 |---|---|
-| Fecha | Pendiente |
+| Fecha | 6 de octubre de 2026 |
 | Fase | Semana 1 |
-| Estado | Pendiente |
+| Estado | Completada: verificación local |
 | Objetivo | Reproducir la validación y las comprobaciones de calidad con el entorno y CSV locales |
 
-Registrar aquí los comandos ejecutados, resultados de tests y cobertura, salida de la validación, diferencias respecto al reporte histórico y pendientes descubiertos.
+**Trabajo realizado**
+
+- Copiado `Churn_Modelling.csv` desde Descargas a `data/raw/Churn_Modelling.csv` sin modificar el original.
+- Instalado el entorno nuevo con Python 3.11.16 y las dependencias de `uv.lock`.
+- Validado el CSV y regenerado `reports/data_quality.json`, sin diferencias respecto al reporte inicial.
+- Ejecutados los comandos solicitados de Ruff, formato, pre-commit y pytest.
+- Comprobado el rechazo de nulos en `Surname`, tipo incorrecto en `Age` y duplicados de `RowNumber`, complementando los tests existentes de rangos, categorías, `CustomerId` y columnas faltantes/adicionales.
+- Confirmados cero valores nulos en el CSV y su exclusión de Git.
+- Instalado el hook de pre-commit para futuros commits.
+
+**Comandos ejecutados y salida resumida**
+
+```text
+Copy-Item -LiteralPath "$HOME\Downloads\Churn_Modelling.csv" -Destination "data/raw/Churn_Modelling.csv"
+  Copia realizada; el CSV permanece excluido de Git.
+
+uv sync --locked
+  Resolved 36 packages. Entorno nuevo: Installed 34 packages.
+  Segunda ejecución: Checked 34 packages; sin cambios en uv.lock.
+
+uv run churn-validate --out reports/data_quality.json
+  Código de salida 0; 10.000 filas y 0 duplicados.
+  churn_rate=0.2037; balance_zero_share=0.3617.
+  NumOfProducts=3: n=266, churn_rate=0.8271.
+  NumOfProducts=4: n=60, churn_rate=1.0.
+  low_salary_rows=59; surname_cardinality=2932.
+  Cuatro advertencias informativas: balance cero, productos 3 y 4, salarios bajos.
+  Sin alarma de fuga por AUC individual.
+
+uv run ruff check .
+  All checks passed!
+
+uv run ruff format --check .
+  12 files already formatted.
+
+uv run pre-commit run --all-files
+  8 hooks Passed; nbstripout Skipped (no files to check).
+
+uv run pytest --cov=churn --cov-fail-under=85
+  collected 22 items; 22 passed in 0.93s.
+  TOTAL: 113 statements, 3 missed; Total coverage: 97.35%.
+  Required test coverage of 85% reached.
+
+uv run pre-commit install
+  pre-commit installed at .git/hooks/pre-commit.
+
+git check-ignore -v -- data/raw/Churn_Modelling.csv
+  .gitignore:17:data/raw/*    data/raw/Churn_Modelling.csv
+```
+
+Comprobación complementaria con `uv run python -c`: `null_surname`, `wrong_age_dtype` y `duplicate_row_number` rechazados por Pandera; `raw null values: 0`. La primera invocación falló por escape de comillas en PowerShell (`SyntaxError`); se corrigió la invocación y la comprobación pasó, sin modificar código ni datos.
+
+Verificación final después de actualizar la documentación:
+
+- `uv run pre-commit run --all-files`: 8 hooks aprobados; `nbstripout` omitido por ausencia de notebooks.
+- `uv run pre-commit run --files AGENTS.md`: comprobaciones pertinentes aprobadas; incluye explícitamente el archivo nuevo, todavía sin versionar.
+- `git diff --check` y `git diff --no-index --check -- /dev/null AGENTS.md`: sin errores de espacios.
+- Búsqueda documental: sin rutas absolutas del usuario ni referencias al antiguo experimento con `Gender` como entrada.
+- `git diff -- reports/data_quality.json`: sin diferencias de contenido. `git ls-files --eol -- reports/data_quality.json` confirma LF en el índice y CRLF en la copia regenerada de Windows; por eso puede aparecer como modificado en el estado local.
+
+**Decisiones y evidencia**
+
+- Tests sin CSV antes de su copia: 21 aprobados, 1 omitido y 95,58 % de cobertura. Tests con CSV: 22 aprobados y 97,35 %; ambos superan el mínimo del 85 %.
+- Se reproducen los resultados históricos de la semana 1. Los avisos de calidad motivan la auditoría de la semana 2; no son infracciones del contrato.
+- Se creó `AGENTS.md` con las cinco reglas solicitadas. Se ajustó E-01 a auditoría por grupos: `Gender` nunca es feature, tampoco en experimentos.
+- No se ha dividido el dataset ni evaluado un modelo sobre el conjunto de prueba; estas comprobaciones son de contrato y calidad de datos originales.
+- Esta evidencia corresponde al entorno local de Windows; no acredita CI remoto en Linux.
+
+**Archivos modificados o creados**
+
+- `AGENTS.md`
+- `README.md`
+- `specs/001-overview-and-data-contract.md`
+- `specs/002-modeling-and-evaluation.md`
+- `docs/registro-avance.md`
+- `data/raw/Churn_Modelling.csv` (solo local, excluido de Git).
+- `reports/data_quality.json` regenerado, sin diferencias de contenido.
+
+**Siguiente paso**
+
+Completar S03 cuando el usuario cree el remoto y autorice la publicación; conservar el cierre de CI como pendiente verificable.
 
 ### S03 — Preparación y publicación en GitHub
 
 | Campo | Valor |
 |---|---|
-| Fecha | Pendiente |
+| Fecha | 6 de octubre de 2026 |
 | Fase | Semana 1 |
-| Estado | Pendiente |
+| Estado | En curso: repositorio creado y CI inicial en verde; pendientes publicación y verificación de los cambios de S02/S03 |
 | Objetivo | Alinear rama y remoto, completar enlaces públicos y verificar CI |
 
-Registrar aquí el repositorio, la rama, el commit publicado y la URL de la ejecución de CI que respalde el cierre de la semana 1.
+**Trabajo realizado y comandos**
+
+- Ejecutado `git branch -M main`: rama local renombrada correctamente, alineada con `.github/workflows/ci.yml`.
+- Ejecutado `git remote -v`: sin salida; todavía no hay remoto configurado.
+- Ejecutado `git log --oneline -2`: `3104886` (S01) y `6037f9e` (base de semana 1).
+- Actualizado el README para reflejar la rama actual y los resultados locales.
+- El usuario autorizó crear el repositorio y publicar para cerrar S03.
+- `gh auth status`: cuenta activa `darwinjaco`, acceso a GitHub disponible.
+- `gh repo create darwinjaco/bank-churn-ml --public --source . --remote origin --description "Predicción de abandono bancario y decisiones de retención basadas en beneficio esperado."`: repositorio creado y `origin` configurado.
+- `git push -u origin main`: publicados los commits existentes hasta `3104886`; seguimiento de `origin/main` configurado.
+- `gh run list --repo darwinjaco/bank-churn-ml --workflow ci.yml --branch main --commit 3104886e95677f170f06e86082bf913d702e2f0f --json databaseId,headSha,status,conclusion,url`: identificada la ejecución inicial.
+- `gh run watch 37419338512 --repo darwinjaco/bank-churn-ml --exit-status --interval 10`: ejecución satisfactoria.
+- `gh run view 37419338512 --repo darwinjaco/bank-churn-ml --log`: comprobados los resultados en Linux: 21 tests aprobados, 1 omitido y cobertura del 95,58 %.
+- `gh repo view darwinjaco/bank-churn-ml --json url,visibility,defaultBranchRef`: repositorio público y rama predeterminada `main` confirmados.
+
+**Estado de publicación**
+
+| Campo | Valor |
+|---|---|
+| Rama local | `main` |
+| Último commit local | `3104886` — `docs: translate specs/README, add progress log` |
+| Repositorio público | https://github.com/darwinjaco/bank-churn-ml |
+| Remoto | `origin`: `https://github.com/darwinjaco/bank-churn-ml.git` |
+| Push | Publicación inicial completada con autorización del usuario |
+| Commit publicado inicialmente | `3104886` |
+| CI inicial | https://github.com/darwinjaco/bank-churn-ml/actions/runs/37419338512 |
+| CI remoto en verde | Verificado para `3104886`; nueva verificación tras publicar los cambios pendientes |
+
+**Decisiones y pendientes**
+
+- Publicar primero los commits existentes permitió verificar CI remoto antes de crear nuevos commits, conforme a `AGENTS.md`.
+- S02 está cerrada localmente. El cierre de S03 requiere publicar `AGENTS.md` y la documentación pendiente, comprobar su CI y registrar la evidencia.
+- La primera ejecución remota confirma instalación, lint, formato y tests sin el CSV. Los hooks se ejecutan localmente como comprobación adicional.
+
+**Siguiente paso**
+
+Versionar y publicar los cambios de S02/S03 tras las comprobaciones locales, verificar su ejecución remota y actualizar el cierre documental de la semana 1.
 
 ## 6. Plantilla para nuevas secciones
 

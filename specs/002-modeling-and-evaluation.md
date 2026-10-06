@@ -35,7 +35,7 @@ Seleccionar un modelo que **ordene adecuadamente el riesgo y produzca probabilid
 | Categórica | `Geography` | `OneHotEncoder(handle_unknown="error")`, coherente con el contrato cerrado |
 | Derivadas candidatas | `has_balance`, `balance_to_salary`, `age_band` | Documentar definición; admitirlas solo con justificación en validación cruzada |
 
-`RowNumber`, `CustomerId` y `Surname` se excluyen. `Gender` se conserva para auditoría y solo se incorpora al experimento E-01. `EstimatedSalary` permanece como candidata hasta E-03; la variante que la excluya también excluirá `balance_to_salary` para evitar conservar indirectamente su información.
+`RowNumber`, `CustomerId` y `Surname` se excluyen. `Gender` se conserva exclusivamente para auditoría: nunca se incorpora como feature, tampoco en experimentos ni mediante variables derivadas. E-01 compara resultados por grupos sin entrenar con `Gender`. `EstimatedSalary` permanece como candidata hasta E-03; la variante que la excluya también excluirá `balance_to_salary` para evitar conservar indirectamente su información.
 
 ## 4. Modelos
 
@@ -95,7 +95,7 @@ Registrar cada aplicación de esta regla en MLflow. La selección en validación
 
 | ID | Experimento | Pregunta |
 |---|---|---|
-| E-01 | Con y sin `Gender` | ¿Cómo cambia el rendimiento al aplicar D-02 y qué diferencias aparecen en la auditoría por grupos? |
+| E-01 | Auditoría de equidad por `Gender`, siempre excluido de las features | ¿Qué diferencias de rendimiento, calibración y decisiones aparecen entre grupos? El costo predictivo de excluirlo no se estima porque no se entrena un modelo con esa variable |
 | E-02 | Con y sin la información de `NumOfProducts` | ¿Cuánto depende el modelo del patrón Q-03? La ablación completa se complementará con análisis separado de los clientes con 3–4 productos |
 | E-03 | Con y sin `EstimatedSalary` y sus derivadas | ¿Aporta utilidad en combinación con otras variables o introduce ruido? |
 | E-04 | Probabilidad original frente a calibración isotónica y sigmoidal | ¿Se reduce Brier en validación con calibradores ajustados únicamente en entrenamiento? |

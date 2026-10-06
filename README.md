@@ -2,7 +2,7 @@
 
 Proyecto de aprendizaje automático de extremo a extremo para estimar el abandono de clientes (**churn**) y **decidir a quién conviene contactar**, convirtiendo probabilidades calibradas en beneficio esperado bajo supuestos explícitos.
 
-> En desarrollo. Semana 1 de 8: base del repositorio implementada; verificación local y CI remoto pendientes. El detalle de cada sección está en el [registro de avance](docs/registro-avance.md).
+> En desarrollo. Semana 1 de 8: verificación local completada; publicación y CI remoto pendientes de crear el remoto. El detalle de cada sección está en el [registro de avance](docs/registro-avance.md).
 
 ## Objetivo de negocio
 
@@ -15,10 +15,11 @@ El dataset no contiene ingresos del banco, valor de vida del cliente (CLV), cost
 - Implementados: carga del CSV, contrato de datos con Pandera, reporte de calidad y tests.
 - Configurados: uv, Ruff, pytest, pre-commit y GitHub Actions; cobertura mínima en CI del 85 %.
 - Documentadas: especificaciones 001 y 002 en español.
-- Pendiente: ejecutar las comprobaciones en este entorno y validar el CSV local.
-- Publicación pendiente: la rama local es `master`, el CI de push espera `main` y todavía no hay remoto de GitHub.
+- Verificados localmente: contrato del CSV, Ruff, formato, pre-commit y 22 tests; cobertura del 97,35 %.
+- Reglas de trabajo: [AGENTS.md](AGENTS.md), incluidas especificación previa y exclusión permanente de `Gender` de las features.
+- Repositorio público: [darwinjaco/bank-churn-ml](https://github.com/darwinjaco/bank-churn-ml), rama `main`. Publicación de los cambios de S02/S03 en curso.
 
-Las cifras históricas de 22 tests y 97 % de cobertura aún deben reproducirse en este entorno. Los criterios de cierre se marcarán con evidencia en el registro de avance.
+La ejecución sin el CSV también pasó: 21 tests aprobados, 1 omitido y cobertura del 95,58 %, reproduciendo el escenario esperado del CI sin datos reales. Los resultados locales y el pendiente remoto están registrados en S02 y S03.
 
 ## Inicio rápido
 
@@ -68,7 +69,7 @@ El [contrato de datos](specs/001-overview-and-data-contract.md) define columnas,
 
 ### Hallazgos del reporte existente
 
-Estos valores proceden de [`reports/data_quality.json`](reports/data_quality.json), incluido en la base del proyecto. Su reproducción con el CSV local está pendiente.
+Estos valores proceden de [`reports/data_quality.json`](reports/data_quality.json), reproducido con el CSV local el 6 de octubre de 2026 sin diferencias respecto al reporte inicial.
 
 | Comprobación | Resultado registrado |
 |---|---|
@@ -80,9 +81,9 @@ Estos valores proceden de [`reports/data_quality.json`](reports/data_quality.jso
 | `EstimatedSalary` | AUC individual de 0,5087; 59 valores menores a 1.000 |
 | Alarma de fuga por AUC individual | Ninguna variable numérica alcanza `max(AUC, 1 − AUC) ≥ 0,90`; máximo: `Age`, 0,7321 |
 
-Los patrones de productos y salarios motivan una auditoría de posible origen sintético, pero no lo demuestran. La alarma univariada tampoco descarta todas las formas de fuga de información. El contrato rechaza nulos; su cumplimiento se comprobará al validar el CSV.
+Los patrones de productos y salarios motivan una auditoría de posible origen sintético, pero no lo demuestran. La alarma univariada tampoco descarta todas las formas de fuga de información. El CSV pasó el contrato y la comprobación adicional confirmó cero valores nulos.
 
-`RowNumber`, `CustomerId` y `Surname` están excluidos de las entradas del modelo. `Gender` se conserva para auditoría. `EstimatedSalary` sigue como candidata en la configuración; su exclusión se decidirá mediante el experimento E-03, no solo por su AUC individual.
+`RowNumber`, `CustomerId` y `Surname` están excluidos de las entradas del modelo. `Gender` se conserva exclusivamente para auditoría y nunca se usa como feature, tampoco en experimentos. `EstimatedSalary` sigue como candidata en la configuración; su exclusión se decidirá mediante el experimento E-03, no solo por su AUC individual.
 
 ## Estructura del proyecto
 
@@ -100,7 +101,7 @@ notebooks/    Exploración; la lógica reutilizable se implementará en src/chur
 
 | N.º | Especificación | Estado |
 |---|---|---|
-| 001 | [Visión general y contrato de datos](specs/001-overview-and-data-contract.md) | Documentada; cierre técnico pendiente |
+| 001 | [Visión general y contrato de datos](specs/001-overview-and-data-contract.md) | Verificación local completada; cierre remoto pendiente |
 | 002 | [Modelado y evaluación](specs/002-modeling-and-evaluation.md) | Documentada; implementación pendiente |
 | 003 | Capa de decisión y beneficio esperado | Por redactar antes de la semana 5 |
 | 004 | API y dashboard | Por redactar antes de la semana 7 |
@@ -128,10 +129,9 @@ Plan del **5 de octubre al 29 de noviembre de 2026**, con unas **8 horas por sem
 Una vez verificadas las comprobaciones locales y versionados los cambios que se publicarán:
 
 1. Crea en GitHub un repositorio vacío llamado `bank-churn-ml`.
-2. Alinea la rama local con el CI y configura el remoto. Sustituye `TU_USUARIO` por tu usuario real:
+2. La rama local ya es `main`. Cuando esté creado el repositorio remoto y se indique publicar, configura su URL. Sustituye `TU_USUARIO` por tu usuario real:
 
    ```powershell
-   git branch -m main
    git remote add origin https://github.com/TU_USUARIO/bank-churn-ml.git
    git push -u origin main
    ```

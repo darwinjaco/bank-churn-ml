@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Estado | Diseño documentado; validación del cierre pendiente |
+| Estado | Verificación local completada; cierre remoto pendiente |
 | Responsable | Darwin Jacome Cuenca |
 | Semana | 1 |
 | Última revisión documental | 6 de octubre de 2026 |
@@ -72,7 +72,7 @@ Implementadas en `src/churn/data.py` y `src/churn/validation.py`.
 
 ## 6. Hallazgos y limitaciones de los datos
 
-Evidencia: [reporte de calidad existente](../reports/data_quality.json). Su reproducción en este entorno está pendiente. Las interpretaciones de origen sintético del reporte son hipótesis por contrastar.
+Evidencia: [reporte de calidad](../reports/data_quality.json), reproducido con el CSV local el 6 de octubre de 2026. Las interpretaciones de origen sintético del reporte son hipótesis por contrastar.
 
 | ID | Hallazgo | Evidencia registrada | Tratamiento previsto |
 |---|---|---|---|
@@ -87,7 +87,7 @@ Evidencia: [reporte de calidad existente](../reports/data_quality.json). Su repr
 | ID | Decisión | Justificación |
 |---|---|---|
 | D-01 | Excluir `RowNumber`, `CustomerId` y `Surname` | Son identificadores. `Surname` tiene 2.932 valores y puede favorecer sobreajuste o actuar como proxy de nacionalidad u origen |
-| D-02 | Excluir `Gender` de las entradas y conservarlo para auditoría | Evitar uso directo de este atributo; medir el efecto de la exclusión con E-01 en la semana 4. La exclusión no garantiza equidad |
+| D-02 | `Gender` nunca como entrada del modelo, tampoco en experimentos; conservarlo solo para auditoría | Regla del proyecto en `AGENTS.md`. E-01 auditará resultados por grupos; no medirá un modelo que incluya `Gender`. La exclusión no garantiza equidad |
 | D-03 | Conservar el CSV original sin modificaciones y fuera de Git | Datos obtenidos por separado bajo las condiciones de su fuente; carga reproducible mediante `load_raw()` |
 | D-04 | Ejecutar CI con muestras sintéticas | CI independiente del dataset; el test `realdata` se omite si falta el archivo |
 | D-05 | Validar el esquema con Pandera | Contrato declarativo y recopilación de infracciones |
@@ -95,12 +95,12 @@ Evidencia: [reporte de calidad existente](../reports/data_quality.json). Su repr
 
 ## 8. Criterios de aceptación
 
-Estos criterios siguen pendientes de verificación en este entorno. La evidencia se incorporará al [registro de avance](../docs/registro-avance.md).
+La evidencia local está en S02 del [registro de avance](../docs/registro-avance.md). El cierre remoto sigue pendiente de S03.
 
-- [ ] `uv sync --locked` y `uv run pytest` pasan en una copia limpia; el test real se omite si falta el CSV.
-- [ ] `uv run churn-validate --out reports/data_quality.json` pasa con el archivo real y reproduce el reporte.
-- [ ] Las infracciones de contrato se rechazan: rangos, categorías, unicidad, nulos, tipos y columnas faltantes o adicionales; la cobertura pertinente queda verificada.
-- [ ] Ruff y las comprobaciones de pre-commit pasan.
+- [x] `uv sync --locked` instala desde el archivo de bloqueo en un entorno nuevo y los tests pasan con y sin el CSV; el test real se omite si falta.
+- [x] `uv run churn-validate --out reports/data_quality.json` pasa con el archivo real y reproduce el reporte.
+- [x] Rechazo verificado de rangos, categorías, unicidad, nulos, tipos y columnas faltantes o adicionales: tests existentes y comprobación complementaria de S02.
+- [x] Ruff y las comprobaciones de pre-commit pasan.
 - [ ] CI pasa en `main` con cobertura de al menos 85 % y se registra el enlace de la ejecución.
 
 ## 9. Definición de cierre
