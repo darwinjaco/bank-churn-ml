@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 4: resolución documental B-02 antes de implementar |
+| Fase actual | Semana 4: T1–T7 en ejecución (implementación por Claude a petición del responsable) |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -576,13 +576,13 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 |---|---|
 | Fecha de apertura | 6 de octubre de 2026 |
 | Fechas planificadas | 26 de octubre–1 de noviembre de 2026 |
-| Estado | Resolución B-02 autorizada, pendiente de versionar; T0 ya publicado |
+| Estado | En curso: T1; B-02 resuelto y versionado |
 | Objetivo | Fijar el protocolo antes de entrenar, comparar familias en FASE B y ejecutar E-03/E-02 sin consultar prueba |
 
 | Tarea | Estado | Commit requerido |
 |---|---|---|
-| T0 | Verificada localmente; confirmación remota pendiente de versionar en T1 | `docs: amend spec 002 v1.2 and week 4 plan (SDD gate)` |
-| T1 | Pendiente; O1/O2 requieren ampliar el código de reporte | `fix: baseline report precision and paired differences` |
+| T0 | Completada | `docs: amend spec 002 v1.2 and week 4 plan (SDD gate)` |
+| T1 | Completada (commit local; CI tras push) | `fix: baseline report precision and paired differences` |
 | T2 | Pendiente | `build: add xgboost` |
 | T3 | Pendiente | `feat: tree pipelines and preregistered search spaces` |
 | T4 | Pendiente; protocolo OOF bloqueado por B-02 | `feat: two-phase tuning and re-evaluation` |
@@ -599,6 +599,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - Cálculo de O2 mediante `uv run python -c` desde `baselines.json`, comprobando hashes de pliegues: Δ AP [0,178426436; 0,230043639; 0,193189012; 0,192766200; 0,194004916], media 0,197686041, std ddof=1 0,019208887 y 5/5 positivos. A tres decimales: +0,198 ± 0,019.
 - No se han modificado `src/`, tests ni dependencias, ni ejecutado entrenamiento, ajuste, selección o ablaciones de semana 4. Ejecución anticipada por instrucción del usuario; se mantienen las fechas planificadas.
 - Comprobaciones completas de `AGENTS.md`, con sincronización adicional EDA, satisfactorias: 90 aprobados y cobertura del 98,56 %; Ruff, formato y hooks en verde. Sin diferencias en `src/`, tests, dependencias o reportes de baselines. CI previo verificado en verde; pendientes commit y CI de T0. La continuación requiere resolver B-02 antes de implementar o entrenar.
+- Confirmación de T0 versionada en T1: `860393c`, CI satisfactorio https://github.com/darwinjaco/bank-churn-ml/actions/runs/37524372835.
 
 #### Bloqueo B-02 — Agregación de OOF repetidas para E-02
 
@@ -617,6 +618,16 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - Referencia incorporada a §9: AP 0,833333 y 0,583333, media 0,708333. §6 y E-03 permanecen sin cambios.
 - La confirmación pendiente del CI de T0 se versionará junto con T1, según instrucción del usuario. Esta enmienda es solo documental y precede a todo código de semana 4.
 - Comprobaciones completas de `AGENTS.md`, con EDA adicional, satisfactorias: 90 aprobados, cobertura del 98,56 %, lint/formato/hooks en verde. CI previo T0 confirmado en verde; pendiente CI de la enmienda tras el commit `docs: amend spec 002 v1.3 (B-02 OOF aggregation per repetition)`.
+- Enmienda publicada: `a868641`, CI en verde https://github.com/darwinjaco/bank-churn-ml/actions/runs/37526758149. B-02 cerrado antes de código o resultados reales.
+
+#### T1 — Precisión y diferencias pareadas
+
+- Nuevo `reports.py`: tablas a tres decimales, diferencias pareadas con validación de pliegues y std ddof=1; regeneración reproducible de `baselines.md` con `uv run python -m churn.reports`.
+- O1/O2 implementadas sin modificar `baselines.json`; AP pareada +0,198 ± 0,019, con cinco signos positivos. Se conserva trazabilidad de las corridas históricas.
+- `uv run pytest tests/test_reports.py`: dos aprobados; cálculo desde JSON sintético, signos positivo/negativo/cero, pliegues incompatibles y render/CLI verificados.
+- Corregidos signos Unicode ambiguos y longitud de cadenas señalados por Ruff, sin omitir reglas. Comprobaciones completas satisfactorias: 92 aprobados, cobertura del 98,49 %, hooks/lint/formato en verde. CI previo de v1.3 en verde; pendiente CI de T1 tras publicar.
+- Cambio de rol a petición del responsable: desde T1, Claude implementa T1–T7 además de planificar. Entorno Linux aislado (`UV_PROJECT_ENVIRONMENT` fuera del repo, sin tocar `.venv` de Windows). Los hooks de `pre-commit` no pueden descargarse desde GitHub en ese entorno; se ejecutan sus equivalentes de PyPI (`pre-commit-hooks==5.0.0`, `nbstripout==0.8.1`) con los mismos argumentos. Commits locales; el push y el CI quedan a cargo del responsable. El hook instalado en `.git/hooks/pre-commit` apunta al intérprete de Windows y no es ejecutable desde Linux; por eso los commits de Claude usan `core.hooksPath` vacío tras ejecutar los hooks equivalentes y quedan validados por CI al publicar.
+- Verificación de T1 por Claude: Ruff y formato en verde; hooks equivalentes en verde; 92 aprobados, cobertura 98,49 %.
 
 ## 6. Plantilla para nuevas secciones
 

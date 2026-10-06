@@ -1,49 +1,41 @@
 # Baselines — Semana 3
 
-Fuente: [baselines.json](baselines.json), generado por `uv run churn-baselines` con la especificación 002 v1.1.
+Fuente: [baselines.json](baselines.json); reporte generado con `uv run python -m churn.reports`.
 
-- Exclusivamente **6.000 filas de entrenamiento**, cinco pliegues estratificados con mezcla y semilla 42; los hashes de índices de cada pliegue coinciden entre las tres corridas.
-- AP corresponde a precisión promedio (`average_precision_score`). Las celdas muestran **media ± desviación estándar muestral**, con `ddof=1` entre los cinco pliegues.
-- Configuración fija: Dummy con estrategia prior; LogReg L2, C=1, lbfgs y max_iter=1000. FS-RAW y FS-EDA según §3; sin remuestreo ni ponderación de clases.
-- Evaluación de desarrollo en CV de entrenamiento; selección reservada para semana 4. Validación y prueba no se utilizan para las métricas de esta semana.
+CV de entrenamiento: **6,000 filas**, 5 pliegues estratificados, shuffle=True y semilla 42. Media ± desviación estándar muestral (ddof=1). AP es precisión promedio; tablas legibles a tres decimales.
+
+Configuraciones históricas fijas de semana 3: Dummy prior y LogReg L2, C=1, lbfgs, max_iter=1000; sin ponderación ni remuestreo. FS-RAW/FS-EDA según la spec 002. Validación externa y prueba reservadas.
 
 ## Tabla generada desde JSON
 
 | Modelo | AP | ROC-AUC | Brier | Log loss |
 |---|---|---|---|---|
-| dummy-raw | 0.203833 ± 0.000456 | 0.500000 ± 0.000000 | 0.162285 ± 0.000270 | 0.505671 ± 0.000622 |
-| logreg-raw | 0.459104 ± 0.029316 | 0.755001 ± 0.012016 | 0.137894 ± 0.003545 | 0.435357 ± 0.009273 |
-| logreg-eda | 0.656790 ± 0.028053 | 0.839331 ± 0.021047 | 0.110680 ± 0.004947 | 0.364184 ± 0.018428 |
+| dummy-raw | 0.204 ± 0.000 | 0.500 ± 0.000 | 0.162 ± 0.000 | 0.506 ± 0.001 |
+| logreg-raw | 0.459 ± 0.029 | 0.755 ± 0.012 | 0.138 ± 0.004 | 0.435 ± 0.009 |
+| logreg-eda | 0.657 ± 0.028 | 0.839 ± 0.021 | 0.111 ± 0.005 | 0.364 ± 0.018 |
+
+## Diferencia pareada de AP por pliegue
+
+| Pliegue | Δ AP EDA - RAW | Signo |
+|---|---|---|
+| 1 | +0.178 | positivo |
+| 2 | +0.230 | positivo |
+| 3 | +0.193 | positivo |
+| 4 | +0.193 | positivo |
+| 5 | +0.194 | positivo |
+
+Δ AP EDA - RAW: **+0.198 ± 0.019**; 5/5 positivos. La desviación corresponde a las diferencias pareadas, no a las desviaciones de cada modelo por separado.
 
 ## Lectura descriptiva
 
-- Dummy presenta AP 0,203833, acorde con la prevalencia de entrenamiento, y ROC-AUC 0,5 como referencia mínima.
-- La AP media de LogReg-EDA supera a LogReg-RAW en 0,197686, más que las desviaciones estándar respectivas de 0,028053 y 0,029316; esta comparación es descriptiva, no una prueba de significación.
-- En los mismos pliegues, LogReg-EDA también presenta ROC-AUC mayor y Brier/log loss menores que LogReg-RAW; son resultados de las configuraciones fijadas previamente.
-- Estas métricas pertenecen a CV de entrenamiento: no se elige modelo, no se infiere causalidad y la selección de la semana 4 y la evaluación final reservada siguen pendientes.
-
-Código utilizado para generar las filas, sin recalcular ni introducir resultados manuales:
-
-```python
-import json
-
-from churn.config import PROJECT_ROOT
-
-data = json.loads((PROJECT_ROOT / "reports/baselines.json").read_text(encoding="utf-8"))
-metrics = ("ap", "roc_auc", "brier", "log_loss")
-print("| Modelo | AP | ROC-AUC | Brier | Log loss |")
-print("|---|---|---|---|---|")
-for run in data["runs"]:
-    values = [
-        "{:.6f} ± {:.6f}".format(run["summary"][name]["mean"], run["summary"][name]["std"])
-        for name in metrics
-    ]
-    print("| " + run["name"] + " | " + " | ".join(values) + " |")
-```
+- Dummy tiene AP acorde con la prevalencia de entrenamiento y ROC-AUC 0,500 como referencia mínima.
+- Las diferencias pareadas muestran el signo en cada pliegue; no constituyen una prueba de significación.
+- La tabla conserva ROC-AUC, Brier y log loss de las configuraciones fijadas previamente.
+- Estas métricas son de desarrollo; la regla de selección de semana 4 se aplica a su reevaluación preregistrada.
 
 ## Trazabilidad MLflow local
 
-Tracking URI: `sqlite:///mlruns/mlflow.db`, experimento `bank-churn`. Base y artefactos locales excluidos de Git; el JSON versionado conserva los identificadores y métricas. Todas las corridas tienen `stage=baseline` y `final=false`; Dummy tiene `eligible=false`.
+Tracking: `sqlite:///mlruns/mlflow.db`; experimento `bank-churn`. Todas las corridas tienen stage=baseline y final=false; Dummy eligible=false. Base local excluida de Git.
 
 | Corrida | Run ID |
 |---|---|
@@ -51,12 +43,10 @@ Tracking URI: `sqlite:///mlruns/mlflow.db`, experimento `bank-churn`. Base y art
 | logreg-raw | `22b313957b96480bbd21f50a4130b1df` |
 | logreg-eda | `bef5ae63e7b8421abcfee5f1ad65dd5c` |
 
-Código registrado: `c75af93fbfb0dd87f51efeb39fa70071caa4d399`. CSV SHA-256: `3996cd1fa372e0db0cd9c0ebac35bbd4e8e3c65fb942bb010c826e7b1eeef0a0`. Manifiesto SHA-256 de la copia consumida: `978161d49e6b6394b8550beeb49dc93b20ce467a2ac2b810033b370f713827f8`.
-
-Para consultar las corridas desde la raíz del proyecto:
+Código registrado: `c75af93fbfb0dd87f51efeb39fa70071caa4d399`. CSV SHA-256: `3996cd1fa372e0db0cd9c0ebac35bbd4e8e3c65fb942bb010c826e7b1eeef0a0`. Manifiesto SHA-256 consumido: `978161d49e6b6394b8550beeb49dc93b20ce467a2ac2b810033b370f713827f8`.
 
 ```powershell
 uv run mlflow ui --backend-store-uri sqlite:///mlruns/mlflow.db --port 5000
 ```
 
-Abre `http://127.0.0.1:5000`. Para reproducir la ejecución: `uv sync --locked --all-groups` y `uv run churn-baselines`; se crearán tres nuevas corridas con la misma configuración.
+Interfaz: http://127.0.0.1:5000. Reproducir: `uv sync --locked --all-groups` y `uv run churn-baselines`; crearán nuevas corridas con la misma configuración.
