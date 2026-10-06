@@ -2,9 +2,18 @@
 
 import numpy as np
 import pytest
-from scipy.stats import norm
+from scipy.stats import chi2_contingency, fisher_exact, norm
 
-from churn.stats import auc_bootstrap, cramers_v, holm, odds_ratio, risk_difference, wilson_ci
+from churn.stats import (
+    auc_bootstrap,
+    cramers_v,
+    freeman_halton,
+    holm,
+    independence_test,
+    odds_ratio,
+    risk_difference,
+    wilson_ci,
+)
 
 
 @pytest.mark.parametrize(
@@ -84,3 +93,45 @@ def test_auc_bootstrap_known_auc_and_determinism():
 def test_auc_bootstrap_rejects_undefined_inputs(scores, labels, n_boot):
     with pytest.raises(ValueError):
         auc_bootstrap(scores, labels, n_boot=n_boot)
+
+
+@pytest.mark.parametrize(
+    ("table", "expected"),
+    [([[8, 2], [1, 5], [0, 4]], 0.008764), ([[3, 1], [1, 3], [0, 0]], 0.485714)],
+)
+def test_freeman_halton_references_and_determinism(table, expected):
+    first = freeman_halton(table)
+    assert first == pytest.approx(expected, abs=1e-6)
+    assert first == freeman_halton(table)
+    assert first == pytest.approx(freeman_halton(np.asarray(table)[:, ::-1]), abs=1e-12)
+
+
+def test_freeman_halton_zero_row_matches_exact_fisher():
+    assert freeman_halton([[3, 1], [1, 3], [0, 0]]) == pytest.approx(
+        fisher_exact([[3, 1], [1, 3]], alternative="two-sided").pvalue, abs=1e-12
+    )
+
+
+@pytest.mark.parametrize("table", [[[1, 2, 3], [3, 2, 1]], [[1.5, 2], [3, 4]], [[-1, 2], [3, 4]]])
+def test_freeman_halton_rejects_invalid_tables(table):
+    with pytest.raises(ValueError):
+        freeman_halton(table)
+
+
+@pytest.mark.parametrize(
+    ("table", "name"),
+    [
+        ([[20, 80], [10, 90]], "chi2_pearson"),
+        ([[3, 1], [1, 3]], "fisher_exact"),
+        ([[8, 2], [1, 5], [0, 4]], "freeman_halton"),
+    ],
+)
+def test_independence_selector(table, name):
+    pvalue, selected = independence_test(table)
+    assert selected == name
+    if name == "chi2_pearson":
+        assert pvalue == chi2_contingency(table, correction=False).pvalue
+    elif name == "fisher_exact":
+        assert pvalue == fisher_exact(table, alternative="two-sided").pvalue
+    else:
+        assert pvalue == freeman_halton(table)

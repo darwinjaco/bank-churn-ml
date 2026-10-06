@@ -315,6 +315,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - La frecuencia esperada aproximada de 53 en el grupo 3–4 es una previsión del responsable de diseño; no se ha ejecutado el contraste real. El fallback es una regla de robustez.
 - Paso 1 solo documental, con mensaje `docs: amend spec 003 v1.1 (B-01 exact RxC test)`. Comprobaciones locales de `AGENTS.md` satisfactorias: 47 tests aprobados, 1 omitido y cobertura del 98,62 %. CI previo T3 en verde; pendiente la verificación remota de la enmienda tras publicar.
 - La confirmación pendiente del CI de T3 se versionará en el paso 3 de la resolución, junto al cierre de B-01.
+- Paso 1 publicado: `9e043df`. CI en verde: https://github.com/darwinjaco/bank-churn-ml/actions/runs/37423573546. La primera cadena de comandos tuvo un error de sintaxis de PowerShell antes de ejecutar Git; se corrigió y se realizó un único commit.
 
 ### S05 — T1–T4: dependencias, división y contrastes
 
@@ -370,6 +371,15 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - Consultada la [documentación de scipy sobre Fisher](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.fisher_exact.html), que expone métodos de remuestreo para tablas distintas de 2×2.
 - Según el rol de implementador y la regla 6, se detiene el avance a T4–T7. No se ha elegido un método, cambiado H1–H6 ni creado `hypotheses.py`.
 - Para desbloquear: el responsable de diseño debe fijar el procedimiento para el caso 3×2 de H2 en una enmienda versionada de la especificación, con los parámetros necesarios para reproducirlo, antes de implementar T4.
+
+#### Resolución B-01 — Paso 2 (6 de octubre de 2026)
+
+- Implementados `freeman_halton(table)` e `independence_test(table)` en `stats.py`, después de versionar la enmienda v1.1.
+- Enumeración completa, pesos combinatorios enteros y comparación exacta con la tolerancia aprobada; sin aleatoriedad ni aproximación Monte Carlo.
+- Selector: Pearson sin Yates si todas las esperadas son ≥5, Fisher bilateral para 2×2 con esperadas pequeñas y Freeman–Halton para R×2.
+- Tests de los dos valores de referencia (`1e-6`), determinismo, fila nula, invalidación de entradas y selección de las tres pruebas.
+- `uv run pytest tests/test_stats.py`: 28 aprobados. Ruff señaló `zip` sin `strict`; corregido, lint y formato satisfactorios.
+- Comprobaciones locales de `AGENTS.md` satisfactorias: 56 aprobados, 1 omitido, cobertura global del 98,79 % y `stats.py` al 100 %. CI previo de la enmienda confirmado en verde; pendiente el CI del commit `feat: exact Freeman-Halton test (B-01)` tras publicar.
 
 ### S06 — T5–T7: resultados, notebook y conclusiones
 

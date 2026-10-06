@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+from math import comb, prod
+
 import numpy as np
-from scipy.stats import chi2_contingency
+from scipy.stats import chi2_contingency, fisher_exact
 from sklearn.metrics import roc_auc_score
 from statsmodels.stats.contingency_tables import Table2x2
 from statsmodels.stats.multitest import multipletests
@@ -54,6 +56,54 @@ def cramers_v(table) -> float:
     values = _table(table)
     statistic = chi2_contingency(values, correction=False).statistic
     return float(np.sqrt(statistic / (values.sum() * (min(values.shape) - 1))))
+
+
+def _integer_table(table) -> np.ndarray:
+    values = _table(table)
+    if values.shape[1] != 2 or (values != np.floor(values)).any():
+        raise ValueError("Se requieren dos columnas y frecuencias enteras no negativas.")
+    return values
+
+
+def freeman_halton(table) -> float:
+    """P bilateral exacto por enumeración completa con marginales fijos (v1.1)."""
+    values = _integer_table(table)
+    rows = [int(total) for total in values.sum(axis=1)]
+    first_column = int(values[:, 0].sum())
+    denominator = comb(sum(rows), first_column)
+    observed_weight = prod(
+        comb(total, int(value)) for total, value in zip(rows, values[:, 0], strict=True)
+    )
+
+    def weights(row: int, remaining: int, weight: int):
+        if row == len(rows) - 1:
+            if 0 <= remaining <= rows[row]:
+                yield weight * comb(rows[row], remaining)
+            return
+        lower = max(0, remaining - sum(rows[row + 1 :]))
+        upper = min(rows[row], remaining)
+        for count in range(lower, upper + 1):
+            yield from weights(row + 1, remaining - count, weight * comb(rows[row], count))
+
+    # El denominador es común. Comparar enteros evita subdesbordamientos y redondeo.
+    # 10_000_001 / 10_000_000 equivale exactamente a la tolerancia relativa 1 + 1e-7.
+    extreme_weight = sum(
+        weight
+        for weight in weights(0, first_column, 1)
+        if weight * 10_000_000 <= observed_weight * 10_000_001
+    )
+    return extreme_weight / denominator
+
+
+def independence_test(table) -> tuple[float, str]:
+    """Selecciona Pearson, Fisher 2x2 o Freeman-Halton según las esperadas."""
+    values = _integer_table(table)
+    expected = np.outer(values.sum(axis=1), values.sum(axis=0)) / values.sum()
+    if (expected >= 5).all():
+        return float(chi2_contingency(values, correction=False).pvalue), "chi2_pearson"
+    if values.shape == (2, 2):
+        return float(fisher_exact(values, alternative="two-sided").pvalue), "fisher_exact"
+    return freeman_halton(values), "freeman_halton"
 
 
 def holm(pvalues) -> np.ndarray:
