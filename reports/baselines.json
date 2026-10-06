@@ -1,0 +1,297 @@
+{
+  "stage": "baseline",
+  "n_training": 6000,
+  "n_folds": 5,
+  "seed": 42,
+  "git_commit": "c75af93fbfb0dd87f51efeb39fa70071caa4d399",
+  "csv_sha256": "3996cd1fa372e0db0cd9c0ebac35bbd4e8e3c65fb942bb010c826e7b1eeef0a0",
+  "split_manifest_sha256": "978161d49e6b6394b8550beeb49dc93b20ce467a2ac2b810033b370f713827f8",
+  "runs": [
+    {
+      "name": "dummy-raw",
+      "model": "dummy",
+      "feature_set": "raw",
+      "run_id": "67f346cabc794a749c709d298a8a77d8",
+      "eligible": false,
+      "final": false,
+      "parameters": {
+        "constant": null,
+        "random_state": null,
+        "strategy": "prior"
+      },
+      "folds": [
+        {
+          "fold": 1,
+          "fit_indices_sha256": "4f46053e306c55a410f26c9dfdf079b0fd84ba6b51f2ee985c54a0232aa207bc",
+          "score_indices_sha256": "7d66d7e6df8645cb1925b5548c30223dbe8edf9a5a556d8e175808d2c7f9077a",
+          "metrics": {
+            "ap": 0.20416666666666666,
+            "roc_auc": 0.5,
+            "brier": 0.1624828125,
+            "log_loss": 0.5061252107770333
+          }
+        },
+        {
+          "fold": 2,
+          "fit_indices_sha256": "0bd5c49139bc2e20868f7d789c93a7d6a194503636bfaf4fc566f10ce3031e47",
+          "score_indices_sha256": "42daf62f5a3cf96a4bf26dfddba86a265c53a5f6b739daba4c62140c435e2868",
+          "metrics": {
+            "ap": 0.20416666666666666,
+            "roc_auc": 0.5,
+            "brier": 0.1624828125,
+            "log_loss": 0.5061252107770334
+          }
+        },
+        {
+          "fold": 3,
+          "fit_indices_sha256": "ef50cfc948d76492c610e44aa6e81b2befdfbe8d389a675d444ad503a742b803",
+          "score_indices_sha256": "e0b11c81b4e6670f006260409d5b3005ccc37cf08062c1e1e6d86118789eec01",
+          "metrics": {
+            "ap": 0.20416666666666666,
+            "roc_auc": 0.5,
+            "brier": 0.1624828125,
+            "log_loss": 0.5061252107770334
+          }
+        },
+        {
+          "fold": 4,
+          "fit_indices_sha256": "596f8ae97f236b769ddf7f3f3f5aace0923d22b916f556b5c51b4a75ece95cb1",
+          "score_indices_sha256": "c1210dd95cdbf9fcdccc7cfea54e86406387873aa37744ad39ce5298cb28077a",
+          "metrics": {
+            "ap": 0.20333333333333334,
+            "roc_auc": 0.5,
+            "brier": 0.1619892795138889,
+            "log_loss": 0.5049900297820816
+          }
+        },
+        {
+          "fold": 5,
+          "fit_indices_sha256": "014710193d955c4bada129609efc1edf57f63f325c8f983050b2914019803557",
+          "score_indices_sha256": "bf7a5152e18ee644b60af2d6f5d0a39b0af656409ef9202c9fa2ce534e328a87",
+          "metrics": {
+            "ap": 0.20333333333333334,
+            "roc_auc": 0.5,
+            "brier": 0.16198927951388886,
+            "log_loss": 0.5049900297820816
+          }
+        }
+      ],
+      "summary": {
+        "ap": {
+          "mean": 0.20383333333333337,
+          "std": 0.00045643546458763376
+        },
+        "roc_auc": {
+          "mean": 0.5,
+          "std": 0.0
+        },
+        "brier": {
+          "mean": 0.16228539930555555,
+          "std": 0.00027031914936594115
+        },
+        "log_loss": {
+          "mean": 0.5056711383790526,
+          "std": 0.0006217642377862393
+        }
+      }
+    },
+    {
+      "name": "logreg-raw",
+      "model": "logreg",
+      "feature_set": "raw",
+      "run_id": "22b313957b96480bbd21f50a4130b1df",
+      "eligible": true,
+      "final": false,
+      "parameters": {
+        "C": 1.0,
+        "class_weight": null,
+        "dual": false,
+        "fit_intercept": true,
+        "intercept_scaling": 1,
+        "l1_ratio": 0.0,
+        "max_iter": 1000,
+        "n_jobs": null,
+        "penalty": "l2",
+        "random_state": null,
+        "solver": "lbfgs",
+        "tol": 0.0001,
+        "verbose": 0,
+        "warm_start": false
+      },
+      "folds": [
+        {
+          "fold": 1,
+          "fit_indices_sha256": "4f46053e306c55a410f26c9dfdf079b0fd84ba6b51f2ee985c54a0232aa207bc",
+          "score_indices_sha256": "7d66d7e6df8645cb1925b5548c30223dbe8edf9a5a556d8e175808d2c7f9077a",
+          "metrics": {
+            "ap": 0.4344332542250772,
+            "roc_auc": 0.7437418527620472,
+            "brier": 0.14060444278087167,
+            "log_loss": 0.44435261754262606
+          }
+        },
+        {
+          "fold": 2,
+          "fit_indices_sha256": "0bd5c49139bc2e20868f7d789c93a7d6a194503636bfaf4fc566f10ce3031e47",
+          "score_indices_sha256": "42daf62f5a3cf96a4bf26dfddba86a265c53a5f6b739daba4c62140c435e2868",
+          "metrics": {
+            "ap": 0.4246256250820839,
+            "roc_auc": 0.7430964846671653,
+            "brier": 0.14241525206934771,
+            "log_loss": 0.4458649835660323
+          }
+        },
+        {
+          "fold": 3,
+          "fit_indices_sha256": "ef50cfc948d76492c610e44aa6e81b2befdfbe8d389a675d444ad503a742b803",
+          "score_indices_sha256": "e0b11c81b4e6670f006260409d5b3005ccc37cf08062c1e1e6d86118789eec01",
+          "metrics": {
+            "ap": 0.48636821157446947,
+            "roc_auc": 0.7715995298643016,
+            "brier": 0.13439658315501665,
+            "log_loss": 0.42537939364732286
+          }
+        },
+        {
+          "fold": 4,
+          "fit_indices_sha256": "596f8ae97f236b769ddf7f3f3f5aace0923d22b916f556b5c51b4a75ece95cb1",
+          "score_indices_sha256": "c1210dd95cdbf9fcdccc7cfea54e86406387873aa37744ad39ce5298cb28077a",
+          "metrics": {
+            "ap": 0.4611027154960092,
+            "roc_auc": 0.7558303038617188,
+            "brier": 0.1373055486330935,
+            "log_loss": 0.4325551750986579
+          }
+        },
+        {
+          "fold": 5,
+          "fit_indices_sha256": "014710193d955c4bada129609efc1edf57f63f325c8f983050b2914019803557",
+          "score_indices_sha256": "bf7a5152e18ee644b60af2d6f5d0a39b0af656409ef9202c9fa2ce534e328a87",
+          "metrics": {
+            "ap": 0.48898836963490566,
+            "roc_auc": 0.7607346182865766,
+            "brier": 0.13474585036796038,
+            "log_loss": 0.4286329114493647
+          }
+        }
+      ],
+      "summary": {
+        "ap": {
+          "mean": 0.4591036352025091,
+          "std": 0.029316427469479305
+        },
+        "roc_auc": {
+          "mean": 0.7550005578883618,
+          "std": 0.012016230670073116
+        },
+        "brier": {
+          "mean": 0.13789353540125798,
+          "std": 0.003545323150581585
+        },
+        "log_loss": {
+          "mean": 0.43535701626080076,
+          "std": 0.009273012883354494
+        }
+      }
+    },
+    {
+      "name": "logreg-eda",
+      "model": "logreg",
+      "feature_set": "eda",
+      "run_id": "bef5ae63e7b8421abcfee5f1ad65dd5c",
+      "eligible": true,
+      "final": false,
+      "parameters": {
+        "C": 1.0,
+        "class_weight": null,
+        "dual": false,
+        "fit_intercept": true,
+        "intercept_scaling": 1,
+        "l1_ratio": 0.0,
+        "max_iter": 1000,
+        "n_jobs": null,
+        "penalty": "l2",
+        "random_state": null,
+        "solver": "lbfgs",
+        "tol": 0.0001,
+        "verbose": 0,
+        "warm_start": false
+      },
+      "folds": [
+        {
+          "fold": 1,
+          "fit_indices_sha256": "4f46053e306c55a410f26c9dfdf079b0fd84ba6b51f2ee985c54a0232aa207bc",
+          "score_indices_sha256": "7d66d7e6df8645cb1925b5548c30223dbe8edf9a5a556d8e175808d2c7f9077a",
+          "metrics": {
+            "ap": 0.6128596901997401,
+            "roc_auc": 0.8041200983011005,
+            "brier": 0.11896382265551604,
+            "log_loss": 0.39571701441033297
+          }
+        },
+        {
+          "fold": 2,
+          "fit_indices_sha256": "0bd5c49139bc2e20868f7d789c93a7d6a194503636bfaf4fc566f10ce3031e47",
+          "score_indices_sha256": "42daf62f5a3cf96a4bf26dfddba86a265c53a5f6b739daba4c62140c435e2868",
+          "metrics": {
+            "ap": 0.6546692643119748,
+            "roc_auc": 0.8371791858104498,
+            "brier": 0.11115243527707813,
+            "log_loss": 0.3655638943505549
+          }
+        },
+        {
+          "fold": 3,
+          "fit_indices_sha256": "ef50cfc948d76492c610e44aa6e81b2befdfbe8d389a675d444ad503a742b803",
+          "score_indices_sha256": "e0b11c81b4e6670f006260409d5b3005ccc37cf08062c1e1e6d86118789eec01",
+          "metrics": {
+            "ap": 0.6795572237750727,
+            "roc_auc": 0.8500737258254086,
+            "brier": 0.10816296397224953,
+            "log_loss": 0.35363499357797895
+          }
+        },
+        {
+          "fold": 4,
+          "fit_indices_sha256": "596f8ae97f236b769ddf7f3f3f5aace0923d22b916f556b5c51b4a75ece95cb1",
+          "score_indices_sha256": "c1210dd95cdbf9fcdccc7cfea54e86406387873aa37744ad39ce5298cb28077a",
+          "metrics": {
+            "ap": 0.6538689156438927,
+            "roc_auc": 0.8580106660264766,
+            "brier": 0.1088288188435709,
+            "log_loss": 0.3536032492789473
+          }
+        },
+        {
+          "fold": 5,
+          "fit_indices_sha256": "014710193d955c4bada129609efc1edf57f63f325c8f983050b2914019803557",
+          "score_indices_sha256": "bf7a5152e18ee644b60af2d6f5d0a39b0af656409ef9202c9fa2ce534e328a87",
+          "metrics": {
+            "ap": 0.6829932858811842,
+            "roc_auc": 0.8472717607517664,
+            "brier": 0.10629020981777465,
+            "log_loss": 0.3524014410997331
+          }
+        }
+      ],
+      "summary": {
+        "ap": {
+          "mean": 0.6567896759623729,
+          "std": 0.028052901105282645
+        },
+        "roc_auc": {
+          "mean": 0.8393310873430405,
+          "std": 0.021046553548355395
+        },
+        "brier": {
+          "mean": 0.11067965011323784,
+          "std": 0.00494665321580761
+        },
+        "log_loss": {
+          "mean": 0.36418411854350946,
+          "std": 0.01842754475440132
+        }
+      }
+    }
+  ]
+}

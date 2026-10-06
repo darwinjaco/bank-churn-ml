@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 3: T5, CV y tracking MLflow |
+| Fase actual | Semana 3: T6, resultados reales de baselines |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -477,7 +477,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 |---|---|
 | Fecha de apertura | 6 de octubre de 2026 |
 | Fechas planificadas | 19–25 de octubre de 2026 |
-| Estado | En curso: T5 |
+| Estado | En curso: T6 |
 | Objetivo | Tres baselines fijas con CV exclusivamente de entrenamiento, transformaciones seguras y trazabilidad MLflow |
 
 | Tarea | Estado | Commit requerido |
@@ -487,8 +487,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T2 | Completada | `build: add mlflow` |
 | T3 | Completada | `feat: leakage-safe feature transformers` |
 | T4 | Completada | `feat: model pipelines for baselines` |
-| T5 | Arnés y tracking temporal verificados; comprobación completa pendiente | `feat: cross-validation harness with MLflow tracking` |
-| T6 | Pendiente | `chore: baseline results` |
+| T5 | Completada | `feat: cross-validation harness with MLflow tracking` |
+| T6 | Tres corridas generadas y verificadas; comprobaciones completas pendientes | `chore: baseline results` |
 | T7 | Pendiente | `docs: week 3 results and log` |
 
 #### T0 — Enmienda y compuerta SDD
@@ -542,6 +542,17 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - Tests con URI SQLite temporal y directorio de trabajo `tmp_path`; no se creó `mlruns/` en el proyecto. Incluyen prevalencia/ROC de Dummy, determinismo, mismos pliegues, exclusión de IDs de validación/prueba y campos/historiales de MLflow.
 - `uv run pytest tests/test_train.py --cov=churn --cov-report=term-missing`: seis aprobados, módulo train al 97 %. Advertencias de deprecación de sklearn/SQLAlchemy observadas, sin suprimirlas ni alterar configuraciones.
 - Comprobaciones completas satisfactorias: 90 aprobados y cobertura del 98,56 %; 25 advertencias de bibliotecas documentadas. CI previo T4 en verde; pendiente CI de T5. Todavía no se han ejecutado baselines reales.
+- Commit T5: `c75af93`; CI en verde: https://github.com/darwinjaco/bank-churn-ml/actions/runs/37512680458.
+
+#### T6 — Ejecución real
+
+- `uv run churn-baselines`: tres corridas de CV sobre 6.000 filas de entrenamiento; cinco pliegues fijos, sin métricas de validación externa o prueba.
+- `reports/baselines.json`: métricas de cada pliegue, resumen, parámetros, procedencia y run IDs. `reports/baselines.md`: tabla generada desde el JSON, con código reproducible de formateo.
+- AP media ± std: Dummy 0,203833 ± 0,000456; LogReg-RAW 0,459104 ± 0,029316; LogReg-EDA 0,656790 ± 0,028053. Sin selección de modelo.
+- Verificación con `uv run python -c`: tres corridas FINISHED en `sqlite:///mlruns/mlflow.db`, experimento `bank-churn`; todas las medias/std de MLflow coinciden con JSON y la tabla MD coincide con su generador.
+- Réplica de CV sin registrar nuevas corridas: métricas e índices exactamente iguales para las tres configuraciones. Se conservan solo tres corridas reales en el tracking.
+- Run IDs: Dummy `67f346cabc794a749c709d298a8a77d8`, RAW `22b313957b96480bbd21f50a4130b1df`, EDA `bef5ae63e7b8421abcfee5f1ad65dd5c`. Código registrado: `c75af93fbfb0dd87f51efeb39fa70071caa4d399`; etiquetas `final=false`.
+- Comprobaciones completas satisfactorias: 90 aprobados y cobertura del 98,56 %. Base MLflow, CSV e índices excluidos de Git verificados con `git check-ignore`. CI previo T5 en verde; pendiente CI de T6 tras publicar.
 
 ## 6. Plantilla para nuevas secciones
 
