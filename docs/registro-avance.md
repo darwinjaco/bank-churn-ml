@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 5: calibración y capa de decisión (opción A) |
+| Fase actual | Semana 5 implementada; siguiente: semana 6 (SHAP, errores, segmentos, E-01 y ficha del modelo) |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -31,7 +31,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 | Semana 2 | 12–18 oct | EDA, hipótesis y auditoría de productos 3–4 y balance cero | Hipótesis contrastadas con pruebas estadísticas, tamaños de efecto e incertidumbre | Completada y revisada el 6 de octubre; correcciones interpretativas incorporadas |
 | Semana 3 | 19–25 oct | Pipeline, división estratificada, Dummy/LogReg y MLflow | Modelos de referencia registrados en MLflow | Baselines implementadas y registradas; revisión pendiente |
 | Semana 4 | 26 oct–1 nov | RF, XGBoost, validación cruzada y ajuste acotado | Tabla de media ± desviación estándar por modelo | Compuerta documental en curso; bloqueo B-02 antes de entrenar |
-| Semana 5 | 2–8 nov | Calibración (E-04) y umbral monetario analítico (opción A); deciles y sensibilidad excluidos por decisión del responsable | Umbral justificado por beneficio esperado bajo supuestos explícitos | En curso |
+| Semana 5 | 2–8 nov | Calibración (E-04) y umbral monetario analítico (opción A); deciles y sensibilidad excluidos por decisión del responsable | Umbral justificado por beneficio esperado bajo supuestos explícitos | Implementada; pendiente de publicación |
 | Semana 6 | 9–15 nov | SHAP, errores, segmentos y ficha del modelo | Limitaciones documentadas | Pendiente |
 | Semana 7 | 16–22 nov | FastAPI, Streamlit, tests de API y Docker Compose | `docker compose up` funciona desde cero | Pendiente |
 | Semana 8 | 23–29 nov | Cambio de distribución simulado, despliegue y README final | URL pública y reproducibilidad verificadas | Pendiente |
@@ -691,7 +691,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 |---|---|
 | Fecha de apertura | 6 de octubre de 2026 |
 | Fechas planificadas | 2–8 de noviembre de 2026 |
-| Estado | En curso: T0 |
+| Estado | Implementada (T0–T6); pendiente de publicación |
 | Objetivo | Calibrar el Random Forest final (E-04), aplicar el umbral analítico de la spec 004 y congelar el artefacto, sin consultar prueba |
 
 | Tarea | Estado | Commit requerido |
@@ -701,8 +701,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T2 | Completada (`cc74f95`) | `feat: probability calibration (E-04)` |
 | T3 | Completada (`fa7472e`) | `feat: expected-profit decision layer (spec 004)` |
 | T4 | Completada (`f2796d5`) | `feat: calibrate, decide and freeze artifact` |
-| T5 | Completada (commit local) | `chore: calibration and decision results` |
-| T6 | Pendiente | `docs: week 5 calibration and decision` |
+| T5 | Completada (`364fe26`) | `chore: calibration and decision results` |
+| T6 | Completada; pendiente de publicación y CI | `docs: week 5 calibration and decision` |
 
 #### T0 — Compuerta
 
@@ -738,6 +738,11 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - Decisión (t* = 1/6, 2.000 clientes, 407 abandonos): el modelo contacta a 621 (31,1 %), captura 310 abandonos y obtiene **61.950 €**; contactar a todos 22.100 €; aleatoria 20 % 4.420 €; nadie 0 €; oráculo 101.750 €. Diferencia frente a la mejor referencia: +39.850 €; 60,9 % del oráculo. Precisión 0,499; recall 0,762; F1 0,603.
 - Verificación independiente (script sin importar `churn`): Brier 0,1026 / 0,1010 / 0,1013; 621 contactados, 310 capturados, 61.950 €, 22.100 € y 101.750 €. Coincide con `decision.json`.
 - Figura de fiabilidad revisada: sin calibrar subestima el decil de mayor riesgo (≈71 % predicho frente a ≈82 % observado); la sigmoide lo corrige.
+
+#### T6 — Reporte y cierre
+
+- `decision_report.py` genera `reports/decision.md` desde `decision.json` (test que compara cifras y salida de la CLI). README con la sección de la semana 5; spec 002 §8 (selección/calibración y artefacto marcados; E-01 pendiente) y spec 004 §9 completos.
+- Pendiente para la semana 6: E-01 (auditoría por `Gender`), SHAP agrupando `has_balance` y `Geography` (R4), análisis de errores y segmentos, y ficha del modelo con el sesgo del grupo 3–4 y los límites de la spec 004. La evaluación final en prueba sigue reservada.
 
 ## 6. Plantilla para nuevas secciones
 

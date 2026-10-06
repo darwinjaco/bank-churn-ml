@@ -14,7 +14,7 @@ El dataset no contiene ingresos del banco, valor de vida del cliente (CLV), cost
 
 ## Estado actual
 
-- Implementados: contrato, división, EDA, figuras corregidas, transformadores sin fuga, baselines con MLflow, ajuste en dos fases, regla de selección y ablaciones E-02/E-03.
+- Implementados: contrato, división, EDA, figuras corregidas, transformadores sin fuga, baselines con MLflow, ajuste en dos fases, regla de selección, ablaciones E-02/E-03, calibración E-04, capa de decisión y artefacto congelado.
 - Configurados: uv, Ruff, pytest, pre-commit y GitHub Actions; cobertura mínima en CI del 85 %.
 - Documentadas: especificaciones 001–003; modelado v1.1 fija FS-RAW/FS-EDA y CV exclusiva de entrenamiento. EDA v1.1 conserva H1–H6 y resuelve B-01.
 - Verificados localmente: 90 tests aprobados y cobertura del 98,56 %, además de Ruff, formato y pre-commit.
@@ -161,9 +161,9 @@ notebooks/    EDA delgado; lógica reutilizable en src/churn/
 | N.º | Especificación | Estado |
 |---|---|---|
 | 001 | [Visión general y contrato de datos](specs/001-overview-and-data-contract.md) | Completada: validación local y CI remoto verificados |
-| 002 | [Modelado y evaluación](specs/002-modeling-and-evaluation.md) | v1.4: baselines y selección implementadas (Random Forest); calibración pendiente |
+| 002 | [Modelado y evaluación](specs/002-modeling-and-evaluation.md) | v1.5: baselines, selección (Random Forest) y calibración sigmoide implementadas |
 | 003 | [EDA e hipótesis preregistradas](specs/003-eda-and-hypotheses.md) | Implementada v1.1 y revisada |
-| 004 | [Capa de decisión y beneficio esperado](specs/004-decision-layer.md) | Aprobada v1.0 (opción A: umbral analítico) |
+| 004 | [Capa de decisión y beneficio esperado](specs/004-decision-layer.md) | Implementada v1.0 (opción A: umbral analítico 1/6) |
 | 005 | API y dashboard | Por redactar antes de la semana 7 |
 | 006 | Operación: tests, Docker, CI y monitoreo | Por redactar antes de ampliar operación y serving |
 
@@ -207,7 +207,28 @@ uv run churn-select    # regla §6, E-03, E-02 y validación
 uv run python -m churn.selection_report
 ```
 
-Estado de cierre: semanas 1–3 revisadas; semana 4 implementada, pendiente de revisión. Semanas 5–8 sin iniciar. La división se adelantó a semana 2 para reservar la prueba antes del EDA.
+### Semana 5: calibración y decisión
+
+E-04 calibra el Random Forest final con predicciones OOF de entrenamiento y compara en validación: Brier sin calibrar 0.1026, **sigmoide 0.1010** (elegida), isotónica 0.1013. La sigmoide corrige la subestimación del decil de mayor riesgo y conserva la AP.
+
+Regla de la spec 004 (opción A): contactar si la probabilidad calibrada supera **t\* = c / (s·V) = 1/6**, con supuestos ilustrativos V = 1.000 €, c = 50 € y s = 30 %. El umbral es analítico, no se ajusta con datos.
+
+| Política (validación, 2.000 clientes) | Contactados | Beneficio |
+|---|---|---|
+| Nadie | 0 | 0 € |
+| Todos | 2.000 | 22.100 € |
+| Aleatoria 20 % | 400 | 4.420 € |
+| **Modelo** | **621** | **61.950 €** |
+| Oráculo (cota superior) | 407 | 101.750 € |
+
+El modelo obtiene 39.850 € más que la mejor política sin modelo y captura el 60.9% del beneficio máximo posible. Cifras de desarrollo con supuestos ilustrativos; detalle y límites en [decision.md](reports/decision.md).
+
+```powershell
+uv run churn-decide                       # E-04, decisión, artefacto en models/ y figura
+uv run python -m churn.decision_report
+```
+
+Estado de cierre: semanas 1–4 publicadas; semana 5 implementada, pendiente de publicación. Semanas 6–8 sin iniciar. La división se adelantó a semana 2 para reservar la prueba antes del EDA.
 
 ## Publicación y seguimiento
 

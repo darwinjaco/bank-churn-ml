@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Estado | Aprobada v1.0 |
+| Estado | Implementada v1.0 (semana 5) |
 | Responsable | Darwin Jacome Cuenca |
 | Semana | 5 (2–8 de noviembre de 2026) |
 | Dependencias | [002](002-modeling-and-evaluation.md) §5.3 (calibración, v1.5) |
@@ -98,11 +98,11 @@ Estas cifras son de **desarrollo**: la validación ya se usó para seleccionar e
 
 ## 9. Criterios de aceptación
 
-- [ ] t* calculado desde las constantes de `config.py` y verificado por test (1/6).
-- [ ] Beneficio de cada política reproducible desde `reports/decision.json`, con tests sobre un caso de valores conocidos.
-- [ ] La política del modelo usa la probabilidad calibrada elegida en E-04.
-- [ ] Reporte sin lenguaje causal y con las limitaciones de §4.
-- [ ] Prueba sin usar.
+- [x] t* calculado desde las constantes de `config.py` y verificado por test (1/6).
+- [x] Beneficio de cada política reproducible desde `reports/decision.json`, con tests sobre un caso de valores conocidos.
+- [x] La política del modelo usa la probabilidad calibrada elegida en E-04.
+- [x] Reporte sin lenguaje causal y con las limitaciones de §4.
+- [x] Prueba sin usar.
 
 ## 10. Definición de cierre
 

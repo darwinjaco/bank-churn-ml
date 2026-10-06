@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Estado | En implementación: semanas 3–4 completadas; semana 5 (calibración y artefacto) en curso |
+| Estado | En implementación: semanas 3–5 completadas; pendientes E-01 (semana 6) y evaluación final en prueba |
 | Responsable | Darwin Jacome Cuenca |
 | Dependencia | [Especificación 001](001-overview-and-data-contract.md) |
 | Versión | v1.5 — semana 5: detalle de calibración (E-04), artefacto y hash canónico del manifiesto; §6 y experimentos sin cambios |
@@ -167,11 +167,11 @@ Decisiones preregistradas de semana 4: sobre la familia seleccionada, con sus hi
 ## 8. Criterios de aceptación
 
 - [x] Tabla de comparación en el README con media ± desviación estándar y protocolo de cálculo (semanas 3–4).
-- [ ] Experimentos E-01 a E-04 documentados con resultados y conclusión breve.
+- [ ] Experimentos E-01 a E-04 documentados con resultados y conclusión breve (E-02, E-03 y E-04 hechos; E-01 en semana 6).
 - [x] División reproducible y ausencia de solapamientos verificada mediante tests.
-- [ ] Modelo seleccionado conforme a §6 y calibración conforme a §5.3; decisiones registradas en MLflow.
+- [x] Modelo seleccionado conforme a §6 y calibración conforme a §5.3; decisiones registradas en MLflow.
 - [ ] Conjunto de prueba utilizado en una única evaluación final, registrada con la etiqueta `final=true`.
-- [ ] Artefacto guardado: pipeline completo, calibrador elegido si aplica y `metadata.json`, con variables, versiones, hash de datos y referencia a la política de decisión.
+- [x] Artefacto guardado: pipeline completo, calibrador elegido si aplica y `metadata.json`, con variables, versiones, hash de datos y referencia a la política de decisión.
 
 ## 9. Definición de cierre
 
