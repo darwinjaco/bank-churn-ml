@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 2: T5, resultados reales y figuras |
+| Fase actual | Semana 2: T6, notebook narrativo |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -409,13 +409,13 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | Campo | Valor |
 |---|---|
 | Fase | Semana 2 |
-| Estado | En curso: T5 |
+| Estado | En curso: T6 |
 | Objetivo | Generar los entregables de EDA y detenerse para revisión al terminar T7 |
 
 | Tarea | Estado | Commit requerido |
 |---|---|---|
-| T5 | Verificada localmente; CI del commit por confirmar | `chore: generate split manifest, hypothesis results and figures` |
-| T6 | Pendiente | `docs: EDA notebook` |
+| T5 | Completada | `chore: generate split manifest, hypothesis results and figures` |
+| T6 | Verificado localmente; CI del commit por confirmar | `docs: EDA notebook` |
 | T7 | Pendiente | `docs: week 2 conclusions and log` |
 
 #### T5 — Resultados y figuras (6 de octubre de 2026)
@@ -429,6 +429,15 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - El CI pasa a `uv sync --locked --all-groups` porque los nuevos tests gráficos necesitan el grupo `eda`; no se añadieron dependencias adicionales.
 - Comprobaciones locales de `AGENTS.md` y sincronización adicional `uv sync --locked --all-groups` satisfactorias: 71 tests aprobados, incluido `realdata` del manifiesto; cobertura global del 98,48 %, sin exclusiones de cobertura.
 - `git check-ignore -v -- data/processed/split.json data/raw/Churn_Modelling.csv`: ambos excluidos. CI de T4 en verde antes del commit; pendiente CI de T5 tras publicar.
+- Commit T5: `c937861`; publicado. CI en verde: https://github.com/darwinjaco/bank-churn-ml/actions/runs/37486403134.
+
+#### T6 — Notebook (6 de octubre de 2026)
+
+- Creado `notebooks/01_eda.ipynb`, con cuatro celdas de código: carga de exploración, tipos/cardinalidades/distribuciones, reporte JSON y figuras ya generadas.
+- Sin funciones, lambdas, inferencia o modelos propios; único lector de filas: `load_exploration()`.
+- `uv run ruff format notebooks/01_eda.ipynb`, `uv run ruff check notebooks/01_eda.ipynb` y `uv run pre-commit run nbstripout --files notebooks/01_eda.ipynb`: satisfactorios tras ordenar los imports.
+- Validación con `uv run --group eda python -c`: ejecutadas las cuatro celdas, AST sin definiciones de funciones y carga de 8.000 filas únicamente de entrenamiento/validación. Confirmados `outputs=[]` y `execution_count=null` en el archivo.
+- Comprobaciones locales completas de `AGENTS.md`, con instalación adicional del grupo EDA, satisfactorias: 71 aprobados y cobertura del 98,48 %; `nbstripout` incluido y aprobado. CI de T5 en verde antes del commit; pendiente CI de T6 tras publicar.
 
 ## 6. Plantilla para nuevas secciones
 
