@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 3: T3, transformadores sin fuga |
+| Fase actual | Semana 3: T4, pipelines de baselines |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -477,7 +477,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 |---|---|
 | Fecha de apertura | 6 de octubre de 2026 |
 | Fechas planificadas | 19–25 de octubre de 2026 |
-| Estado | En curso: T3 |
+| Estado | En curso: T4 |
 | Objetivo | Tres baselines fijas con CV exclusivamente de entrenamiento, transformaciones seguras y trazabilidad MLflow |
 
 | Tarea | Estado | Commit requerido |
@@ -485,8 +485,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T0 | Completada | `docs: amend spec 002 v1.1 and week 3 plan (SDD gate)` |
 | T1 | Completada | `fix: figure readability (week 2 debt)` |
 | T2 | Completada | `build: add mlflow` |
-| T3 | Transformadores y tests focalizados aprobados; comprobación completa pendiente | `feat: leakage-safe feature transformers` |
-| T4 | Pendiente | `feat: model pipelines for baselines` |
+| T3 | Completada | `feat: leakage-safe feature transformers` |
+| T4 | Pipelines y tests focalizados aprobados; comprobación completa pendiente | `feat: model pipelines for baselines` |
 | T5 | Pendiente | `feat: cross-validation harness with MLflow tracking` |
 | T6 | Pendiente | `chore: baseline results` |
 | T7 | Pendiente | `docs: week 3 results and log` |
@@ -523,6 +523,15 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - `FEATURE_SETS` contiene solo las nueve entradas originales permitidas; las derivadas se generan en el pipeline. Constantes de umbral y clip fijadas en config.
 - `uv run pytest tests/test_features.py`: seis aprobados, incluida la prueba A→B que conserva la media de A y prohíbe usar `config.centered_age()`.
 - Ruff pidió nombres de argumentos en minúscula; corregidos sin omitir reglas. Comprobaciones completas satisfactorias: 77 aprobados, cobertura global del 98,61 % y `features.py` al 100 %. CI previo T2 en verde; pendiente CI de T3 tras publicar.
+- Commit T3: `1888bc9`; CI en verde: https://github.com/darwinjaco/bank-churn-ml/actions/runs/37510509610.
+
+#### T4 — Pipelines
+
+- `build_pipeline` combina defensa de auditoría, ColumnTransformer y Dummy/LogReg con la configuración fija aprobada. FS-EDA agrupa productos antes de one-hot y ajusta escala/cuadrática de edad dentro del pipeline.
+- Se rechaza explícitamente un DataFrame con columnas de auditoría, también al predecir; categorías desconocidas producen error. Nombres de salida sin IDs ni auditoría.
+- `uv run pytest tests/test_pipeline.py --cov=churn --cov-report=term-missing`: siete aprobados y módulo pipeline al 100 %.
+- Scikit-learn 1.9.1 avisa que el argumento `penalty` se deprecará; la configuración L2 aprobada es válida en la versión bloqueada y se conserva, sin suprimir advertencias ni cambiar hiperparámetros.
+- Comprobaciones completas satisfactorias: 84 aprobados y cobertura del 98,72 %; cuatro advertencias de deprecación documentadas. CI previo T3 en verde; pendiente CI de T4 tras publicar.
 
 ## 6. Plantilla para nuevas secciones
 
