@@ -2,10 +2,10 @@
 
 | Campo | Valor |
 |---|---|
-| Estado | Diseño documentado; implementación pendiente en semanas 3–5 |
+| Estado | En implementación: semanas 3–4 completadas/en curso |
 | Responsable | Darwin Jacome Cuenca |
 | Dependencia | [Especificación 001](001-overview-and-data-contract.md) |
-| Versión | v1.1 — incorpora los hallazgos de la semana 2 (spec 003) |
+| Versión | v1.2 — protocolo de la semana 4 fijado antes de entrenar |
 | Última revisión documental | 6 de octubre de 2026 |
 
 ## 1. Objetivo
@@ -32,14 +32,15 @@ Seleccionar un modelo que **ordene adecuadamente el riesgo y produzca probabilid
 |---|---|---|
 | FS-RAW | Referencia ingenua | CreditScore, Age, Tenure, Balance, EstimatedSalary, NumOfProducts (entero), HasCrCard, IsActiveMember, Geography (one-hot, `handle_unknown="error"`). Numéricas con `StandardScaler` en modelos lineales |
 | FS-EDA | LogReg informada por H1–H6 | FS-RAW con estos cambios: NumOfProducts → one-hot de {1, 2, 3–4} (H2: no monótona; mapeo sin estado `clip(upper=3)`); Age → `StandardScaler` + término cuadrático, ajustados dentro de cada pliegue (H4); se añade `has_balance` (H5, Q-10); Balance continuo escalado; EstimatedSalary se mantiene hasta E-03 |
+| FS-TREE | RF y XGBoost | CreditScore, Age, Tenure, Balance, EstimatedSalary, NumOfProducts (entero, sin agrupar: los árboles modelan la no monotonía), HasCrCard, IsActiveMember, Geography (one-hot) + has_balance. Sin escalado ni término cuadrático |
 
 - **R1.** Toda transformación con parámetros aprendidos de los datos (medias, escalas, categorías) es un transformador sklearn dentro del Pipeline. Prohibido calcular estadísticos fuera del pipeline. `config.centered_age()` queda solo para la inferencia de la spec 003, nunca en modelado.
 - **R2.** Las transformaciones sin estado (`has_balance`, clip de NumOfProducts) usan constantes fijas.
-- **R3.** Sin remuestreo (SMOTE, undersampling) ni `class_weight`: las probabilidades deben conservar la escala real para la calibración y la decisión económica (specs 002 §5.3 y 004).
+- **R3.** Sin remuestreo (SMOTE, undersampling) ni `class_weight`: las probabilidades deben conservar la escala real para la calibración y la decisión económica (specs 002 §5.3 y 004). Aplica también a árboles: `class_weight=None`, `scale_pos_weight=1` y sin remuestreo.
 - **R4.** Q-10: `has_balance` y `Geography` comparten señal. Sus coeficientes LogReg no se interpretan por separado; en la semana 6, SHAP se reporta agrupando ambas.
 - **R5.** `age_band` deja de ser candidata en modelos lineales; la sustituye el término cuadrático (H4). Los árboles (semana 4) usan Age sin transformar.
 
-`RowNumber`, `CustomerId` y `Surname` se excluyen. `Gender` se conserva exclusivamente para auditoría: nunca se incorpora como feature, tampoco en experimentos ni mediante variables derivadas. E-01 compara resultados por grupos sin entrenar con `Gender`. `EstimatedSalary` permanece como candidata hasta E-03; la variante que la excluya también excluirá `balance_to_salary` para evitar conservar indirectamente su información.
+`RowNumber`, `CustomerId` y `Surname` se excluyen. `Gender` se conserva exclusivamente para auditoría: nunca se incorpora como feature, tampoco en experimentos ni mediante variables derivadas. E-01 compara resultados por grupos sin entrenar con `Gender`. `EstimatedSalary` permanece como candidata hasta E-03. `balance_to_salary` deja de ser candidata (H6: el salario no tiene señal univariada; E-03 decide sobre el salario). `age_band` ya se había descartado en modelos lineales (R5).
 
 ## 4. Modelos
 
@@ -58,13 +59,22 @@ Configuración fija de la semana 3, sin ajuste de hiperparámetros:
 - LogReg: penalización L2, `C=1.0`, `solver="lbfgs"`, `max_iter=1000`, con FS-RAW y con FS-EDA.
 - En total, tres corridas: `dummy-raw`, `logreg-raw` y `logreg-eda`. La selección corresponde a la semana 4 (§6).
 
+Espacios de búsqueda de la semana 4, fijados antes de entrenar y expresados mediante distribuciones de `scipy.stats` donde corresponda:
+
+- **LogReg (FS-EDA):** `C ~ loguniform(1e-3, 1e2)`; L2, lbfgs, `max_iter=2000`.
+- **RF (FS-TREE):** `n_estimators=500` fijo; `max_depth ∈ {None, 4, 6, 8, 10, 12, 16}`; `min_samples_leaf ∈ {1, 2, 5, 10, 20, 50}`; `max_features ∈ {"sqrt", 0.3, 0.5, 0.8}`; `random_state=42`; `n_jobs=-1`.
+- **XGBoost (FS-TREE):** `n_estimators ∈ {100, 200, 400, 800}`; `learning_rate ~ loguniform(0.01, 0.3)`; `max_depth ∈ {2, 3, 4, 5, 6}`; `min_child_weight ∈ {1, 3, 5, 10}`; `subsample ~ uniform(0.6, 0.4)`; `colsample_bytree ~ uniform(0.6, 0.4)`; `reg_lambda ~ loguniform(0.1, 10)`; `tree_method="hist"`; `scale_pos_weight=1`; `eval_metric="logloss"`; `random_state=42`; `n_jobs=-1`. Sin early stopping.
+
 ## 5. Protocolo de evaluación
 
 ### 5.1. Validación cruzada y trazabilidad
 
 - `StratifiedKFold` de 5 pliegues sobre entrenamiento, con mezcla, semilla 42 e idénticas particiones para comparar modelos.
 - Reportar **media ± desviación estándar muestral** entre pliegues para cada métrica de la tabla de comparación.
-- Ajuste acotado con `RandomizedSearchCV`: como máximo 50 iteraciones por búsqueda, espacio pequeño y documentado, semilla fija y `scoring="average_precision"`.
+- **FASE A (ajuste):** `RandomizedSearchCV` sobre entrenamiento con `StratifiedKFold(5, shuffle=True, random_state=42)`, `scoring="average_precision"`, `refit=False`. Presupuestos: LogReg 20 iteraciones, RF 40 y XGBoost 40; `random_state=42` en la búsqueda.
+- **FASE B (selección):** la mejor configuración de cada familia se reevalúa en pliegues nuevos: `RepeatedStratifiedKFold(n_splits=5, n_repeats=2, random_state=2027)`, idénticos para todas las familias. La regla de §6 usa las AP medias de FASE B, no las de búsqueda.
+- Motivo de las dos fases: el máximo elegido en la búsqueda está inflado por seleccionar entre muchas configuraciones, especialmente en familias con más parámetros. Los nuevos pliegues reducen ese sesgo optimista; la evaluación sigue siendo de desarrollo.
+- Reporte adicional informativo: diferencia pareada de AP por pliegue de FASE B entre cada familia y la mejor. No modifica la regla de §6, que permanece congelada.
 - Registrar en MLflow parámetros, métricas, semilla, particiones, commit de Git y hash de datos.
 - Las métricas de pliegues reutilizados para ajustar hiperparámetros son estimaciones de desarrollo y pueden ser optimistas. Identificarlas como tales; la evaluación final independiente corresponde a prueba.
 - La semana 3 evalúa **solo** con validación cruzada estratificada de 5 pliegues sobre entrenamiento (6.000 filas; `shuffle=True`; semilla 42; mismos pliegues para todos los modelos). La validación no se usa en la semana 3.
@@ -98,7 +108,7 @@ El uso de validación para elegir calibración y umbral se registrará como sele
 - Tracking URI desde `MLFLOW_TRACKING_URI`; por defecto `sqlite:///mlruns/mlflow.db` (`mlruns/` fuera de Git). Experimento: `bank-churn`.
 - Parámetros: modelo, conjunto de variables, hiperparámetros, `n_folds`, `seed`.
 - Métricas: media y desviación de cada métrica, más las métricas por pliegue con `step` igual al número de pliegue.
-- Etiquetas: `stage=baseline`, `git_commit`, `csv_sha256`, `split_manifest_sha256`, `eligible` (`false` para Dummy) y `final=false`.
+- Etiquetas: `stage=baseline` para semana 3 y `stage ∈ {tuning, reevaluation, experiment, selection}` para semana 4, `git_commit`, `csv_sha256`, `split_manifest_sha256`, `eligible` (`false` para Dummy) y `final=false`. En experimentos, etiqueta `experiment=E-02` o `experiment=E-03` donde corresponda. El puntaje de búsqueda se marca como optimista.
 - Los tests usan tracking URI temporal en `tmp_path` y no escriben en el directorio `mlruns/` del proyecto.
 
 ## 6. Regla de selección del modelo, fijada antes de entrenar
@@ -111,6 +121,12 @@ El uso de validación para elegir calibración y umbral se registrará como sele
 
 Registrar cada aplicación de esta regla en MLflow. La selección en validación no reemplaza la evaluación final en prueba.
 
+En semana 4, los pasos 1–2 utilizan las AP medias y desviación estándar de **FASE B**. Los pasos 1–5 anteriores permanecen congelados, sin reinterpretación.
+
+**Uso de validación por primera vez en el modelado:** solo para los pasos 3–4. Cada candidato necesario se ajusta con todo el entrenamiento y se calcula su AP en validación una vez, registrada en MLflow con `stage=selection`. No se ajustan hiperparámetros ni variables con validación.
+
+**Orden de ejecución fijo:** FASE A → FASE B → aplicar §6 pasos 1–2 → E-03 (decide conjunto final de variables) → E-02 (auditoría) → ajustar en entrenamiento con el conjunto final → validación, pasos 3–4 (el candidato y, si es complejo, LogReg con la misma decisión de variables).
+
 ## 7. Experimentos requeridos
 
 | ID | Experimento | Pregunta |
@@ -121,6 +137,11 @@ Registrar cada aplicación de esta regla en MLflow. La selección en validación
 | E-04 | Probabilidad original frente a calibración isotónica y sigmoidal | ¿Se reduce Brier en validación con calibradores ajustados únicamente en entrenamiento? |
 
 Los experimentos usarán las mismas particiones y semillas. Cada conclusión incluirá métricas, tamaño de los segmentos pertinentes y limitaciones. Las decisiones de variables se fijarán antes de la evaluación final.
+
+Decisiones preregistradas de semana 4: sobre la familia seleccionada, con sus hiperparámetros fijos, sin reajuste de hiperparámetros y en los pliegues de FASE B:
+
+- **E-03:** comparar con y sin `EstimatedSalary`. Δ = AP(sin) − AP(con), pareada por pliegue. Si media(Δ) ≥ −0,005, eliminar `EstimatedSalary` del modelo final por parsimonia; en caso contrario conservarlo.
+- **E-02:** auditoría, no decisión de eliminar `NumOfProducts`, cuya señal está documentada en H2. Reportar (a) AP con/sin `NumOfProducts`, pareada; (b) con predicciones OOF de FASE B, AP excluyendo clientes con `NumOfProducts ≥ 3` para medir rendimiento sin el grupo fácil del artefacto Q-03; (c) en el grupo 3–4, probabilidad media predicha frente a tasa observada, con n. Alimenta la ficha del modelo de semana 6.
 
 ## 8. Criterios de aceptación
 
@@ -147,3 +168,15 @@ El [plan de semana 3](../docs/plan-semana-3.md) fija T0–T7. La enmienda v1.1 i
 - CLI `churn-baselines`: ejecuta exclusivamente las tres corridas fijadas y escribe `reports/baselines.json`. `reports/baselines.md` se genera desde ese JSON y presenta modelo × {AP, ROC-AUC, Brier, log loss}, con media ± desviación estándar.
 - Tests de transformadores sin estado/no fuga, pipelines/probabilidades/categorías/columnas prohibidas, métricas Dummy, determinismo y mismos pliegues, exclusión de clientes de validación/prueba de entrenamiento y trazabilidad MLflow temporal.
 - Cierre: 3–5 líneas descriptivas sobre la diferencia de AP frente a las desviaciones estándar, sin seleccionar modelo; README y S07 actualizados, CI verificado y corridas MLflow localizadas. Detenerse para revisión tras T7.
+
+## 11. Alcance de implementación de la semana 4
+
+El [plan completo de semana 4](../docs/plan-semana-4.md) fija T0–T7 y las observaciones O1–O3:
+
+- O1/O2: reportes legibles de baselines a tres decimales y diferencia pareada EDA−RAW de AP por pliegue (media, std ddof=1 y signo). Generar desde JSON y probar diferencias sobre JSON sintético; cambios de código de reportes corresponden a T1, después de T0.
+- T2: añadir `xgboost`, bloquear dependencias y sincronizar todos los grupos.
+- T3: ampliar `build_pipeline` a modelos {rf, xgb} con feature_set `tree`, manteniendo InputGuard; espacios exactos de §4 en `search_spaces.py`. Tests de coincidencia exacta, probabilidades, ausencia de escalado/ponderación y determinismo con la misma semilla.
+- T4: `tune.py`, `tune_family(family)` para FASE A exclusivamente con `load_training()`, y `reevaluate(configs)` para FASE B. Métricas por pliegue AP, ROC-AUC, Brier y log loss; guardar OOF en `data/processed/oof_phaseB.parquet`, fuera de Git. CLI `churn-tune` → `reports/tuning.json`. Tests sintéticos con presupuesto reducido y pliegues B iguales entre familias, diferentes de A, sin validación externa.
+- T5: `selection.py`, función pura `select_model(cv_summary, val_scores=None)` que aplica literalmente §6 pasos 1–5. Tests de todas las ramas, incluido fallo frente a Dummy, fallback a LogReg y comparación de LogReg solo con Dummy.
+- T6: CLI `churn-select` → `reports/model_selection.json`, con AP de búsqueda optimista, métricas FASE B, diferencias pareadas, decisiones paso a paso, E-03, E-02 y AP de validación de los candidatos necesarios, siguiendo el orden de §6. Registrar stages y etiquetas de §5.4.
+- T7: `reports/model_selection.md` generado desde JSON, tablas a tres decimales, aplicación de la regla, experimentos y AP de validación como selección de desarrollo; lenguaje descriptivo sin causalidad y sin decisiones económicas de semana 5. README, criterios cumplidos de §8 y S08 actualizados con CI y run IDs. Detenerse para revisión, sin avanzar a semana 5.

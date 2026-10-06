@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 3 implementada y verificada; detenida para revisión |
+| Fase actual | Semana 4: compuerta v1.2; continuación bloqueada por B-02 |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -30,7 +30,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 | Semana 1 | 5–11 oct | Repo, uv, Ruff, pytest, pre-commit, CI mínimo, specs 001–002 y Pandera | Tests pasan en CI | Completada el 6 de octubre: validación local y CI remoto verificados |
 | Semana 2 | 12–18 oct | EDA, hipótesis y auditoría de productos 3–4 y balance cero | Hipótesis contrastadas con pruebas estadísticas, tamaños de efecto e incertidumbre | Completada y revisada el 6 de octubre; correcciones interpretativas incorporadas |
 | Semana 3 | 19–25 oct | Pipeline, división estratificada, Dummy/LogReg y MLflow | Modelos de referencia registrados en MLflow | Baselines implementadas y registradas; revisión pendiente |
-| Semana 4 | 26 oct–1 nov | RF, XGBoost, validación cruzada y ajuste acotado | Tabla de media ± desviación estándar por modelo | Pendiente |
+| Semana 4 | 26 oct–1 nov | RF, XGBoost, validación cruzada y ajuste acotado | Tabla de media ± desviación estándar por modelo | Compuerta documental en curso; bloqueo B-02 antes de entrenar |
 | Semana 5 | 2–8 nov | Calibración, umbral monetario, lift y beneficio por decil, sensibilidad | Umbral justificado por beneficio esperado bajo supuestos explícitos | Pendiente |
 | Semana 6 | 9–15 nov | SHAP, errores, segmentos y ficha del modelo | Limitaciones documentadas | Pendiente |
 | Semana 7 | 16–22 nov | FastAPI, Streamlit, tests de API y Docker Compose | `docker compose up` funciona desde cero | Pendiente |
@@ -43,7 +43,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 | Especificación | Tema | Estado | Momento previsto |
 |---|---|---|---|
 | 001 | Visión general y contrato de datos | Completada: verificación local y remota | Semana 1 |
-| 002 | Modelado y evaluación | Baselines v1.1 implementadas; selección y calibración pendientes | Semanas 3–5 |
+| 002 | Modelado y evaluación | Baselines implementadas; protocolo de semana 4 v1.2 y bloqueo B-02 | Semanas 3–5 |
 | 003 | [EDA e hipótesis preregistradas](../specs/003-eda-and-hypotheses.md) | Implementada v1.1 y revisada; H1–H6 congeladas en v1.0 | Semana 2 |
 | 004 | Capa de decisión y beneficio esperado | Pendiente de redacción | Antes de implementar la semana 5 |
 | 005 | API y dashboard | Pendiente de redacción | Antes de implementar la semana 7 |
@@ -569,6 +569,44 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - Tres configuraciones fijas, mismos cinco pliegues exclusivamente de entrenamiento, métricas y trazabilidad completas; ninguna transformación aprendida usa `config.centered_age()` fuera de sklearn.
 - Rechazo explícito de auditoría en el pipeline, IDs excluidos, sin remuestreo ni ponderación y sin usar validación externa o prueba para métricas.
 - S07 cerrada técnicamente, sin bloqueos pendientes. No se elige modelo ni se avanza a semana 4; la revisión del responsable de diseño es el siguiente paso.
+
+### S08 — Semana 4: árboles, ajuste, selección y ablaciones
+
+| Campo | Valor |
+|---|---|
+| Fecha de apertura | 6 de octubre de 2026 |
+| Fechas planificadas | 26 de octubre–1 de noviembre de 2026 |
+| Estado | Compuerta T0 en curso; continuación bloqueada por B-02 |
+| Objetivo | Fijar el protocolo antes de entrenar, comparar familias en FASE B y ejecutar E-03/E-02 sin consultar prueba |
+
+| Tarea | Estado | Commit requerido |
+|---|---|---|
+| T0 | Verificada localmente; publicación y CI pendientes | `docs: amend spec 002 v1.2 and week 4 plan (SDD gate)` |
+| T1 | Pendiente; O1/O2 requieren ampliar el código de reporte | `fix: baseline report precision and paired differences` |
+| T2 | Pendiente | `build: add xgboost` |
+| T3 | Pendiente | `feat: tree pipelines and preregistered search spaces` |
+| T4 | Pendiente; protocolo OOF bloqueado por B-02 | `feat: two-phase tuning and re-evaluation` |
+| T5 | Pendiente | `feat: preregistered model selection rule` |
+| T6 | Pendiente; E-02 bloqueada por B-02 | `feat: model selection and ablation experiments` |
+| T7 | Pendiente | `docs: week 4 model selection and experiments` |
+
+#### T0 — Enmienda v1.2 y observaciones de semana 3
+
+- Leídos AGENTS, spec 002, reporte y código existentes. Estado inicial limpio; CI de `98aae24` en verde: https://github.com/darwinjaco/bank-churn-ml/actions/runs/37515966324.
+- Creado el plan completo T0–T7 y actualizado Estado/Versión de la spec, FS-TREE, espacios y presupuestos, FASE A/B, orden de ejecución, uso único de validación y decisiones de E-03/E-02.
+- Motivo de la enmienda: separar búsqueda optimista de reevaluación, congelar presupuestos y comparaciones antes de entrenar y fijar parsimonia de salario frente a la auditoría de productos. La regla de selección §6 pasos 1–5 y E-01 permanecen intactas.
+- O3 aplicada. O1/O2 se difieren a T1, conforme a la condición del plan: el generador existente es un bloque Python embebido en el Markdown; implementar funciones de reporte y sus tests requiere cambios de código posteriores a esta compuerta. El JSON de baselines permanece intacto.
+- Cálculo de O2 mediante `uv run python -c` desde `baselines.json`, comprobando hashes de pliegues: Δ AP [0,178426436; 0,230043639; 0,193189012; 0,192766200; 0,194004916], media 0,197686041, std ddof=1 0,019208887 y 5/5 positivos. A tres decimales: +0,198 ± 0,019.
+- No se han modificado `src/`, tests ni dependencias, ni ejecutado entrenamiento, ajuste, selección o ablaciones de semana 4. Ejecución anticipada por instrucción del usuario; se mantienen las fechas planificadas.
+- Comprobaciones completas de `AGENTS.md`, con sincronización adicional EDA, satisfactorias: 90 aprobados y cobertura del 98,56 %; Ruff, formato y hooks en verde. Sin diferencias en `src/`, tests, dependencias o reportes de baselines. CI previo verificado en verde; pendientes commit y CI de T0. La continuación requiere resolver B-02 antes de implementar o entrenar.
+
+#### Bloqueo B-02 — Agregación de OOF repetidas para E-02
+
+- §5.1 fija `RepeatedStratifiedKFold` con dos repeticiones: cada cliente obtiene dos predicciones OOF. §7 pide AP excluyendo el grupo 3–4 y probabilidad media predicha de ese grupo, pero no define el tratamiento de las dos predicciones por cliente.
+- Elegir agregación de probabilidades por cliente, acumulación de las predicciones de ambas repeticiones o cálculo separado por repetición cambia la AP reportada. No es solo una decisión de formato.
+- Diagnóstico sintético, sin entrenar ni consultar datos reales de semana 4: y=[0,1,0,1], predicciones de repetición 1=[0,1;0,9;0,7;0,6] y repetición 2=[0,8;0,7;0,2;0,5]. AP tras media de probabilidades por cliente=1; AP agrupando ambas repeticiones=0,691667; media de AP por repetición=0,708333.
+- En cumplimiento del rol de implementador y la compuerta SDD, se detiene la continuación. No se ha elegido un procedimiento ni modificado la regla de selección o los criterios de E-03.
+- Para desbloquear, el responsable de diseño debe fijar en una enmienda versionada cómo se construyen las probabilidades OOF para E-02 (b)/(c) y cómo se cuenta n cuando hay dos repeticiones. El protocolo debe quedar definido antes de los resultados reales.
 
 ## 6. Plantilla para nuevas secciones
 
