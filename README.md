@@ -1,8 +1,10 @@
 # Abandono bancario → Decisiones de retención
 
+[![CI](https://github.com/darwinjaco/bank-churn-ml/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/darwinjaco/bank-churn-ml/actions/workflows/ci.yml)
+
 Proyecto de aprendizaje automático de extremo a extremo para estimar el abandono de clientes (**churn**) y **decidir a quién conviene contactar**, convirtiendo probabilidades calibradas en beneficio esperado bajo supuestos explícitos.
 
-> En desarrollo. Semana 1 de 8: verificación local completada; publicación y CI remoto pendientes de crear el remoto. El detalle de cada sección está en el [registro de avance](docs/registro-avance.md).
+> En desarrollo. Semana 1 de 8 completada: repositorio publicado, validación local y CI remoto verificados. Siguiente fase: EDA y auditoría de calidad. El detalle de cada sección está en el [registro de avance](docs/registro-avance.md).
 
 ## Objetivo de negocio
 
@@ -17,15 +19,23 @@ El dataset no contiene ingresos del banco, valor de vida del cliente (CLV), cost
 - Documentadas: especificaciones 001 y 002 en español.
 - Verificados localmente: contrato del CSV, Ruff, formato, pre-commit y 22 tests; cobertura del 97,35 %.
 - Reglas de trabajo: [AGENTS.md](AGENTS.md), incluidas especificación previa y exclusión permanente de `Gender` de las features.
-- Repositorio público: [darwinjaco/bank-churn-ml](https://github.com/darwinjaco/bank-churn-ml), rama `main`. Publicación de los cambios de S02/S03 en curso.
+- Repositorio público: [darwinjaco/bank-churn-ml](https://github.com/darwinjaco/bank-churn-ml), rama `main`.
+- CI remoto verificado: 21 tests aprobados, 1 omitido y 95,58 % de cobertura; [ejecución de cierre técnico](https://github.com/darwinjaco/bank-churn-ml/actions/runs/37419500890).
 
-La ejecución sin el CSV también pasó: 21 tests aprobados, 1 omitido y cobertura del 95,58 %, reproduciendo el escenario esperado del CI sin datos reales. Los resultados locales y el pendiente remoto están registrados en S02 y S03.
+El test con datos reales se omite en CI porque el CSV se obtiene por separado. Los resultados locales de Windows y remotos de Linux están registrados en S02 y S03.
 
 ## Inicio rápido
 
 Requisitos: Git y [uv](https://docs.astral.sh/uv/). La versión de referencia es Python 3.11, fijada en `.python-version`; el paquete admite Python `>=3.11,<3.13`.
 
-Desde la raíz del proyecto, en PowerShell:
+Para obtener una copia nueva, en PowerShell:
+
+```powershell
+git clone https://github.com/darwinjaco/bank-churn-ml.git
+Set-Location bank-churn-ml
+```
+
+Desde la raíz del proyecto:
 
 ```powershell
 uv sync --locked             # Crea .venv e instala las dependencias del archivo de bloqueo
@@ -101,7 +111,7 @@ notebooks/    Exploración; la lógica reutilizable se implementará en src/chur
 
 | N.º | Especificación | Estado |
 |---|---|---|
-| 001 | [Visión general y contrato de datos](specs/001-overview-and-data-contract.md) | Verificación local completada; cierre remoto pendiente |
+| 001 | [Visión general y contrato de datos](specs/001-overview-and-data-contract.md) | Completada: validación local y CI remoto verificados |
 | 002 | [Modelado y evaluación](specs/002-modeling-and-evaluation.md) | Documentada; implementación pendiente |
 | 003 | Capa de decisión y beneficio esperado | Por redactar antes de la semana 5 |
 | 004 | API y dashboard | Por redactar antes de la semana 7 |
@@ -124,20 +134,11 @@ Plan del **5 de octubre al 29 de noviembre de 2026**, con unas **8 horas por sem
 
 **Prioridad:** la capa de decisión de la semana 5 es el entregable central. Si hay retrasos, se reduce primero el alcance del monitoreo de cambios de distribución de la semana 8.
 
-## Preparación para GitHub
+## Publicación y seguimiento
 
-Una vez verificadas las comprobaciones locales y versionados los cambios que se publicarán:
+El repositorio está publicado en **https://github.com/darwinjaco/bank-churn-ml**, con `main` como rama predeterminada y `origin` configurado en la copia de trabajo.
 
-1. Crea en GitHub un repositorio vacío llamado `bank-churn-ml`.
-2. La rama local ya es `main`. Cuando esté creado el repositorio remoto y se indique publicar, configura su URL. Sustituye `TU_USUARIO` por tu usuario real:
-
-   ```powershell
-   git remote add origin https://github.com/TU_USUARIO/bank-churn-ml.git
-   git push -u origin main
-   ```
-
-3. Comprueba la ejecución de GitHub Actions y registra su enlace como evidencia.
-4. Añade al README los enlaces definitivos del repositorio y la insignia de CI.
+El [workflow CI](https://github.com/darwinjaco/bank-churn-ml/actions/workflows/ci.yml) comprueba instalación con dependencias bloqueadas, lint, formato y tests con cobertura mínima del 85 %. Cada nueva publicación en `main` genera una ejecución. Las comprobaciones locales adicionales y la evidencia de cierre se mantienen en el registro de avance.
 
 ## Licencia
 

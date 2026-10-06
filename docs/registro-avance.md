@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 1: CI inicial en verde; publicación de cambios de S02/S03 en curso |
+| Fase actual | Semana 1 completada; próxima fase: semana 2, EDA y auditoría |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -27,7 +27,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 
 | Fase | Fechas | Entregable | Criterio de cierre | Estado |
 |---|---|---|---|---|
-| Semana 1 | 5–11 oct | Repo, uv, Ruff, pytest, pre-commit, CI mínimo, specs 001–002 y Pandera | Tests pasan en CI | CI inicial verificado; cierre de la publicación en curso |
+| Semana 1 | 5–11 oct | Repo, uv, Ruff, pytest, pre-commit, CI mínimo, specs 001–002 y Pandera | Tests pasan en CI | Completada el 6 de octubre: validación local y CI remoto verificados |
 | Semana 2 | 12–18 oct | EDA, hipótesis y auditoría de productos 3–4 y balance cero | Hipótesis contrastadas con pruebas estadísticas, tamaños de efecto e incertidumbre | Pendiente |
 | Semana 3 | 19–25 oct | Pipeline, división estratificada, Dummy/LogReg y MLflow | Modelos de referencia registrados en MLflow | Pendiente |
 | Semana 4 | 26 oct–1 nov | RF, XGBoost, validación cruzada y ajuste acotado | Tabla de media ± desviación estándar por modelo | Pendiente |
@@ -42,7 +42,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 
 | Especificación | Tema | Estado | Momento previsto |
 |---|---|---|---|
-| 001 | Visión general y contrato de datos | Documentada y verificada localmente; cierre remoto pendiente | Semana 1 |
+| 001 | Visión general y contrato de datos | Completada: verificación local y remota | Semana 1 |
 | 002 | Modelado y evaluación | Documentada en español; implementación pendiente | Semanas 3–5 |
 | 003 | Capa de decisión y beneficio esperado | Pendiente de redacción | Antes de implementar la semana 5 |
 | 004 | API y dashboard | Pendiente de redacción | Antes de implementar la semana 7 |
@@ -50,7 +50,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 
 ## 4. Punto de partida — 6 de octubre de 2026
 
-### Evidencia disponible
+### Evidencia disponible al inicio (estado histórico)
 
 - Commit inicial: `6037f9e` (`chore: week 1 scaffold, data contract and validation`).
 - Repositorio local en `master`; el CI de push está configurado para `main` y no hay remoto de GitHub.
@@ -69,8 +69,8 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 - [x] Versionar S01 con el mensaje solicitado y alinear la rama con `main`.
 - [x] Crear `AGENTS.md` y alinear las especificaciones con sus reglas.
 - [x] Crear el repositorio público y configurar el remoto con autorización del usuario.
-- [ ] Publicar cuando se indique y registrar una ejecución satisfactoria de CI.
-- [x] Actualizar los criterios de aceptación con la evidencia local obtenida.
+- [x] Publicar con autorización del usuario y registrar una ejecución satisfactoria de CI.
+- [x] Actualizar los criterios de aceptación con la evidencia local y remota obtenida.
 
 ## 5. Historial de secciones
 
@@ -120,7 +120,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 
 **Siguiente paso**
 
-S01 versionada; la evidencia de ejecución se amplió en S02. La fase completa conserva el pendiente remoto de S03.
+S01 versionada; la evidencia local de S02 y la remota de S03 respaldan el cierre de la semana 1.
 
 ### S02 — Entorno, CSV y verificación local
 
@@ -211,7 +211,7 @@ Verificación final después de actualizar la documentación:
 
 **Siguiente paso**
 
-Completar S03 cuando el usuario cree el remoto y autorice la publicación; conservar el cierre de CI como pendiente verificable.
+S03 completada tras la autorización de publicación y la verificación remota. Continuar con la semana 2.
 
 ### S03 — Preparación y publicación en GitHub
 
@@ -219,7 +219,7 @@ Completar S03 cuando el usuario cree el remoto y autorice la publicación; conse
 |---|---|
 | Fecha | 6 de octubre de 2026 |
 | Fase | Semana 1 |
-| Estado | En curso: repositorio creado y CI inicial en verde; pendientes publicación y verificación de los cambios de S02/S03 |
+| Estado | Completada: repositorio publicado y CI remoto verificado |
 | Objetivo | Alinear rama y remoto, completar enlaces públicos y verificar CI |
 
 **Trabajo realizado y comandos**
@@ -236,29 +236,41 @@ Completar S03 cuando el usuario cree el remoto y autorice la publicación; conse
 - `gh run watch 37419338512 --repo darwinjaco/bank-churn-ml --exit-status --interval 10`: ejecución satisfactoria.
 - `gh run view 37419338512 --repo darwinjaco/bank-churn-ml --log`: comprobados los resultados en Linux: 21 tests aprobados, 1 omitido y cobertura del 95,58 %.
 - `gh repo view darwinjaco/bank-churn-ml --json url,visibility,defaultBranchRef`: repositorio público y rama predeterminada `main` confirmados.
+- Antes del nuevo commit se ejecutaron `uv sync --locked`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run pre-commit run --all-files`, `uv run pre-commit run --files AGENTS.md` y `uv run pytest --cov=churn --cov-report=term-missing --cov-fail-under=85`: comprobaciones satisfactorias, 22 tests aprobados y cobertura local del 97,35 %.
+- `git add` de los archivos previstos y `git diff --cached --check`: únicamente documentación y reglas versionadas; reporte normalizado en el índice sin diferencias de contenido. El CSV siguió excluido.
+- `git commit -m "chore: verify week 1 and add agent rules"`: creado `3c157c0`; hooks del commit satisfactorios. Incluye `AGENTS.md`, README, registro y ambas especificaciones.
+- `git push origin main`: publicado `3c157c0`.
+- `gh run list` para el SHA completo de `3c157c0` y `gh run view 37419500890 --repo darwinjaco/bank-churn-ml --log`: CI del commit publicado satisfactorio, 21 tests aprobados, 1 omitido y cobertura del 95,58 %.
+- Incorporados al README URL pública, instrucciones de clonación, insignia de CI y evidencia del cierre técnico. Marcada como completada la especificación 001.
+- Para versionar el cierre documental se repitieron `uv sync --locked`, Ruff, formato, pre-commit y `uv run pytest --cov=churn --cov-report=term-missing --cov-fail-under=85`: todos satisfactorios; 22 tests aprobados y cobertura del 97,35 %. CI del commit previo `3c157c0` confirmado en verde antes del nuevo commit.
 
 **Estado de publicación**
 
 | Campo | Valor |
 |---|---|
 | Rama local | `main` |
-| Último commit local | `3104886` — `docs: translate specs/README, add progress log` |
+| Commit de S01 | `3104886` — `docs: translate specs/README, add progress log` |
 | Repositorio público | https://github.com/darwinjaco/bank-churn-ml |
 | Remoto | `origin`: `https://github.com/darwinjaco/bank-churn-ml.git` |
-| Push | Publicación inicial completada con autorización del usuario |
+| Push | Commits existentes y cambios de S02/S03 publicados con autorización del usuario |
 | Commit publicado inicialmente | `3104886` |
 | CI inicial | https://github.com/darwinjaco/bank-churn-ml/actions/runs/37419338512 |
-| CI remoto en verde | Verificado para `3104886`; nueva verificación tras publicar los cambios pendientes |
+| Commit de S02/S03 verificado | `3c157c0` — `chore: verify week 1 and add agent rules` |
+| CI de cierre técnico | https://github.com/darwinjaco/bank-churn-ml/actions/runs/37419500890 |
+| CI remoto en verde | Verificado para `3104886` y `3c157c0` |
+| Resultado remoto | 21 tests aprobados, 1 omitido; cobertura del 95,58 % |
 
-**Decisiones y pendientes**
+**Decisiones y cierre**
 
 - Publicar primero los commits existentes permitió verificar CI remoto antes de crear nuevos commits, conforme a `AGENTS.md`.
-- S02 está cerrada localmente. El cierre de S03 requiere publicar `AGENTS.md` y la documentación pendiente, comprobar su CI y registrar la evidencia.
+- S01, S02 y S03 están completadas. El CSV está validado localmente y el código versionado pasa CI sin depender de datos reales.
 - La primera ejecución remota confirma instalación, lint, formato y tests sin el CSV. Los hooks se ejecutan localmente como comprobación adicional.
+- El cierre documental referencia la ejecución satisfactoria de `3c157c0`, que contiene las reglas y la evidencia de S02. La publicación del cierre documental generará además su propia ejecución de CI.
+- Sin bloqueos pendientes de la semana 1. El siguiente trabajo requiere especificar la EDA y sus hipótesis antes de implementar.
 
 **Siguiente paso**
 
-Versionar y publicar los cambios de S02/S03 tras las comprobaciones locales, verificar su ejecución remota y actualizar el cierre documental de la semana 1.
+Semana 2: definir la sección de EDA, hipótesis y protocolo estadístico en la especificación 001, preservando la reserva del conjunto de prueba, y después implementar la auditoría de calidad.
 
 ## 6. Plantilla para nuevas secciones
 

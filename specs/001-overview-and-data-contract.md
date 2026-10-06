@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Estado | Verificación local completada; cierre remoto pendiente |
+| Estado | Completada: verificación local y CI remoto satisfactorios |
 | Responsable | Darwin Jacome Cuenca |
 | Semana | 1 |
 | Última revisión documental | 6 de octubre de 2026 |
@@ -95,13 +95,13 @@ Evidencia: [reporte de calidad](../reports/data_quality.json), reproducido con e
 
 ## 8. Criterios de aceptación
 
-La evidencia local está en S02 del [registro de avance](../docs/registro-avance.md). El cierre remoto sigue pendiente de S03.
+La evidencia local está en S02 del [registro de avance](../docs/registro-avance.md), y la remota en S03. El [CI del commit `3c157c0`](https://github.com/darwinjaco/bank-churn-ml/actions/runs/37419500890) pasó en `main` con cobertura del 95,58 % sin el dataset real.
 
 - [x] `uv sync --locked` instala desde el archivo de bloqueo en un entorno nuevo y los tests pasan con y sin el CSV; el test real se omite si falta.
 - [x] `uv run churn-validate --out reports/data_quality.json` pasa con el archivo real y reproduce el reporte.
 - [x] Rechazo verificado de rangos, categorías, unicidad, nulos, tipos y columnas faltantes o adicionales: tests existentes y comprobación complementaria de S02.
 - [x] Ruff y las comprobaciones de pre-commit pasan.
-- [ ] CI pasa en `main` con cobertura de al menos 85 % y se registra el enlace de la ejecución.
+- [x] CI pasa en `main` con cobertura de al menos 85 % y se registra el enlace de la ejecución.
 
 ## 9. Definición de cierre
 
