@@ -1,0 +1,42 @@
+{
+  "n_rows": 10000,
+  "n_duplicated_rows": 0,
+  "churn_rate": 0.2037,
+  "balance_zero_share": 0.3617,
+  "churn_by_products": {
+    "1": {
+      "churn_rate": 0.2771,
+      "n": 5084
+    },
+    "2": {
+      "churn_rate": 0.0758,
+      "n": 4590
+    },
+    "3": {
+      "churn_rate": 0.8271,
+      "n": 266
+    },
+    "4": {
+      "churn_rate": 1.0,
+      "n": 60
+    }
+  },
+  "low_salary_rows": 59,
+  "surname_cardinality": 2932,
+  "single_feature_auc": {
+    "Age": 0.7321,
+    "Balance": 0.5777,
+    "CreditScore": 0.4833,
+    "EstimatedSalary": 0.5087,
+    "HasCrCard": 0.496,
+    "IsActiveMember": 0.4031,
+    "NumOfProducts": 0.4211,
+    "Tenure": 0.49
+  },
+  "warnings": [
+    "Balance has a point mass at 0 (36.2%); add an explicit 'has_balance' flag instead of treating it as continuous.",
+    "NumOfProducts=3: churn 83% on only 266 rows; likely synthetic artefact, audit model reliance.",
+    "NumOfProducts=4: churn 100% on only 60 rows; likely synthetic artefact, audit model reliance.",
+    "59 rows with EstimatedSalary < 1,000; implausible values, salary is likely synthetic (check for uniform distribution)."
+  ]
+}

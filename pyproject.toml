@@ -1,0 +1,60 @@
+[project]
+name = "churn"
+version = "0.1.0"
+description = "Bank customer churn prediction and profit-driven retention decisions."
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "Darwin Jacome Cuenca" }]
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "numpy>=2.4.6",
+    "pandas>=3.0.6",
+    "pandera>=0.24",
+]
+
+[project.scripts]
+churn-validate = "churn.validation:main"
+
+[build-system]
+requires = ["uv_build>=0.8.17,<0.9.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.6.2",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.16.10",
+]
+
+# ---------------------------------------------------------------- ruff
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort
+    "B",        # bugbear
+    "UP",       # pyupgrade
+    "SIM",      # simplify
+    "N",        # pep8-naming
+    "PD",       # pandas-vet
+    "NPY",      # numpy
+    "RUF",
+]
+
+
+[tool.ruff.lint.per-file-ignores]
+"notebooks/*" = ["E402", "B018"]
+
+# ---------------------------------------------------------------- pytest
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "realdata: requires data/raw/Churn_Modelling.csv (skipped if absent)",
+]
