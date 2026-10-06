@@ -5,7 +5,7 @@
 | Estado | En implementación: semanas 3–4 completadas/en curso |
 | Responsable | Darwin Jacome Cuenca |
 | Dependencia | [Especificación 001](001-overview-and-data-contract.md) |
-| Versión | v1.2 — protocolo de la semana 4 fijado antes de entrenar |
+| Versión | v1.3 — enmienda B-02: agregación de OOF por repetición; reglas de §6 y E-03 sin cambios |
 | Última revisión documental | 6 de octubre de 2026 |
 
 ## 1. Objetivo
@@ -142,6 +142,10 @@ Decisiones preregistradas de semana 4: sobre la familia seleccionada, con sus hi
 
 - **E-03:** comparar con y sin `EstimatedSalary`. Δ = AP(sin) − AP(con), pareada por pliegue. Si media(Δ) ≥ −0,005, eliminar `EstimatedSalary` del modelo final por parsimonia; en caso contrario conservarlo.
 - **E-02:** auditoría, no decisión de eliminar `NumOfProducts`, cuya señal está documentada en H2. Reportar (a) AP con/sin `NumOfProducts`, pareada; (b) con predicciones OOF de FASE B, AP excluyendo clientes con `NumOfProducts ≥ 3` para medir rendimiento sin el grupo fácil del artefacto Q-03; (c) en el grupo 3–4, probabilidad media predicha frente a tasa observada, con n. Alimenta la ficha del modelo de semana 6.
+  - Unidad de cálculo para (b) y (c): la repetición. En cada repetición de FASE B cada cliente de entrenamiento tiene exactamente una predicción OOF; las métricas se calculan sobre las predicciones de esa repetición. Se reportan los valores de cada repetición y su media.
+  - Prohibido: (1) promediar probabilidades por cliente entre repeticiones (genera un ensamble distinto del modelo evaluado); (2) juntar las predicciones de ambas repeticiones (duplica a cada cliente).
+  - (b) se compara con la AP de todos los clientes calculada de la misma forma, agregada por repetición, no con la media por pliegue de FASE B.
+  - n = número de clientes únicos del segmento en entrenamiento, igual en ambas repeticiones. Las OOF se guardan con `CustomerId`, `repeat` (0/1), `fold`, `y` y `proba`.
 
 ## 8. Criterios de aceptación
 
@@ -155,6 +159,12 @@ Decisiones preregistradas de semana 4: sobre la familia seleccionada, con sus hi
 ## 9. Definición de cierre
 
 Modelo y calibración justificados, experimentos documentados y artefacto cargable por el futuro módulo `predict.py`, con un test de predicción reproducible. La capa de decisión y su umbral monetario deberán satisfacer además la especificación 004. La evidencia y los pendientes se mantendrán en el [registro de avance](../docs/registro-avance.md).
+
+Prueba de referencia B-02 para AP por repetición:
+
+| Objetivo | Repetición 1 | Repetición 2 | AP rep1 | AP rep2 | Media |
+|---|---|---|---|---|---|
+| y=[0,1,0,1] | [0.1,0.9,0.7,0.6] | [0.8,0.7,0.2,0.5] | 0,833333 | 0,583333 | 0,708333 |
 
 ## 10. Alcance de implementación de la semana 3
 

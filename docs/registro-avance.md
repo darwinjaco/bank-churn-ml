@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 4: compuerta v1.2; continuación bloqueada por B-02 |
+| Fase actual | Semana 4: resolución documental B-02 antes de implementar |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -576,12 +576,12 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 |---|---|
 | Fecha de apertura | 6 de octubre de 2026 |
 | Fechas planificadas | 26 de octubre–1 de noviembre de 2026 |
-| Estado | Compuerta T0 en curso; continuación bloqueada por B-02 |
+| Estado | Resolución B-02 autorizada, pendiente de versionar; T0 ya publicado |
 | Objetivo | Fijar el protocolo antes de entrenar, comparar familias en FASE B y ejecutar E-03/E-02 sin consultar prueba |
 
 | Tarea | Estado | Commit requerido |
 |---|---|---|
-| T0 | Verificada localmente; publicación y CI pendientes | `docs: amend spec 002 v1.2 and week 4 plan (SDD gate)` |
+| T0 | Verificada localmente; confirmación remota pendiente de versionar en T1 | `docs: amend spec 002 v1.2 and week 4 plan (SDD gate)` |
 | T1 | Pendiente; O1/O2 requieren ampliar el código de reporte | `fix: baseline report precision and paired differences` |
 | T2 | Pendiente | `build: add xgboost` |
 | T3 | Pendiente | `feat: tree pipelines and preregistered search spaces` |
@@ -602,11 +602,21 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 
 #### Bloqueo B-02 — Agregación de OOF repetidas para E-02
 
+**Estado: resuelto por la decisión del responsable de diseño; enmienda v1.3 pendiente de commit.** Se conserva a continuación el diagnóstico original.
+
 - §5.1 fija `RepeatedStratifiedKFold` con dos repeticiones: cada cliente obtiene dos predicciones OOF. §7 pide AP excluyendo el grupo 3–4 y probabilidad media predicha de ese grupo, pero no define el tratamiento de las dos predicciones por cliente.
 - Elegir agregación de probabilidades por cliente, acumulación de las predicciones de ambas repeticiones o cálculo separado por repetición cambia la AP reportada. No es solo una decisión de formato.
 - Diagnóstico sintético, sin entrenar ni consultar datos reales de semana 4: y=[0,1,0,1], predicciones de repetición 1=[0,1;0,9;0,7;0,6] y repetición 2=[0,8;0,7;0,2;0,5]. AP tras media de probabilidades por cliente=1; AP agrupando ambas repeticiones=0,691667; media de AP por repetición=0,708333.
 - En cumplimiento del rol de implementador y la compuerta SDD, se detiene la continuación. No se ha elegido un procedimiento ni modificado la regla de selección o los criterios de E-03.
 - Para desbloquear, el responsable de diseño debe fijar en una enmienda versionada cómo se construyen las probabilidades OOF para E-02 (b)/(c) y cómo se cuenta n cuando hay dos repeticiones. El protocolo debe quedar definido antes de los resultados reales.
+
+#### Enmienda v1.3 — resolución de B-02
+
+- Decisión recibida: calcular E-02 (b)/(c) por repetición, reportando ambos valores y su media; no promediar probabilidades ni duplicar clientes al juntar repeticiones. n cuenta clientes únicos del segmento.
+- Comparador de E-02 (b): AP de todos los clientes calculada por repetición, no media por pliegue. OOF con CustomerId, repeat 0/1, fold, y y proba.
+- Referencia incorporada a §9: AP 0,833333 y 0,583333, media 0,708333. §6 y E-03 permanecen sin cambios.
+- La confirmación pendiente del CI de T0 se versionará junto con T1, según instrucción del usuario. Esta enmienda es solo documental y precede a todo código de semana 4.
+- Comprobaciones completas de `AGENTS.md`, con EDA adicional, satisfactorias: 90 aprobados, cobertura del 98,56 %, lint/formato/hooks en verde. CI previo T0 confirmado en verde; pendiente CI de la enmienda tras el commit `docs: amend spec 002 v1.3 (B-02 OOF aggregation per repetition)`.
 
 ## 6. Plantilla para nuevas secciones
 
