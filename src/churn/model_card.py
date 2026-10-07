@@ -137,10 +137,48 @@ def render_audit(audit: dict) -> str:
     return "\n\n".join(sections) + "\n"
 
 
-def render_card(audit: dict, decision: dict, selection: dict, tuning: dict, metadata: dict) -> str:
+def _final_section(final: dict | None, validation_decision: dict, phase_b: dict) -> str:
+    if final is None:
+        return "Pendiente: la prueba sigue reservada (spec 002 §11.6)."
+    m, d = final["metrics"], final["decision"]
+    pol = d["policies"]
+    return (
+        f"Única evaluación, el {final['evaluated_on']}, sobre {_int(final['n'])} clientes nunca "
+        f"usados (abandono {final['churn_rate']:.1%}), con modelo, calibrador y umbral "
+        "congelados. Es la estimación independiente del rendimiento.\n\n"
+        "| Métrica | Prueba | Validación (desarrollo) |\n|---|---|---|\n"
+        f"| AP | {m['ap']:.3f} | {validation_decision['_val_ap']:.3f} |\n"
+        f"| ROC-AUC | {m['roc_auc']:.3f} | — |\n"
+        f"| Brier | {m['brier']:.4f} | {validation_decision['_val_brier']:.4f} |\n"
+        f"| Contactados | {_int(pol['model']['contacted'])} | "
+        f"{_int(validation_decision['policies']['model']['contacted'])} |\n"
+        f"| Beneficio del modelo | {_eur(pol['model']['benefit_eur'])} | "
+        f"{_eur(validation_decision['policies']['model']['benefit_eur'])} |\n"
+        f"| Beneficio contactando a todos | {_eur(pol['everyone']['benefit_eur'])} | "
+        f"{_eur(validation_decision['policies']['everyone']['benefit_eur'])} |\n"
+        f"| Fracción del oráculo | {d['oracle_share_captured']:.1%} | "
+        f"{validation_decision['oracle_share_captured']:.1%} |\n\n"
+        f"En t*: precisión {d['classification_at_threshold']['precision']:.3f}, sensibilidad "
+        f"{d['classification_at_threshold']['recall']:.3f}. AP de FASE B (CV de entrenamiento): "
+        f"{phase_b['ap']['mean']:.3f} ± {phase_b['ap']['std']:.3f}."
+    )
+
+
+def render_card(
+    audit: dict,
+    decision: dict,
+    selection: dict,
+    tuning: dict,
+    metadata: dict,
+    final: dict | None = None,
+) -> str:
     rf = tuning["families"]["rf"]["phase_b"]["summary"]
     cal = decision["calibration"]
-    dec = decision["decision"]
+    dec = {
+        **decision["decision"],
+        "_val_ap": cal["validation_metrics"][metadata["calibrator"]]["ap"],
+        "_val_brier": cal["validation_metrics"][metadata["calibrator"]]["brier"],
+    }
     pol = dec["policies"]
     e01 = audit["e01_gender"]
     alerts = [METRICS[key] for key in METRICS if e01[key]["alert"]] or ["ninguna"]
@@ -204,7 +242,7 @@ def render_card(audit: dict, decision: dict, selection: dict, tuning: dict, meta
         "responsable).\n"
         "- Las métricas de validación son de desarrollo.",
         "## Evaluación final en prueba",
-        f"{metadata.get('final_test_evaluation', 'pendiente').capitalize()}.",
+        _final_section(final, dec, rf),
         "## Trazabilidad",
         f"Artefacto: commit `{metadata['git_commit']}`; CSV `{metadata['csv_sha256'][:12]}…`; "
         f"manifiesto `{metadata['split_manifest_sha256'][:12]}…`; versiones "
@@ -224,6 +262,7 @@ def main() -> int:
             _load("model_selection.json"),
             _load("tuning.json"),
             _load("model_metadata.json"),
+            _load("final_test.json") if (REPORTS / "final_test.json").exists() else None,
         ),
         encoding="utf-8",
     )

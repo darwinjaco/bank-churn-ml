@@ -26,3 +26,23 @@ def test_reports_contain_json_values_and_cli(tmp_path, monkeypatch):
 def test_formatters():
     assert model_card._pct(None) == "—" and model_card._pct(0.5) == "50.0%"
     assert model_card._eur(61950) == "61.950 €"
+
+
+def test_card_with_final_section():
+    decision = model_card._load("decision.json")
+    final = {
+        "evaluated_on": "2026-01-01",
+        "n": 2000,
+        "churn_rate": 0.2,
+        "metrics": {"ap": 0.7, "roc_auc": 0.86, "brier": 0.1, "log_loss": 0.33},
+        "decision": decision["decision"],
+    }
+    card = model_card.render_card(
+        model_card._load("audit.json"),
+        decision,
+        model_card._load("model_selection.json"),
+        model_card._load("tuning.json"),
+        model_card._load("model_metadata.json"),
+        final,
+    )
+    assert "Única evaluación, el 2026-01-01" in card and "| AP | 0.700 |" in card

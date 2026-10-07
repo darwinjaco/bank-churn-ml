@@ -769,8 +769,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T2 | Completada (`a28f6aa`) | `feat: SHAP explanations with grouped features` |
 | T3 | Completada (`2ee7455`) | `feat: error, segment and E-01 fairness audit` |
 | T4 | Completada (`6e398a3` código, `97b4aed` resultados) | `chore: explainability and audit results` |
-| T5 | Completada (commit local) | `docs: week 6 audit and model card` |
-| T6 | Pendiente; requiere confirmación del responsable | `feat: final test evaluation` |
+| T5 | Completada (`0b82172`) | `docs: week 6 audit and model card` |
+| T6 | Confirmada por el responsable; código versionado antes de ejecutar | `feat: final test evaluation` |
 
 #### T0 — Compuerta
 
@@ -809,6 +809,12 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 
 - `model_card.py` genera `reports/audit.md` (SHAP global y local, perfiles de error, segmentos, E-01 con IC y lectura) y `reports/model_card.md` (resumen, uso previsto y no previsto, datos, variables, selección, calibración y decisión, explicabilidad y equidad, limitaciones, evaluación final "pendiente" y trazabilidad), ambos desde los JSON; test que compara cifras y salida de la CLI. README con la sección de la semana 6.
 - Siguiente: T6, la única evaluación en prueba (§11.6), solo con confirmación explícita del responsable.
+
+#### T6 — Evaluación final en prueba (código)
+
+- **Confirmación explícita del responsable** recibida el 7 de octubre de 2026 para ejecutar la única evaluación en prueba.
+- `final_eval.py` y CLI `churn-final`: comprueba primero la metadata (`final_test_evaluation = "pendiente"`) y el umbral; `load_test_once` se niega si existe `reports/final_test.json` y verifica el SHA-256 de los `CustomerId` de prueba y su tamaño contra el manifiesto versionado. Evalúa el artefacto congelado (AP, ROC-AUC, Brier, log loss y políticas de la spec 004), registra en MLflow `stage=final`, `final=true` y marca la metadata como completada. La ficha incorpora la sección de prueba si existe el JSON.
+- Tests: verificación del manifiesto, rechazo de una segunda ejecución (por archivo y por metadata) y actualización de ambas copias de la metadata.
 
 ## 6. Plantilla para nuevas secciones
 

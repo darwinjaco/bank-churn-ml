@@ -27,6 +27,7 @@ churn-tune = "churn.tune:main"
 churn-select = "churn.experiments:main"
 churn-decide = "churn.decide:main"
 churn-audit = "churn.run_audit:main"
+churn-final = "churn.final_eval:main"
 
 [build-system]
 requires = ["uv_build>=0.8.17,<0.9.0"]
