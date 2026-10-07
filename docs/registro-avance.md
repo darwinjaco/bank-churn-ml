@@ -838,8 +838,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 |---|---|---|
 | T0 | Completada (`ce0abeb`) | `docs: spec 005 api and dashboard, week 7 plan (SDD gate)` |
 | T1 | Completada (`80ab9d0`) | `build: add serving dependencies` |
-| T2 | Completada (commit local) | `feat: model artifact download with hash check` |
-| T3 | Pendiente | `feat: FastAPI service` |
+| T2 | Completada (`0e473a1`) | `feat: model artifact download with hash check` |
+| T3 | Completada (commit local) | `feat: FastAPI service` |
 | T4 | Pendiente | `feat: optional LLM explanation with template fallback` |
 | T5 | Pendiente | `feat: Streamlit dashboard` |
 | T6 | Pendiente | `build: docker image and compose` |
@@ -854,6 +854,12 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 
 - Dependencias: `fastapi`, `uvicorn`, `streamlit`, `openai` (cliente compatible para el LLM opcional) y `httpx` (dev, para `TestClient`). Sin paquetes NVIDIA en el lock.
 - `artifact.py`: URL del Release `model-v1.0`, SHA-256 `579b7fe3…095a`; `ensure_model()` descarga a un archivo temporal, verifica y solo entonces lo mueve; falla si el hash no coincide (también para archivos ya presentes); `load_model()` carga solo tras verificar; `MODEL_PATH` y `MODEL_URL` configurables. Tests sin red con descargador simulado, y comprobación de que el hash publicado coincide con el artefacto local.
+
+#### T3 — API
+
+- `api.py`: `Customer` (Pydantic, `extra="forbid"`, rangos del contrato; `EstimatedSalary` opcional e ignorada), `Batch` (1–1.000), `Service` (modelo, metadata, SHA-256 y evaluación final cargados una vez en el `lifespan`), endpoints `/health`, `/model`, `/predict` (probabilidad calibrada, contacto, beneficio esperado, umbral y 3 razones SHAP con dirección) y `/predict/batch` (resumen de contactados y beneficio esperado). Umbral y supuestos desde la metadata.
+- Tests (14) con modelo sintético: equivalencia exacta con `predict_proba`, regla y beneficio, salario ignorado, 422 por rango, categoría, `Gender`, `CustomerId` o campo faltante, límites del lote y carga del servicio.
+- Prueba de humo con el artefacto real: `/health` devuelve el SHA-256 publicado y `/predict` responde con la evaluación final disponible en `/model`.
 
 ## 6. Plantilla para nuevas secciones
 
