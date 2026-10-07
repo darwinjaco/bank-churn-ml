@@ -243,7 +243,11 @@ uv run churn-audit
 uv run python -m churn.model_card
 ```
 
-Estado de cierre: semanas 1–5 publicadas y reproducidas desde un clon limpio; semana 6 implementada (evaluación final en prueba pendiente de confirmación). Semanas 7–8 sin iniciar. La división se adelantó a semana 2 para reservar la prueba antes del EDA.
+### Evaluación final en prueba (única)
+
+Con modelo, calibrador y umbral congelados, sobre 2.000 clientes nunca usados: **AP 0,705**, ROC-AUC 0,862, Brier 0,1017. El modelo contacta a 634 clientes y obtiene **61.600 €**, frente a 22.100 € contactando a todos (60,5 % del máximo posible). Las cifras coinciden con las de validación (AP 0,696; 61.950 €): sin señales de sobreajuste. Detalle en la [ficha del modelo](reports/model_card.md).
+
+Estado de cierre: semanas 1–5 publicadas y reproducidas desde un clon limpio; semana 6 implementada con la evaluación final en prueba ya realizada (una sola vez). Semanas 7–8 sin iniciar. La división se adelantó a semana 2 para reservar la prueba antes del EDA.
 
 ## Publicación y seguimiento
 

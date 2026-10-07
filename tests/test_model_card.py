@@ -14,6 +14,9 @@ def test_reports_contain_json_values_and_cli(tmp_path, monkeypatch):
         model_card._load("model_selection.json"),
         model_card._load("tuning.json"),
         model_card._load("model_metadata.json"),
+        model_card._load("final_test.json")
+        if (model_card.REPORTS / "final_test.json").exists()
+        else None,
     )
     assert "Uso previsto" in card and "Limitaciones" in card and "Gender" in card
     monkeypatch.setattr(model_card, "AUDIT_MD", tmp_path / "audit.md")

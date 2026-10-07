@@ -46,7 +46,19 @@ Búsqueda en dos fases (spec 002 §5.1) entre LogReg, Random Forest y XGBoost; r
 
 ## Evaluación final en prueba
 
-Pendiente.
+Única evaluación, el 2026-10-07, sobre 2.000 clientes nunca usados (abandono 20.3%), con modelo, calibrador y umbral congelados. Es la estimación independiente del rendimiento.
+
+| Métrica | Prueba | Validación (desarrollo) |
+|---|---|---|
+| AP | 0.705 | 0.696 |
+| ROC-AUC | 0.862 | — |
+| Brier | 0.1017 | 0.1010 |
+| Contactados | 634 | 621 |
+| Beneficio del modelo | 61.600 € | 61.950 € |
+| Beneficio contactando a todos | 22.100 € | 22.100 € |
+| Fracción del oráculo | 60.5% | 60.9% |
+
+En t*: precisión 0.491, sensibilidad 0.764. AP de FASE B (CV de entrenamiento): 0.686 ± 0.018.
 
 ## Trazabilidad
 

@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Estado | En implementación: semanas 3–5 completadas; pendientes E-01 (semana 6) y evaluación final en prueba |
+| Estado | Completada: criterios de §8 cumplidos; evaluación final en prueba realizada |
 | Responsable | Darwin Jacome Cuenca |
 | Dependencia | [Especificación 001](001-overview-and-data-contract.md) |
 | Versión | v1.6 — semana 6: explicabilidad (SHAP), errores, segmentos, E-01 y ficha del modelo; evaluación final en prueba con confirmación explícita |
@@ -167,10 +167,10 @@ Decisiones preregistradas de semana 4: sobre la familia seleccionada, con sus hi
 ## 8. Criterios de aceptación
 
 - [x] Tabla de comparación en el README con media ± desviación estándar y protocolo de cálculo (semanas 3–4).
-- [ ] Experimentos E-01 a E-04 documentados con resultados y conclusión breve (E-02, E-03 y E-04 hechos; E-01 en semana 6).
+- [x] Experimentos E-01 a E-04 documentados con resultados y conclusión breve.
 - [x] División reproducible y ausencia de solapamientos verificada mediante tests.
 - [x] Modelo seleccionado conforme a §6 y calibración conforme a §5.3; decisiones registradas en MLflow.
-- [ ] Conjunto de prueba utilizado en una única evaluación final, registrada con la etiqueta `final=true`.
+- [x] Conjunto de prueba utilizado en una única evaluación final, registrada con la etiqueta `final=true`.
 - [x] Artefacto guardado: pipeline completo, calibrador elegido si aplica y `metadata.json`, con variables, versiones, hash de datos y referencia a la política de decisión.
 
 ## 9. Definición de cierre

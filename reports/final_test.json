@@ -1,0 +1,80 @@
+{
+  "stage": "final",
+  "final": true,
+  "evaluated_on": "2026-10-07",
+  "git_commit": "764cb00450868cda3a15042b605b879f7112bb99",
+  "csv_sha256": "3996cd1fa372e0db0cd9c0ebac35bbd4e8e3c65fb942bb010c826e7b1eeef0a0",
+  "split_manifest_sha256": "09ee6a9697dc06695524f3fea4b34b2bacf34943592c21603e11340eb5c73397",
+  "artifact_commit": "f2796d55bd2bd4683b6745516061486654b43bba",
+  "run_id": "9e57e27ccaad44cf99a03471d3b99092",
+  "n": 2000,
+  "churn_rate": 0.2035,
+  "metrics": {
+    "ap": 0.7046705707492862,
+    "roc_auc": 0.8616197090773363,
+    "brier": 0.10168256910099663,
+    "log_loss": 0.33797426908568623
+  },
+  "mean_predicted": 0.20500616675347988,
+  "decision": {
+    "threshold": 0.16666666666666666,
+    "assumptions": {
+      "customer_value_eur": 1000.0,
+      "contact_cost_eur": 50.0,
+      "retention_success_rate": 0.3
+    },
+    "n": 2000,
+    "churners": 407,
+    "policies": {
+      "nobody": {
+        "contacted": 0,
+        "contacted_share": 0.0,
+        "churners_captured": 0,
+        "benefit_eur": 0.0,
+        "benefit_per_contact_eur": 0.0
+      },
+      "everyone": {
+        "contacted": 2000,
+        "contacted_share": 1.0,
+        "churners_captured": 407,
+        "benefit_eur": 22100.0,
+        "benefit_per_contact_eur": 11.05
+      },
+      "random_20": {
+        "contacted": 400.0,
+        "contacted_share": 0.2,
+        "churners_captured": 81.4,
+        "benefit_eur": 4420.0,
+        "benefit_per_contact_eur": 11.05
+      },
+      "model": {
+        "contacted": 634,
+        "contacted_share": 0.317,
+        "churners_captured": 311,
+        "benefit_eur": 61600.0,
+        "benefit_per_contact_eur": 97.1608832807571
+      },
+      "oracle": {
+        "contacted": 407,
+        "contacted_share": 0.2035,
+        "churners_captured": 407,
+        "benefit_eur": 101750.0,
+        "benefit_per_contact_eur": 250.0
+      }
+    },
+    "best_reference": "everyone",
+    "model_minus_best_reference_eur": 39500.0,
+    "oracle_share_captured": 0.6054054054054054,
+    "classification_at_threshold": {
+      "precision": 0.49053627760252366,
+      "recall": 0.7641277641277642,
+      "f1": 0.5975024015369836,
+      "confusion_matrix": {
+        "tn": 1270,
+        "fp": 323,
+        "fn": 96,
+        "tp": 311
+      }
+    }
+  }
+}

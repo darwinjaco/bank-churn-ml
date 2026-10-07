@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 6: explicabilidad, auditoría y ficha del modelo |
+| Fase actual | Semana 6 completada (prueba usada una vez); siguiente: semana 7 (API y dashboard, spec 005) |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -32,7 +32,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 | Semana 3 | 19–25 oct | Pipeline, división estratificada, Dummy/LogReg y MLflow | Modelos de referencia registrados en MLflow | Baselines implementadas y registradas; revisión pendiente |
 | Semana 4 | 26 oct–1 nov | RF, XGBoost, validación cruzada y ajuste acotado | Tabla de media ± desviación estándar por modelo | Compuerta documental en curso; bloqueo B-02 antes de entrenar |
 | Semana 5 | 2–8 nov | Calibración (E-04) y umbral monetario analítico (opción A); deciles y sensibilidad excluidos por decisión del responsable | Umbral justificado por beneficio esperado bajo supuestos explícitos | Completada |
-| Semana 6 | 9–15 nov | SHAP, errores, segmentos, E-01, ficha del modelo y evaluación final (con confirmación) | Limitaciones documentadas | En curso |
+| Semana 6 | 9–15 nov | SHAP, errores, segmentos, E-01, ficha del modelo y evaluación final (con confirmación) | Limitaciones documentadas | Completada |
 | Semana 7 | 16–22 nov | FastAPI, Streamlit, tests de API y Docker Compose | `docker compose up` funciona desde cero | Pendiente |
 | Semana 8 | 23–29 nov | Cambio de distribución simulado, despliegue y README final | URL pública y reproducibilidad verificadas | Pendiente |
 
@@ -759,7 +759,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 |---|---|
 | Fecha de apertura | 7 de octubre de 2026 |
 | Fechas planificadas | 9–15 de noviembre de 2026 |
-| Estado | T0–T5 completadas; T6 (prueba) espera confirmación |
+| Estado | Completada (T0–T6); pendiente de publicación |
 | Objetivo | Explicar el modelo congelado, auditar errores, segmentos y género (E-01) en validación, redactar la ficha y, con confirmación, hacer la única evaluación en prueba |
 
 | Tarea | Estado | Commit requerido |
@@ -770,7 +770,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T3 | Completada (`2ee7455`) | `feat: error, segment and E-01 fairness audit` |
 | T4 | Completada (`6e398a3` código, `97b4aed` resultados) | `chore: explainability and audit results` |
 | T5 | Completada (`0b82172`) | `docs: week 6 audit and model card` |
-| T6 | Confirmada por el responsable; código versionado antes de ejecutar | `feat: final test evaluation` |
+| T6 | Completada (`764cb00` código; resultados en commit local) | `feat: final test evaluation` |
 
 #### T0 — Compuerta
 
@@ -815,6 +815,15 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - **Confirmación explícita del responsable** recibida el 7 de octubre de 2026 para ejecutar la única evaluación en prueba.
 - `final_eval.py` y CLI `churn-final`: comprueba primero la metadata (`final_test_evaluation = "pendiente"`) y el umbral; `load_test_once` se niega si existe `reports/final_test.json` y verifica el SHA-256 de los `CustomerId` de prueba y su tamaño contra el manifiesto versionado. Evalúa el artefacto congelado (AP, ROC-AUC, Brier, log loss y políticas de la spec 004), registra en MLflow `stage=final`, `final=true` y marca la metadata como completada. La ficha incorpora la sección de prueba si existe el JSON.
 - Tests: verificación del manifiesto, rechazo de una segunda ejecución (por archivo y por metadata) y actualización de ambas copias de la metadata.
+
+#### T6 — Resultado de la evaluación final (única)
+
+- `uv run churn-final` el 2026-10-07 con el artefacto `f2796d5`: verificación del manifiesto superada; MLflow `stage=final`, `final=true` (`9e57e27ccaad44cf99a03471d3b99092`).
+- Prueba (2.000 clientes, abandono 20.35%): AP 0.7047, ROC-AUC 0.8616, Brier 0.1017, log loss 0.3380; probabilidad media 0.2050 (bien calibrada).
+- Decisión en t*: contacta a 634, captura 311 de 407 abandonos, beneficio 61,600 € frente a 22,100 € (todos) y 101,750 € (oráculo); 60.5% del oráculo. Precisión 0.491, sensibilidad 0.764.
+- Coherente con desarrollo (validación: AP 0,696, Brier 0,1010, 61.950 €; FASE B: AP 0,690 sin salario): sin señales de sobreajuste a la validación.
+- Verificación independiente (script sin `churn`, reproduce la misma evaluación sin tomar decisiones): AP 0,7047, ROC-AUC 0,8616, Brier 0,1017, 634 contactados, 311 capturados, 61.600 €. Coincide.
+- Metadata marcada como completada; una segunda ejecución falla por diseño. Spec 002 §8: todos los criterios cumplidos. Ficha del modelo con la sección de prueba.
 
 ## 6. Plantilla para nuevas secciones
 
