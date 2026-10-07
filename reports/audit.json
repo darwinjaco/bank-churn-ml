@@ -1,0 +1,520 @@
+{
+  "stage": "audit",
+  "git_commit": "6e398a3de1521aea6f3cef5734673cb47116f722",
+  "csv_sha256": "3996cd1fa372e0db0cd9c0ebac35bbd4e8e3c65fb942bb010c826e7b1eeef0a0",
+  "split_manifest_sha256": "09ee6a9697dc06695524f3fea4b34b2bacf34943592c21603e11340eb5c73397",
+  "artifact_commit": "f2796d55bd2bd4683b6745516061486654b43bba",
+  "threshold": 0.16666666666666666,
+  "n_validation": 2000,
+  "contacted": 621,
+  "shap": {
+    "base_value": 0.20419200000000007,
+    "additivity_max_gap": 9.325873406851315e-15,
+    "explains": "probabilidad sin calibrar del Random Forest base",
+    "per_feature": [
+      {
+        "feature": "Age",
+        "mean_abs_shap": 0.10297932645023199
+      },
+      {
+        "feature": "NumOfProducts",
+        "mean_abs_shap": 0.07126472355508666
+      },
+      {
+        "feature": "IsActiveMember",
+        "mean_abs_shap": 0.05398976843533844
+      },
+      {
+        "feature": "Geography=Germany",
+        "mean_abs_shap": 0.02735467765343445
+      },
+      {
+        "feature": "Balance",
+        "mean_abs_shap": 0.01477219283643003
+      },
+      {
+        "feature": "has_balance",
+        "mean_abs_shap": 0.013420933819777589
+      },
+      {
+        "feature": "CreditScore",
+        "mean_abs_shap": 0.008031613232817526
+      },
+      {
+        "feature": "Geography=France",
+        "mean_abs_shap": 0.0072235834950906625
+      },
+      {
+        "feature": "Tenure",
+        "mean_abs_shap": 0.00497862385087814
+      },
+      {
+        "feature": "HasCrCard",
+        "mean_abs_shap": 0.00364534121935967
+      },
+      {
+        "feature": "Geography=Spain",
+        "mean_abs_shap": 0.0035519161756153196
+      }
+    ],
+    "groups": {
+      "Geography": 0.03439047498820666,
+      "saldo (Balance + has_balance)": 0.026174431358889194,
+      "saldo y geograf\u00eda (R4)": 0.05398832814755772
+    },
+    "local": [
+      {
+        "case": "mayor_probabilidad",
+        "customer_id": 15570002,
+        "p_calibrated": 0.9746566453286595,
+        "p_raw": 0.9675567510322169,
+        "base_value": 0.20419200000000007,
+        "top_contributions": [
+          {
+            "feature": "NumOfProducts",
+            "value": 4.0,
+            "shap": 0.3466875208227025
+          },
+          {
+            "feature": "Age",
+            "value": 55.0,
+            "shap": 0.23737214598728212
+          },
+          {
+            "feature": "IsActiveMember",
+            "value": 0.0,
+            "shap": 0.06275721764059727
+          },
+          {
+            "feature": "Geography=Germany",
+            "value": 1.0,
+            "shap": 0.03796391132788022
+          },
+          {
+            "feature": "Balance",
+            "value": 118772.71,
+            "shap": 0.0359197331242177
+          }
+        ]
+      },
+      {
+        "case": "cerca_del_umbral",
+        "customer_id": 15655175,
+        "p_calibrated": 0.1667751778769818,
+        "p_raw": 0.2217961375596763,
+        "base_value": 0.20419200000000007,
+        "top_contributions": [
+          {
+            "feature": "NumOfProducts",
+            "value": 2.0,
+            "shap": -0.09520953347329741
+          },
+          {
+            "feature": "Geography=Germany",
+            "value": 1.0,
+            "shap": 0.05092283408401758
+          },
+          {
+            "feature": "Balance",
+            "value": 114318.78,
+            "shap": 0.03387467185635864
+          },
+          {
+            "feature": "Age",
+            "value": 40.0,
+            "shap": -0.03308437733612505
+          },
+          {
+            "feature": "IsActiveMember",
+            "value": 0.0,
+            "shap": 0.0324685279946234
+          }
+        ]
+      },
+      {
+        "case": "menor_probabilidad",
+        "customer_id": 15774393,
+        "p_calibrated": 0.04230289740353559,
+        "p_raw": 0.0074921769101973556,
+        "base_value": 0.20419200000000007,
+        "top_contributions": [
+          {
+            "feature": "Age",
+            "value": 30.0,
+            "shap": -0.06013175440487629
+          },
+          {
+            "feature": "NumOfProducts",
+            "value": 2.0,
+            "shap": -0.05745598345106866
+          },
+          {
+            "feature": "IsActiveMember",
+            "value": 1.0,
+            "shap": -0.027456799126428788
+          },
+          {
+            "feature": "has_balance",
+            "value": 0.0,
+            "shap": -0.021533117814354998
+          },
+          {
+            "feature": "Geography=Germany",
+            "value": 0.0,
+            "shap": -0.008767515896043021
+          }
+        ]
+      }
+    ]
+  },
+  "errors": {
+    "profiles": {
+      "VP": {
+        "n": 310,
+        "means": {
+          "CreditScore": 640.741935483871,
+          "Age": 47.406451612903226,
+          "Tenure": 4.996774193548387,
+          "Balance": 88108.00590322581,
+          "NumOfProducts": 1.4258064516129032,
+          "HasCrCard": 0.7096774193548387,
+          "IsActiveMember": 0.3193548387096774,
+          "Germany_share": 0.4935483870967742,
+          "zero_balance_share": 0.25806451612903225
+        }
+      },
+      "FP": {
+        "n": 311,
+        "means": {
+          "CreditScore": 652.6463022508038,
+          "Age": 44.92926045016077,
+          "Tenure": 5.016077170418006,
+          "Balance": 95484.80778135048,
+          "NumOfProducts": 1.2508038585209003,
+          "HasCrCard": 0.6720257234726688,
+          "IsActiveMember": 0.4180064308681672,
+          "Germany_share": 0.3762057877813505,
+          "zero_balance_share": 0.2057877813504823
+        }
+      },
+      "FN": {
+        "n": 97,
+        "means": {
+          "CreditScore": 625.6185567010309,
+          "Age": 37.27835051546392,
+          "Tenure": 5.329896907216495,
+          "Balance": 79562.5762886598,
+          "NumOfProducts": 1.3917525773195876,
+          "HasCrCard": 0.711340206185567,
+          "IsActiveMember": 0.5876288659793815,
+          "Germany_share": 0.21649484536082475,
+          "zero_balance_share": 0.3402061855670103
+        }
+      },
+      "VN": {
+        "n": 1282,
+        "means": {
+          "CreditScore": 652.9773790951638,
+          "Age": 35.51482059282371,
+          "Tenure": 4.945397815912637,
+          "Balance": 64552.45250390015,
+          "NumOfProducts": 1.6123244929797191,
+          "HasCrCard": 0.7129485179407177,
+          "IsActiveMember": 0.5772230889235569,
+          "Germany_share": 0.16380655226209048,
+          "zero_balance_share": 0.4547581903276131
+        }
+      }
+    },
+    "near_threshold": {
+      "band": 0.05,
+      "n": 319,
+      "observed_rate": 0.20376175548589343,
+      "contacted": 122
+    },
+    "worst_missed_segment": {
+      "segment": "tramo_edad",
+      "level": "18-29",
+      "missed_churn_share": 0.6538461538461539,
+      "churners": 26
+    }
+  },
+  "segments": {
+    "Geography": {
+      "France": {
+        "n": 1013,
+        "churners": 148,
+        "observed_rate": 0.14610069101678183,
+        "mean_predicted": 0.16288766091412996,
+        "calibration_gap": 0.016786969897348125,
+        "contact_rate": 0.22606120434353405,
+        "recall": 0.6756756756756757,
+        "precision": 0.4366812227074236,
+        "missed_churn_share": 0.32432432432432434,
+        "benefit_eur": 18550.0,
+        "benefit_per_customer_eur": 18.311944718657454
+      },
+      "Germany": {
+        "n": 501,
+        "churners": 174,
+        "observed_rate": 0.3473053892215569,
+        "mean_predicted": 0.3245496338608919,
+        "calibration_gap": -0.022755755360664986,
+        "contact_rate": 0.5389221556886228,
+        "recall": 0.8793103448275862,
+        "precision": 0.5666666666666667,
+        "missed_churn_share": 0.1206896551724138,
+        "benefit_eur": 32400.0,
+        "benefit_per_customer_eur": 64.67065868263474
+      },
+      "Spain": {
+        "n": 486,
+        "churners": 85,
+        "observed_rate": 0.1748971193415638,
+        "mean_predicted": 0.17426605606684334,
+        "calibration_gap": -0.0006310632747204559,
+        "contact_rate": 0.25102880658436216,
+        "recall": 0.6705882352941176,
+        "precision": 0.4672131147540984,
+        "missed_churn_share": 0.32941176470588235,
+        "benefit_eur": 11000.0,
+        "benefit_per_customer_eur": 22.633744855967077
+      }
+    },
+    "tramo_edad": {
+      "18-29": {
+        "n": 339,
+        "churners": 26,
+        "observed_rate": 0.07669616519174041,
+        "mean_predicted": 0.08658072350892025,
+        "calibration_gap": 0.00988455831717984,
+        "contact_rate": 0.061946902654867256,
+        "recall": 0.34615384615384615,
+        "precision": 0.42857142857142855,
+        "missed_churn_share": 0.6538461538461539,
+        "benefit_eur": 1650.0,
+        "benefit_per_customer_eur": 4.867256637168142
+      },
+      "30-39": {
+        "n": 845,
+        "churners": 95,
+        "observed_rate": 0.11242603550295859,
+        "mean_predicted": 0.10316941507906502,
+        "calibration_gap": -0.009256620423893566,
+        "contact_rate": 0.11834319526627218,
+        "recall": 0.45263157894736844,
+        "precision": 0.43,
+        "missed_churn_share": 0.5473684210526316,
+        "benefit_eur": 7900.0,
+        "benefit_per_customer_eur": 9.349112426035504
+      },
+      "40-49": {
+        "n": 535,
+        "churners": 156,
+        "observed_rate": 0.29158878504672897,
+        "mean_predicted": 0.30967958399722323,
+        "calibration_gap": 0.018090798950494258,
+        "contact_rate": 0.5682242990654206,
+        "recall": 0.8717948717948718,
+        "precision": 0.4473684210526316,
+        "missed_churn_share": 0.1282051282051282,
+        "benefit_eur": 25600.0,
+        "benefit_per_customer_eur": 47.850467289719624
+      },
+      "50-59": {
+        "n": 171,
+        "churners": 99,
+        "observed_rate": 0.5789473684210527,
+        "mean_predicted": 0.5618520097035856,
+        "calibration_gap": -0.017095358717467035,
+        "contact_rate": 0.847953216374269,
+        "recall": 0.9595959595959596,
+        "precision": 0.6551724137931034,
+        "missed_churn_share": 0.04040404040404041,
+        "benefit_eur": 21250.0,
+        "benefit_per_customer_eur": 124.26900584795321
+      },
+      "60+": {
+        "n": 110,
+        "churners": 31,
+        "observed_rate": 0.2818181818181818,
+        "mean_predicted": 0.3092143473604083,
+        "calibration_gap": 0.027396165542226514,
+        "contact_rate": 0.4636363636363636,
+        "recall": 0.8709677419354839,
+        "precision": 0.5294117647058824,
+        "missed_churn_share": 0.12903225806451613,
+        "benefit_eur": 5550.0,
+        "benefit_per_customer_eur": 50.45454545454545
+      }
+    },
+    "productos": {
+      "1": {
+        "n": 1034,
+        "churners": 293,
+        "observed_rate": 0.28336557059961315,
+        "mean_predicted": 0.26786752658437296,
+        "calibration_gap": -0.015498044015240187,
+        "contact_rate": 0.4622823984526112,
+        "recall": 0.7986348122866894,
+        "precision": 0.4895397489539749,
+        "missed_churn_share": 0.20136518771331058,
+        "benefit_eur": 46300.0,
+        "benefit_per_customer_eur": 44.77756286266924
+      },
+      "2": {
+        "n": 910,
+        "churners": 69,
+        "observed_rate": 0.07582417582417582,
+        "mean_predicted": 0.09694435662246739,
+        "calibration_gap": 0.021120180798291574,
+        "contact_rate": 0.0956043956043956,
+        "recall": 0.4492753623188406,
+        "precision": 0.3563218390804598,
+        "missed_churn_share": 0.5507246376811594,
+        "benefit_eur": 4950.0,
+        "benefit_per_customer_eur": 5.43956043956044
+      },
+      "3-4": {
+        "n": 56,
+        "churners": 45,
+        "observed_rate": 0.8035714285714286,
+        "mean_predicted": 0.8411336304307042,
+        "calibration_gap": 0.03756220185927561,
+        "contact_rate": 1.0,
+        "recall": 1.0,
+        "precision": 0.8035714285714286,
+        "missed_churn_share": 0.0,
+        "benefit_eur": 10700.0,
+        "benefit_per_customer_eur": 191.07142857142858
+      }
+    },
+    "IsActiveMember": {
+      "0": {
+        "n": 974,
+        "churners": 251,
+        "observed_rate": 0.25770020533880905,
+        "mean_predicted": 0.2683228770556476,
+        "calibration_gap": 0.010622671716838561,
+        "contact_rate": 0.4024640657084189,
+        "recall": 0.8406374501992032,
+        "precision": 0.5382653061224489,
+        "missed_churn_share": 0.1593625498007968,
+        "benefit_eur": 43700.0,
+        "benefit_per_customer_eur": 44.86652977412731
+      },
+      "1": {
+        "n": 1026,
+        "churners": 156,
+        "observed_rate": 0.15204678362573099,
+        "mean_predicted": 0.14712610922671113,
+        "calibration_gap": -0.004920674399019859,
+        "contact_rate": 0.22319688109161792,
+        "recall": 0.6346153846153846,
+        "precision": 0.43231441048034935,
+        "missed_churn_share": 0.36538461538461536,
+        "benefit_eur": 18250.0,
+        "benefit_per_customer_eur": 17.787524366471736
+      }
+    },
+    "has_balance": {
+      "0": {
+        "n": 760,
+        "churners": 113,
+        "observed_rate": 0.14868421052631578,
+        "mean_predicted": 0.15429762107886236,
+        "calibration_gap": 0.005613410552546577,
+        "contact_rate": 0.18947368421052632,
+        "recall": 0.7079646017699115,
+        "precision": 0.5555555555555556,
+        "missed_churn_share": 0.2920353982300885,
+        "benefit_eur": 16800.0,
+        "benefit_per_customer_eur": 22.105263157894736
+      },
+      "1": {
+        "n": 1240,
+        "churners": 294,
+        "observed_rate": 0.23709677419354838,
+        "mean_predicted": 0.23792877282167016,
+        "calibration_gap": 0.0008319986281217773,
+        "contact_rate": 0.38467741935483873,
+        "recall": 0.782312925170068,
+        "precision": 0.48218029350104824,
+        "missed_churn_share": 0.21768707482993196,
+        "benefit_eur": 45150.0,
+        "benefit_per_customer_eur": 36.41129032258065
+      }
+    },
+    "Gender": {
+      "Female": {
+        "n": 889,
+        "churners": 213,
+        "observed_rate": 0.23959505061867267,
+        "mean_predicted": 0.22138927148716167,
+        "calibration_gap": -0.018205779131511002,
+        "contact_rate": 0.31158605174353204,
+        "recall": 0.7746478873239436,
+        "precision": 0.5956678700361011,
+        "missed_churn_share": 0.22535211267605634,
+        "benefit_eur": 35650.0,
+        "benefit_per_customer_eur": 40.10123734533183
+      },
+      "Male": {
+        "n": 1111,
+        "churners": 194,
+        "observed_rate": 0.17461746174617462,
+        "mean_predicted": 0.1939539225623039,
+        "calibration_gap": 0.019336460816129275,
+        "contact_rate": 0.3096309630963096,
+        "recall": 0.7474226804123711,
+        "precision": 0.42151162790697677,
+        "missed_churn_share": 0.25257731958762886,
+        "benefit_eur": 26300.0,
+        "benefit_per_customer_eur": 23.672367236723673
+      }
+    }
+  },
+  "e01_gender": {
+    "n": {
+      "Female": 889,
+      "Male": 1111
+    },
+    "contact_rate": {
+      "Female": 0.31158605174353204,
+      "Male": 0.3096309630963096,
+      "difference": 0.001955088647222436,
+      "ci_low": -0.03945791092045086,
+      "ci_high": 0.04380479386521328,
+      "alert": false
+    },
+    "recall": {
+      "Female": 0.7746478873239436,
+      "Male": 0.7474226804123711,
+      "difference": 0.027225206911572486,
+      "ci_low": -0.05736269188111922,
+      "ci_high": 0.10891313500009614,
+      "alert": false
+    },
+    "precision": {
+      "Female": 0.5956678700361011,
+      "Male": 0.42151162790697677,
+      "difference": 0.17415624212912434,
+      "ci_low": 0.10280537833871231,
+      "ci_high": 0.2522198448276846,
+      "alert": true
+    },
+    "calibration_gap": {
+      "Female": -0.018205779131511002,
+      "Male": 0.019336460816129275,
+      "difference": -0.03754223994764028,
+      "ci_low": -0.06702814800970218,
+      "ci_high": -0.009228594772548566,
+      "alert": false
+    },
+    "observed_rate": {
+      "Female": 0.23959505061867267,
+      "Male": 0.17461746174617462
+    }
+  },
+  "run_id": "0913aa3e07bb4a0e916834a2959c2bf0"
+}

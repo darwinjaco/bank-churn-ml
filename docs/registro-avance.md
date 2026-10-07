@@ -768,7 +768,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T1 | Completada (`928bea6`) | `build: add shap` |
 | T2 | Completada (`a28f6aa`) | `feat: SHAP explanations with grouped features` |
 | T3 | Completada (`2ee7455`) | `feat: error, segment and E-01 fairness audit` |
-| T4 | Pendiente | `chore: explainability and audit results` |
+| T4 | Completada (`6e398a3` código; resultados en commit local) | `chore: explainability and audit results` |
 | T5 | Pendiente | `docs: week 6 audit and model card` |
 | T6 | Pendiente; requiere confirmación del responsable | `feat: final test evaluation` |
 
@@ -794,6 +794,16 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - `run_audit.py` y CLI `churn-audit`: carga el artefacto congelado, añade `Gender` a validación solo para auditar (unión por `CustomerId`; el modelo selecciona sus columnas y nunca recibe `Gender`), calcula SHAP, errores, segmentos y E-01, comprueba que el artefacto reproduce los contactados de `decision.json` (si no, falla) y registra en MLflow (`stage=audit`, `experiment=E-01`). Figura `reports/figures/shap_importance.png`.
 - Corrección: los perfiles de error devuelven `None` en grupos vacíos en lugar de fallar.
 - El código se versiona antes de la ejecución real.
+
+#### T4 — Resultados reales y verificación independiente
+
+- `uv run churn-audit` (≈37 s) con el artefacto de la semana 5: 621 contactados (igual que `decision.json`); aditividad SHAP con error máximo 9·10⁻¹⁵.
+- **SHAP global:** Age 0,103 > NumOfProducts 0,071 > IsActiveMember 0,054 > Geography=Germany 0,027 > Balance 0,015 > has_balance 0,013; grupo saldo + geografía (R4) 0,054. Coherente con H1–H4.
+- **Errores en t*:** los FN son más jóvenes (37 frente a 47 años en VP), más activos y con más saldo cero: abandonos "silenciosos". Mayor proporción de abandonos no contactados: tramo 18–29 (65,4 %, solo 26 abandonos). Banda ±0,05 alrededor de t*: 319 clientes, abandono 20,4 %.
+- **Segmentos:** brechas de calibración entre −2,3 y +3,8 pp; el grupo 3–4 (n = 56) se contacta al 100 % con 80 % de abandono.
+- **E-01 (Gender):** tasa de contacto 31,2 % frente a 31,0 % (Δ +0,002, IC [−0,039; 0,044]); sensibilidad 77,5 % frente a 74,7 % (Δ +0,027, IC [−0,057; 0,109]); brecha de calibración −1,8 frente a +1,9 pp (Δ −0,038, IC [−0,067; −0,009], |Δ| < 0,05: sin alerta); **precisión 59,6 % frente a 42,2 % (Δ +0,174, IC [0,103; 0,252]): alerta preregistrada.** Las tasas base difieren (24,0 % frente a 17,5 %), por lo que con igual tasa de contacto la precisión es mayor en mujeres; además, al excluir `Gender` el modelo subestima levemente a las mujeres y sobrestima a los hombres. Solo se reporta, según §11.4.
+- Verificación independiente (sin importar `churn`): métricas por género, ranking SHAP y segmento 18–29 idénticos.
+- Figura `shap_importance.png` revisada.
 
 ## 6. Plantilla para nuevas secciones
 
