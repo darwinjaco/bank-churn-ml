@@ -99,6 +99,9 @@ def error_profiles(frame: pd.DataFrame, y, contact) -> dict:
     out = {}
     for name, mask in groups.items():
         part = frame.loc[mask]
+        if part.empty:
+            out[name] = {"n": 0, "means": None}
+            continue
         profile = {column: float(part[column].mean()) for column in PROFILE_COLUMNS}
         profile["Germany_share"] = float((part["Geography"] == "Germany").mean())
         profile["zero_balance_share"] = float((part["Balance"] == 0).mean())

@@ -767,7 +767,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T0 | Completada (`2659ef1`) | `docs: spec 002 v1.6 and week 6 plan (SDD gate)` |
 | T1 | Completada (`928bea6`) | `build: add shap` |
 | T2 | Completada (`a28f6aa`) | `feat: SHAP explanations with grouped features` |
-| T3 | Completada (commit local) | `feat: error, segment and E-01 fairness audit` |
+| T3 | Completada (`2ee7455`) | `feat: error, segment and E-01 fairness audit` |
 | T4 | Pendiente | `chore: explainability and audit results` |
 | T5 | Pendiente | `docs: week 6 audit and model card` |
 | T6 | Pendiente; requiere confirmación del responsable | `feat: final test evaluation` |
@@ -788,6 +788,12 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 
 - `audit.py`: segmentos de §11.3 (`productos` en {1, 2, 3-4}; `Gender` solo para auditar), métricas por segmento (n, tasa observada, p media, brecha de calibración, tasa de contacto, sensibilidad, precisión, abandonos no contactados, beneficio), segmento con mayor proporción de abandonos no contactados, perfiles VP/FP/FN/VN, banda ±0,05 alrededor de t* y E-01 con bootstrap estratificado por género (2.000 réplicas, semilla 42) y la señal de alerta preregistrada.
 - Tests: caso de valores conocidos, denominadores vacíos, regla de alerta en sus cuatro casos, bootstrap determinista que detecta una brecha sembrada y no la marca cuando no existe.
+
+#### T4 — Orquestación (código)
+
+- `run_audit.py` y CLI `churn-audit`: carga el artefacto congelado, añade `Gender` a validación solo para auditar (unión por `CustomerId`; el modelo selecciona sus columnas y nunca recibe `Gender`), calcula SHAP, errores, segmentos y E-01, comprueba que el artefacto reproduce los contactados de `decision.json` (si no, falla) y registra en MLflow (`stage=audit`, `experiment=E-01`). Figura `reports/figures/shap_importance.png`.
+- Corrección: los perfiles de error devuelven `None` en grupos vacíos en lugar de fallar.
+- El código se versiona antes de la ejecución real.
 
 ## 6. Plantilla para nuevas secciones
 

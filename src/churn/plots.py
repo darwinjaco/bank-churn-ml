@@ -140,6 +140,26 @@ def reliability_figure(tables: dict[str, list[dict]], chosen: str, path: Path) -
     return _save(fig, path)
 
 
+def shap_importance_figure(importance: dict, path: Path) -> Path:
+    """Media de |SHAP| por variable y por grupo R4 (spec 002 v1.6 §11.1)."""
+    rows = importance["per_feature"]
+    groups = importance["groups"]
+    fig, (left, right) = plt.subplots(
+        1, 2, figsize=(10, 4.2), constrained_layout=True, gridspec_kw={"width_ratios": [3, 2]}
+    )
+    names = [row["feature"] for row in rows][::-1]
+    values = [row["mean_abs_shap"] for row in rows][::-1]
+    left.barh(names, values, color=COLOR)
+    left.set_xlabel("Media de |SHAP| (puntos de probabilidad)")
+    left.set_title("Por variable")
+    labels = list(groups)[::-1]
+    right.barh(labels, [groups[label] for label in labels], color=COLOR)
+    right.set_xlabel("Media de |SHAP| del grupo")
+    right.set_title("Grupos (R4)")
+    fig.suptitle("SHAP en validación: importancia predictiva, no causal")
+    return _save(fig, path)
+
+
 def main() -> int:
     results = json.loads(HYPOTHESES_FILE.read_text(encoding="utf-8"))
     for path in generate_figures(load_exploration(), results, FIGURES_DIR):

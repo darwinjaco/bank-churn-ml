@@ -47,6 +47,8 @@ def test_segments_errors_and_worst_missed(valid_df):
     profiles = audit.error_profiles(valid_df, y, contact)
     assert sum(g["n"] for g in profiles.values()) == len(valid_df)
     assert "Gender" not in profiles["VP"]["means"]
+    empty = audit.error_profiles(valid_df, y, np.zeros(len(valid_df), dtype=bool))
+    assert empty["VP"] == {"n": 0, "means": None} and empty["FP"]["n"] == 0
     near = audit.near_threshold(y, p, 0.5, band=0.1)
     assert near["n"] == int((np.abs(p - 0.5) < 0.1).sum())
 
