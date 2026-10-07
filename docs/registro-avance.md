@@ -837,8 +837,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | Tarea | Estado | Commit requerido |
 |---|---|---|
 | T0 | Completada (`ce0abeb`) | `docs: spec 005 api and dashboard, week 7 plan (SDD gate)` |
-| T1 | Completada (commit local) | `build: add serving dependencies` |
-| T2 | Pendiente | `feat: model artifact download with hash check` |
+| T1 | Completada (`80ab9d0`) | `build: add serving dependencies` |
+| T2 | Completada (commit local) | `feat: model artifact download with hash check` |
 | T3 | Pendiente | `feat: FastAPI service` |
 | T4 | Pendiente | `feat: optional LLM explanation with template fallback` |
 | T5 | Pendiente | `feat: Streamlit dashboard` |
@@ -849,6 +849,11 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 
 - Decisiones del responsable: artefacto por **GitHub Release** con verificación SHA-256 (`579b7fe3…`), despliegue en **Hugging Face Spaces (Docker)** y **LLM opcional** con interfaz compatible con OpenAI (NVIDIA NIM u OpenRouter), desactivado sin clave y con plantilla determinista.
 - Spec 005 v1.0: endpoints `/health`, `/model`, `/predict`, `/predict/batch`, `/explain`; contrato Pydantic con campos extra prohibidos (`Gender` → 422); dashboard que solo consume la API; tests y criterios de aceptación.
+
+#### T1–T2 — Dependencias y artefacto
+
+- Dependencias: `fastapi`, `uvicorn`, `streamlit`, `openai` (cliente compatible para el LLM opcional) y `httpx` (dev, para `TestClient`). Sin paquetes NVIDIA en el lock.
+- `artifact.py`: URL del Release `model-v1.0`, SHA-256 `579b7fe3…095a`; `ensure_model()` descarga a un archivo temporal, verifica y solo entonces lo mueve; falla si el hash no coincide (también para archivos ya presentes); `load_model()` carga solo tras verificar; `MODEL_PATH` y `MODEL_URL` configurables. Tests sin red con descargador simulado, y comprobación de que el hash publicado coincide con el artefacto local.
 
 ## 6. Plantilla para nuevas secciones
 
