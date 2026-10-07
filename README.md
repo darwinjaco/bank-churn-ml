@@ -268,6 +268,12 @@ docker compose up --build
 # API: http://localhost:8000/docs   Dashboard: http://localhost:8501
 ```
 
+Verificación automática (build, arranque, `/predict`, 422 con `Gender`, `/explain` y dashboard):
+
+```powershell
+pwsh -File scripts/verify-docker.ps1        # añade -Down para detener al final
+```
+
 **Sin Docker** (con `models/model.joblib` local o descargado con `uv run python -m churn.artifact`):
 
 ```powershell
