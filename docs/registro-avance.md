@@ -831,7 +831,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 |---|---|
 | Fecha de apertura | 7 de octubre de 2026 |
 | Fechas planificadas | 16–22 de noviembre de 2026 |
-| Estado | T0–T7 implementadas; pendientes del responsable: Release `model-v1.0` y `docker compose up` |
+| Estado | T0–T7 implementadas; Docker verificado en Windows con el modelo local; pendientes: Release `model-v1.0` y CI |
 | Objetivo | Servir el modelo congelado con FastAPI y Streamlit, reproducible con `docker compose up`, sin CSV ni reentrenamiento |
 
 | Tarea | Estado | Commit requerido |
@@ -842,7 +842,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T3 | Completada (`8d96805`) | `feat: FastAPI service` |
 | T4 | Completada (`ae3e9e0`) | `feat: optional LLM explanation with template fallback` |
 | T5 | Completada (`11867df`) | `feat: Streamlit dashboard` |
-| T6 | Completada (`36babc9`); `docker build` real pendiente | `build: docker image and compose` |
+| T6 | Completada (`36babc9`); verificada en Docker Desktop (`3a741c6`, `1b300a2`) | `build: docker image and compose` |
 | T7 | Completada (commit local) | `docs: week 7 api, dashboard and docker` |
 
 #### T0 — Compuerta
@@ -883,6 +883,13 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 
 - README con endpoints, ejecución con y sin Docker, LLM opcional y pasos para publicar el Release `model-v1.0`. Spec 005: tres criterios marcados; quedan `docker compose up` y CI.
 - **Acciones del responsable:** (1) publicar el Release con `models/model.joblib`; (2) `docker compose up --build` y abrir `http://localhost:8501`; (3) push y revisión del CI.
+
+#### Verificación Docker en Windows (6 de octubre de 2026)
+
+- Docker Desktop 29.8.2. Como el Release aún no existe, se añadió la variante `MODEL_SOURCE=local` (`docker-compose.local.yml`, `verify-docker.ps1 -LocalModel`): copia `models/model.joblib` como contexto adicional y **el build sigue fallando si el SHA-256 no coincide** (`3a741c6`).
+- **Defecto encontrado:** el dashboard fallaba en el contenedor con `ModuleNotFoundError: httpx`. `httpx` estaba solo en el grupo `dev` y llegaba de forma transitiva por `openai`; `openai` 3.26 pasó a depender de `httpx2`, y la imagen (`--no-dev`) quedó sin él. Corrección: `httpx` a dependencias de runtime y test `tests/test_packaging.py`, que falla si la API o el dashboard importan algo fuera del cierre transitivo de `[project].dependencies` (comprobado: detecta este caso). 194 tests, 98 % (`1b300a2`).
+- Resultado: `verify-docker.ps1 -LocalModel` completo y dashboard operativo en `http://localhost:8501`, según confirmación del responsable.
+- Pendiente: repetir con el Release publicado (variante por defecto, la que usará Hugging Face) y CI en verde tras el push.
 
 ## 6. Plantilla para nuevas secciones
 

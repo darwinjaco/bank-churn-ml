@@ -68,13 +68,13 @@ CLIs: `churn-validate`, `churn-split`, `churn-hypotheses`, `churn-baselines`, `c
 - **Modelo por GitHub Release:** tag `model-v1.0`, archivo `model.joblib`, SHA-256 `579b7fe349dc035c3171582cbfba1bfaed4599a795da4b149d7664ed21dc095a`. `artifact.py` descarga y **falla si el hash no coincide** (build y arranque).
 - **LLM opcional** (`narrative.py`): compatible con OpenAI vía `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` (NVIDIA NIM `https://integrate.api.nvidia.com/v1` u OpenRouter `https://openrouter.ai/api/v1`). Sin clave o con error → plantilla. Nunca envía IDs ni `Gender`. La clave va en `.env` (no versionado) o en secretos del Space.
 - **Docker:** una imagen (`ROLE=api|dashboard|all`); compose con API en 8000 y dashboard en 8501. En Spaces (`ROLE=all`) el dashboard usa el puerto 7860.
-- Verificado fuera de Docker con el modelo real (API + Streamlit funcionando). `docker build` aún no se ejecutó en ningún equipo.
+- Verificado en Docker Desktop (Windows) con `verify-docker.ps1 -LocalModel` (modelo local, mismo SHA-256). Defecto corregido: `httpx` faltaba en runtime (`1b300a2`); `tests/test_packaging.py` lo vigila.
 
 ## 7. Pendientes inmediatos (en orden)
 
-1. `git push origin main` (el repo local va **9 commits** por delante).
+1. `git push origin main` (el repo local va **13 commits** por delante).
 2. **Publicar el Release** (aún no existe): https://github.com/darwinjaco/bank-churn-ml/releases/new → tag `model-v1.0` (*Create new tag*) → adjuntar `models\model.joblib` → *Publish release*.
-3. Con Docker Desktop en *Engine running* (ya instalado, v29.8.2): `pwsh -File scripts/verify-docker.ps1` desde la raíz del repo. Paso 1 ya pasa; falló en el paso 2 solo porque falta el Release.
+3. Con el Release publicado: `pwsh -File scripts/verify-docker.ps1` (variante por defecto, la que usará Hugging Face). Con `-LocalModel` ya pasó.
 4. Si todo pasa: marcar en spec 005 y registro (S11) el criterio `docker compose up`, y revisar el CI.
 5. `uv sync --locked --all-groups` en Windows (faltan `xgboost-cpu`, `shap`, `fastapi`, etc. en el `.venv`).
 
@@ -88,7 +88,7 @@ CLIs: `churn-validate`, `churn-split`, `churn-hypotheses`, `churn-baselines`, `c
 ## 9. Notas técnicas para quien retome
 
 - Windows: `uv` gestiona `.venv`; `.gitattributes` fuerza LF. No ejecutar `uv` desde otro sistema operativo sobre el `.venv` de Windows.
-- Comprobaciones locales: `uv sync --locked --all-groups`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run pre-commit run --all-files`, `uv run pytest --cov=churn --cov-fail-under=85`. Último resultado: 193 tests, 98 % de cobertura.
+- Comprobaciones locales: `uv sync --locked --all-groups`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run pre-commit run --all-files`, `uv run pytest --cov=churn --cov-fail-under=85`. Último resultado: 194 tests, 98 % de cobertura.
 - MLflow: `uv run mlflow ui --backend-store-uri sqlite:///mlruns/mlflow.db` (base local, fuera de Git).
 - La reproducción completa desde un clon limpio da resultados idénticos a los versionados (verificado antes de la semana 6).
 - Commits con autor `Darwin Jacome <daabjaco@espol.edu.ec>` y línea `Co-Authored-By` de Claude cuando corresponde.
