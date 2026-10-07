@@ -14,7 +14,7 @@ El dataset no contiene ingresos del banco, valor de vida del cliente (CLV), cost
 
 ## Estado actual
 
-- Implementados: contrato, división, EDA, figuras corregidas, transformadores sin fuga, baselines con MLflow, ajuste en dos fases, regla de selección, ablaciones E-02/E-03, calibración E-04, capa de decisión, artefacto congelado, SHAP, auditoría E-01 y ficha del modelo.
+- Implementados: contrato, división, EDA, figuras corregidas, transformadores sin fuga, baselines con MLflow, ajuste en dos fases, regla de selección, ablaciones E-02/E-03, calibración E-04, capa de decisión, artefacto congelado, SHAP, auditoría E-01, ficha del modelo, API FastAPI, dashboard Streamlit e imagen Docker.
 - Configurados: uv, Ruff, pytest, pre-commit y GitHub Actions; cobertura mínima en CI del 85 %.
 - Documentadas: especificaciones 001–003; modelado v1.1 fija FS-RAW/FS-EDA y CV exclusiva de entrenamiento. EDA v1.1 conserva H1–H6 y resuelve B-01.
 - Verificados localmente: 90 tests aprobados y cobertura del 98,56 %, además de Ruff, formato y pre-commit.
@@ -164,7 +164,7 @@ notebooks/    EDA delgado; lógica reutilizable en src/churn/
 | 002 | [Modelado y evaluación](specs/002-modeling-and-evaluation.md) | v1.5: baselines, selección (Random Forest) y calibración sigmoide implementadas |
 | 003 | [EDA e hipótesis preregistradas](specs/003-eda-and-hypotheses.md) | Implementada v1.1 y revisada |
 | 004 | [Capa de decisión y beneficio esperado](specs/004-decision-layer.md) | Implementada v1.0 (opción A: umbral analítico 1/6) |
-| 005 | [API y dashboard](specs/005-api-and-dashboard.md) | Aprobada v1.0 |
+| 005 | [API y dashboard](specs/005-api-and-dashboard.md) | Implementada v1.0; `docker compose up` pendiente del Release |
 | 006 | Operación: tests, Docker, CI y monitoreo | Por redactar antes de ampliar operación y serving |
 
 ## Cronograma
@@ -247,7 +247,43 @@ uv run python -m churn.model_card
 
 Con modelo, calibrador y umbral congelados, sobre 2.000 clientes nunca usados: **AP 0,705**, ROC-AUC 0,862, Brier 0,1017. El modelo contacta a 634 clientes y obtiene **61.600 €**, frente a 22.100 € contactando a todos (60,5 % del máximo posible). Las cifras coinciden con las de validación (AP 0,696; 61.950 €): sin señales de sobreajuste. Detalle en la [ficha del modelo](reports/model_card.md).
 
-Estado de cierre: semanas 1–5 publicadas y reproducidas desde un clon limpio; semana 6 implementada con la evaluación final en prueba ya realizada (una sola vez). Semanas 7–8 sin iniciar. La división se adelantó a semana 2 para reservar la prueba antes del EDA.
+### Semana 7: API, dashboard y Docker
+
+El modelo congelado se sirve con **FastAPI** y un dashboard **Streamlit** que solo consume la API ([spec 005](specs/005-api-and-dashboard.md)).
+
+| Endpoint | Uso |
+|---|---|
+| `GET /health` | Estado y SHA-256 del artefacto |
+| `GET /model` | Variables, umbral, supuestos y evaluación final |
+| `POST /predict` | Probabilidad calibrada, contactar sí/no, beneficio esperado y 3 razones SHAP |
+| `POST /predict/batch` | Hasta 1.000 clientes y resumen de contactados y beneficio |
+| `POST /explain` | Explicación en texto (LLM opcional; sin clave, plantilla) |
+
+La entrada se valida con el contrato de datos: `Gender` o identificadores devuelven **422**. Documentación interactiva en `/docs`.
+
+**Con Docker** (requiere el Release `model-v1.0`; el build descarga el modelo y verifica su SHA-256):
+
+```powershell
+docker compose up --build
+# API: http://localhost:8000/docs   Dashboard: http://localhost:8501
+```
+
+**Sin Docker** (con `models/model.joblib` local o descargado con `uv run python -m churn.artifact`):
+
+```powershell
+uv run uvicorn churn.api:app --port 8000
+uv run streamlit run dashboard/app.py
+```
+
+**LLM opcional** para `/explain`: copiar `.env.example` a `.env` (no se versiona) y definir `LLM_BASE_URL`, `LLM_API_KEY` y `LLM_MODEL` de un proveedor compatible con OpenAI (NVIDIA NIM u OpenRouter). Solo se envían las variables del contrato, la probabilidad y las razones, nunca identificadores; ante cualquier fallo se usa la plantilla.
+
+#### Publicar el modelo (una vez, responsable del repositorio)
+
+1. En GitHub: **Releases → Draft a new release**, etiqueta `model-v1.0`, título "Modelo congelado v1.0".
+2. Adjuntar `models/model.joblib` (SHA-256 `579b7fe349dc035c3171582cbfba1bfaed4599a795da4b149d7664ed21dc095a`) y publicar.
+3. Comprobar: `uv run python -m churn.artifact` en un clon sin `models/` descarga y verifica el archivo.
+
+Estado de cierre: semanas 1–5 publicadas y reproducidas desde un clon limpio; semana 6 completada con la evaluación final en prueba (una sola vez); semana 7 implementada (falta publicar el Release y probar `docker compose up`). Semana 8 sin iniciar. La división se adelantó a semana 2 para reservar la prueba antes del EDA.
 
 ## Publicación y seguimiento
 

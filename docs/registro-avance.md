@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 7: API, dashboard y Docker (spec 005) |
+| Fase actual | Semana 7 implementada; pendiente: Release del modelo y `docker compose up` del responsable |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -33,7 +33,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 | Semana 4 | 26 oct–1 nov | RF, XGBoost, validación cruzada y ajuste acotado | Tabla de media ± desviación estándar por modelo | Compuerta documental en curso; bloqueo B-02 antes de entrenar |
 | Semana 5 | 2–8 nov | Calibración (E-04) y umbral monetario analítico (opción A); deciles y sensibilidad excluidos por decisión del responsable | Umbral justificado por beneficio esperado bajo supuestos explícitos | Completada |
 | Semana 6 | 9–15 nov | SHAP, errores, segmentos, E-01, ficha del modelo y evaluación final (con confirmación) | Limitaciones documentadas | Completada |
-| Semana 7 | 16–22 nov | FastAPI, Streamlit, tests de API y Docker Compose | `docker compose up` funciona desde cero | Pendiente |
+| Semana 7 | 16–22 nov | FastAPI, Streamlit, tests de API y Docker Compose | `docker compose up` funciona desde cero | Implementada; pendiente Release y prueba de Docker |
 | Semana 8 | 23–29 nov | Cambio de distribución simulado, despliegue y README final | URL pública y reproducibilidad verificadas | Pendiente |
 
 **Prioridad de alcance:** proteger la capa de decisión de la semana 5. Si hay retrasos, reducir primero el monitoreo de cambios de distribución de la semana 8 y registrar el ajuste.
@@ -46,7 +46,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 | 002 | Modelado y evaluación | Baselines implementadas; protocolo de semana 4 v1.2 y bloqueo B-02 | Semanas 3–5 |
 | 003 | [EDA e hipótesis preregistradas](../specs/003-eda-and-hypotheses.md) | Implementada v1.1 y revisada; H1–H6 congeladas en v1.0 | Semana 2 |
 | 004 | Capa de decisión y beneficio esperado | Aprobada v1.0 (opción A) | Semana 5 |
-| 005 | API y dashboard | Aprobada v1.0 | Semana 7 |
+| 005 | API y dashboard | Implementada v1.0 (Docker pendiente del Release) | Semana 7 |
 | 006 | Operación: tests, Docker, CI y monitoreo | Pendiente de redacción | Antes de ampliar operación y serving |
 
 ## 4. Punto de partida — 6 de octubre de 2026
@@ -831,7 +831,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 |---|---|
 | Fecha de apertura | 7 de octubre de 2026 |
 | Fechas planificadas | 16–22 de noviembre de 2026 |
-| Estado | En curso: T0 |
+| Estado | T0–T7 implementadas; pendientes del responsable: Release `model-v1.0` y `docker compose up` |
 | Objetivo | Servir el modelo congelado con FastAPI y Streamlit, reproducible con `docker compose up`, sin CSV ni reentrenamiento |
 
 | Tarea | Estado | Commit requerido |
@@ -842,8 +842,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T3 | Completada (`8d96805`) | `feat: FastAPI service` |
 | T4 | Completada (`ae3e9e0`) | `feat: optional LLM explanation with template fallback` |
 | T5 | Completada (`11867df`) | `feat: Streamlit dashboard` |
-| T6 | Completada (commit local); `docker build` real pendiente | `build: docker image and compose` |
-| T7 | Pendiente | `docs: week 7 api, dashboard and docker` |
+| T6 | Completada (`36babc9`); `docker build` real pendiente | `build: docker image and compose` |
+| T7 | Completada (commit local) | `docs: week 7 api, dashboard and docker` |
 
 #### T0 — Compuerta
 
@@ -878,6 +878,11 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - `artifact.py`: permisos 0644 al guardar el modelo (el temporal nace con 0600).
 - **Limitación del entorno de verificación:** el proxy de Claude bloquea Docker Hub, GHCR, ECR y MCR, así que no pudo ejecutarse `docker build` (ni `docker build --check`, que también resuelve la imagen base). Verificaciones hechas: `docker compose config` válido; `shellcheck` sin avisos; **réplica exacta de los pasos de la imagen** en un directorio limpio (mismos archivos copiados, `uv sync --locked --no-dev`, descarga del modelo por HTTP con verificación del hash y `ROLE=all bash docker/start.sh`): `/health` con el SHA-256 publicado, `/predict` 0,947 y contactar, `Gender` → 422, `/explain` con plantilla y Streamlit `/_stcore/health` = ok.
 - Pendiente: `docker compose up --build` real (equipo del responsable o build de Hugging Face en la semana 8), que requiere publicar antes el Release `model-v1.0`.
+
+#### T7 — Documentación
+
+- README con endpoints, ejecución con y sin Docker, LLM opcional y pasos para publicar el Release `model-v1.0`. Spec 005: tres criterios marcados; quedan `docker compose up` y CI.
+- **Acciones del responsable:** (1) publicar el Release con `models/model.joblib`; (2) `docker compose up --build` y abrir `http://localhost:8501`; (3) push y revisión del CI.
 
 ## 6. Plantilla para nuevas secciones
 

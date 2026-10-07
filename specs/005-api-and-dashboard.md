@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Estado | Aprobada v1.0 |
+| Estado | Implementada v1.0; `docker compose up` pendiente de publicar el Release |
 | Responsable | Darwin Jacome Cuenca |
 | Semana | 7 (16–22 de noviembre de 2026) |
 | Dependencias | [002](002-modeling-and-evaluation.md) (artefacto congelado), [004](004-decision-layer.md) (regla de decisión) |
@@ -67,7 +67,7 @@ Mismos rangos que el contrato de datos (spec 001): `CreditScore` 300–900, `Age
 ## 9. Criterios de aceptación
 
 - [ ] `docker compose up` levanta API y dashboard desde un clon limpio (con el Release publicado).
-- [ ] `/predict` devuelve la misma probabilidad que `models/model.joblib` para el mismo cliente.
-- [ ] Hash del artefacto verificado en build y al arrancar.
-- [ ] Sin clave de LLM, `/explain` responde con la plantilla.
-- [ ] CI en verde con cobertura ≥ 85 %.
+- [x] `/predict` devuelve la misma probabilidad que `models/model.joblib` para el mismo cliente.
+- [x] Hash del artefacto verificado en build y al arrancar (réplica de los pasos de la imagen; build real pendiente).
+- [x] Sin clave de LLM, `/explain` responde con la plantilla.
+- [ ] CI en verde con cobertura ≥ 85 % (local: 193 tests, 98 %; CI tras el push).
