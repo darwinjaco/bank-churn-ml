@@ -18,6 +18,28 @@ CONTRACT_COLUMNS = [
     "Geography",
 ]
 MAX_BATCH = 1_000
+INTEGER_COLUMNS = ("CreditScore", "Age", "Tenure", "NumOfProducts", "HasCrCard", "IsActiveMember")
+MAX_ERRORS_SHOWN = 5
+
+
+class ApiError(RuntimeError):
+    """Respuesta de error de la API con un mensaje legible para el dashboard."""
+
+
+def describe_errors(detail) -> str:
+    """Errores 422 de FastAPI → 'fila 3, Age: ...' (las filas empiezan en 1)."""
+    if not isinstance(detail, list):
+        return str(detail)
+    messages = []
+    for error in detail[:MAX_ERRORS_SHOWN]:
+        loc = [part for part in error.get("loc", []) if part not in ("body", "customers")]
+        where = ", ".join(
+            f"fila {part + 1}" if isinstance(part, int) else str(part) for part in loc
+        )
+        messages.append(f"{where}: {error.get('msg', 'valor no válido')}")
+    if len(detail) > MAX_ERRORS_SHOWN:
+        messages.append(f"… y {len(detail) - MAX_ERRORS_SHOWN} errores más")
+    return "; ".join(messages)
 
 
 def api_url() -> str:
@@ -29,15 +51,21 @@ class ApiClient:
         self.base_url = (base_url or api_url()).rstrip("/")
         self.client = client or httpx.Client(timeout=30.0)
 
+    @staticmethod
+    def _check(response: httpx.Response) -> dict:
+        if response.is_success:
+            return response.json()
+        try:
+            detail = response.json().get("detail", response.text)
+        except ValueError:
+            detail = response.text
+        raise ApiError(f"La API respondió {response.status_code}: {describe_errors(detail)}")
+
     def _get(self, path: str) -> dict:
-        response = self.client.get(f"{self.base_url}{path}")
-        response.raise_for_status()
-        return response.json()
+        return self._check(self.client.get(f"{self.base_url}{path}"))
 
     def _post(self, path: str, payload: dict) -> dict:
-        response = self.client.post(f"{self.base_url}{path}", json=payload)
-        response.raise_for_status()
-        return response.json()
+        return self._check(self.client.post(f"{self.base_url}{path}", json=payload))
 
     def health(self) -> dict:
         return self._get("/health")
@@ -51,6 +79,11 @@ class ApiClient:
     def batch(self, customers: list[dict]) -> dict:
         return self._post("/predict/batch", {"customers": customers})
 
+    def monitoring(self) -> dict | None:
+        """Reporte de monitoreo simulado; None si la API no lo tiene (404)."""
+        response = self.client.get(f"{self.base_url}/monitoring")
+        return None if response.status_code == 404 else self._check(response)
+
 
 def prepare_batch(frame: pd.DataFrame) -> list[dict]:
     """Toma solo las columnas del contrato (descarta Gender, IDs, salario) y valida tamaño."""
@@ -60,9 +93,16 @@ def prepare_batch(frame: pd.DataFrame) -> list[dict]:
     if not 1 <= len(frame) <= MAX_BATCH:
         raise ValueError(f"El archivo debe tener entre 1 y {MAX_BATCH} filas.")
     data = frame[CONTRACT_COLUMNS].copy()
-    for column in ("CreditScore", "Age", "Tenure", "NumOfProducts", "HasCrCard", "IsActiveMember"):
-        data[column] = data[column].astype(int)
-    data["Balance"] = data["Balance"].astype(float)
+    empty = [c for c in CONTRACT_COLUMNS if data[c].isna().any()]
+    if empty:
+        raise ValueError(f"Hay celdas vacías en: {', '.join(empty)}")
+    for column in (*INTEGER_COLUMNS, "Balance"):
+        values = pd.to_numeric(data[column], errors="coerce")
+        if values.isna().any():
+            raise ValueError(f"{column} debe ser numérica")
+        if column in INTEGER_COLUMNS and not (values % 1 == 0).all():
+            raise ValueError(f"{column} debe contener enteros")
+        data[column] = values.astype(int) if column in INTEGER_COLUMNS else values.astype(float)
     data["Geography"] = data["Geography"].astype(str)
     return data.to_dict(orient="records")
 
@@ -91,3 +131,43 @@ def reason_rows(prediction: dict) -> list[dict]:
 
 def eur(value: float) -> str:
     return f"{value:,.0f} €".replace(",", ".")
+
+
+def psi_table(report: dict) -> pd.DataFrame:
+    """PSI por variable (filas) y escenario (columnas)."""
+    scenarios = report["scenarios"]
+    table = {
+        name: {
+            **{column: row["psi"] for column, row in scenario["variables"].items()},
+            "Probabilidad predicha": scenario["probability"]["psi"],
+        }
+        for name, scenario in scenarios.items()
+    }
+    return pd.DataFrame(table).round(3)
+
+
+def monitoring_metrics(report: dict) -> pd.DataFrame:
+    """Texto ya formateado: una columna con números y "sí"/"no" no se serializa a Arrow."""
+    rows = {
+        "Alarma de PSI (> 0,25)": lambda s: "sí" if s["alarm"] else "no",
+        "Tasa de contacto": lambda s: f"{100 * s['unlabeled']['contact_rate']:.1f} %",
+        "Abandono observado": lambda s: f"{100 * s['labeled']['churn_rate']:.1f} %",
+        "Calibración global": lambda s: f"{100 * s['labeled']['calibration_gap']:+.1f} pp",
+        "Brier": lambda s: f"{s['labeled']['brier']:.4f}",
+        "Beneficio realizado": lambda s: eur(s["labeled"]["benefit_model_eur"]),
+        "Degradación": lambda s: "sí" if s["degradation"]["degraded"] else "no",
+    }
+    scenarios = report["scenarios"]
+    return pd.DataFrame(
+        {name: {label: get(s) for label, get in rows.items()} for name, s in scenarios.items()}
+    )
+
+
+def expectation_rows(report: dict) -> list[dict]:
+    return [
+        {
+            "Expectativa": f"{key} — {row['description']}",
+            "Resultado": "cumplida" if row["met"] else "no cumplida",
+        }
+        for key, row in report["expectations"].items()
+    ]

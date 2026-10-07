@@ -1,28 +1,49 @@
-"""Dashboard de decisiones de retención (spec 005 §7). Solo consume la API."""
+"""Dashboard de decisiones de retención (spec 005 §7, spec 006 §4.9). Solo consume la API."""
 
 from __future__ import annotations
 
+import httpx
 import pandas as pd
 import streamlit as st
 
-from churn.ui import ApiClient, eur, prepare_batch, reason_rows, results_table
+from churn.ui import (
+    ApiClient,
+    ApiError,
+    eur,
+    expectation_rows,
+    monitoring_metrics,
+    prepare_batch,
+    psi_table,
+    reason_rows,
+    results_table,
+)
+
+API_ERRORS = (ApiError, httpx.HTTPError)
 
 st.set_page_config(page_title="Retención bancaria", page_icon="🏦", layout="wide")
-api = ApiClient()
+
+
+@st.cache_resource
+def get_client() -> ApiClient:
+    """Un solo cliente HTTP por proceso (Streamlit re-ejecuta el script en cada interacción)."""
+    return ApiClient()
+
+
+api = get_client()
 
 st.title("Abandono bancario → decisiones de retención")
 st.caption(
     "Demo de portafolio con datos públicos y supuestos económicos ilustrativos. "
-    "Las razones son factores del modelo, no causas."
+    "Las razones son factores del modelo, no causas. No es asesoría financiera."
 )
 
 try:
     model = api.model()
-except Exception as error:  # La API puede no estar lista todavía.
+except API_ERRORS as error:  # La API puede no estar lista todavía.
     st.error(f"No se pudo contactar la API ({type(error).__name__}). Revisa que esté levantada.")
     st.stop()
 
-single, batch_tab, about = st.tabs(["Cliente", "Lote (CSV)", "Modelo"])
+single, batch_tab, about, drift = st.tabs(["Cliente", "Lote (CSV)", "Modelo", "Monitoreo"])
 
 with single:
     with st.form("cliente"):
@@ -39,25 +60,32 @@ with single:
         }
         submitted = st.form_submit_button("Evaluar")
     if submitted:
-        result = api.explain(customer)
-        prediction = result["prediction"]
-        m1, m2, m3 = st.columns(3)
-        m1.metric("Probabilidad de abandono", f"{prediction['churn_probability']:.1%}")
-        m2.metric("Decisión", "Contactar" if prediction["contact"] else "No contactar")
-        m3.metric("Beneficio esperado", f"{prediction['expected_benefit_eur']:.0f} €")
-        st.dataframe(pd.DataFrame(reason_rows(prediction)), hide_index=True)
-        origin = "LLM" if result["source"] == "llm" else "plantilla"
-        st.info(f"{result['text']}\n\n_Texto generado por: {origin}._")
+        try:
+            result = api.explain(customer)
+        except API_ERRORS as error:
+            st.error(str(error) or type(error).__name__)
+        else:
+            prediction = result["prediction"]
+            m1, m2, m3 = st.columns(3)
+            m1.metric("Probabilidad de abandono", f"{prediction['churn_probability']:.1%}")
+            m2.metric("Decisión", "Contactar" if prediction["contact"] else "No contactar")
+            m3.metric("Beneficio esperado", f"{prediction['expected_benefit_eur']:.0f} €")
+            st.dataframe(pd.DataFrame(reason_rows(prediction)), hide_index=True)
+            origin = "LLM" if result["source"] == "llm" else "plantilla"
+            st.info(f"{result['text']}\n\n_Texto generado por: {origin}._")
 
 with batch_tab:
-    st.write("CSV con las columnas del contrato (otras columnas se ignoran; máximo 1.000 filas).")
+    st.write(
+        "CSV con las columnas del contrato (otras columnas se ignoran; máximo 1.000 filas). "
+        "Ejemplo sintético en el repositorio: `examples/clientes_ejemplo.csv`."
+    )
     upload = st.file_uploader("Archivo CSV", type="csv")
     if upload is not None:
-        frame = pd.read_csv(upload)
         try:
+            frame = pd.read_csv(upload)
             response = api.batch(prepare_batch(frame))
-        except ValueError as error:
-            st.error(str(error))
+        except (ValueError, pd.errors.ParserError, *API_ERRORS) as error:
+            st.error(str(error) or type(error).__name__)
         else:
             summary = response["summary"]
             b1, b2, b3 = st.columns(3)
@@ -92,3 +120,29 @@ with about:
         + ", ".join(model["input_columns"])
         + ". Ficha completa en el repositorio (`reports/model_card.md`)."
     )
+
+with drift:
+    try:
+        report = api.monitoring()
+    except API_ERRORS as error:
+        report = None
+        st.error(str(error) or type(error).__name__)
+    if report is None:
+        st.info("Reporte de monitoreo no disponible en esta instancia.")
+    else:
+        st.write(
+            "Simulación (spec 006 §4): referencia = entrenamiento; actual = validación "
+            "remuestreada en cinco escenarios. Umbrales y expectativas preregistrados; la "
+            "partición de prueba no se usa."
+        )
+        st.subheader("PSI por variable (alerta > 0,25)")
+        st.dataframe(psi_table(report))
+        st.subheader("Señales sin etiquetas y métricas con etiquetas")
+        st.dataframe(monitoring_metrics(report))
+        st.subheader("Expectativas preregistradas")
+        st.dataframe(pd.DataFrame(expectation_rows(report)), hide_index=True)
+        if report["expectations"]["E3"]["met"]:
+            st.caption(
+                "Lección: el cambio de prevalencia (S4) descalibra el modelo sin alarmas de PSI; "
+                "sin etiquetas (retroalimentación) esa degradación no se detecta."
+            )

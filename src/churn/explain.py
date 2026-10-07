@@ -29,13 +29,18 @@ def feature_groups(names: list[str]) -> dict[str, list[str]]:
     }
 
 
-def compute_shap(model, x: pd.DataFrame) -> dict:
+def tree_explainer(model) -> shap.TreeExplainer:
+    """Explicador del estimador base; se puede crear una vez y reutilizar (spec 005 §6)."""
+    return shap.TreeExplainer(model.pipeline.named_steps["model"])
+
+
+def compute_shap(model, x: pd.DataFrame, explainer: shap.TreeExplainer | None = None) -> dict:
     """SHAP de la clase 1 sobre la probabilidad sin calibrar, con comprobación de aditividad."""
     preprocess = model.pipeline[:-1]
     estimator = model.pipeline.named_steps["model"]
     matrix = preprocess.transform(x[model.columns])
     names = [str(n) for n in preprocess.get_feature_names_out()]
-    explainer = shap.TreeExplainer(estimator)
+    explainer = explainer or tree_explainer(model)
     values = np.asarray(explainer.shap_values(matrix))
     if values.ndim == 3:  # (n, variables, clases)
         values = values[:, :, 1]

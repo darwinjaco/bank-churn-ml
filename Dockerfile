@@ -27,7 +27,7 @@ RUN uv sync --locked --no-dev --no-install-project
 COPY src ./src
 COPY dashboard ./dashboard
 COPY docker/start.sh ./docker/start.sh
-COPY reports/model_metadata.json reports/final_test.json ./reports/
+COPY reports/model_metadata.json reports/final_test.json reports/monitoring.json ./reports/
 RUN uv sync --locked --no-dev
 
 # 3) Modelo. En ambas variantes el build falla si el SHA-256 no coincide.

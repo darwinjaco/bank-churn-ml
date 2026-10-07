@@ -1,0 +1,608 @@
+{
+  "stage": "monitoring",
+  "git_commit": "30c0809d5c7f27ccd6f2936dd21f9022d223596f",
+  "csv_sha256": "3996cd1fa372e0db0cd9c0ebac35bbd4e8e3c65fb942bb010c826e7b1eeef0a0",
+  "split_manifest_sha256": "09ee6a9697dc06695524f3fea4b34b2bacf34943592c21603e11340eb5c73397",
+  "config": {
+    "seed": 2028,
+    "reference": "entrenamiento (6000 filas)",
+    "current": "validación remuestreada (2000 filas por escenario)",
+    "probability_reference": "probabilidad del modelo en validación sin remuestrear (S0)",
+    "threshold": 0.16666666666666666,
+    "psi": {
+      "stable_below": 0.1,
+      "alert_above": 0.25,
+      "epsilon": 0.0001
+    },
+    "degradation": {
+      "calibration_tolerance": 0.03,
+      "brier_factor": 1.15
+    },
+    "contact_shift": 0.02,
+    "alpha_holm": 0.05
+  },
+  "scenarios": {
+    "S0": {
+      "description": "Validación sin remuestrear (control de falsas alarmas)",
+      "n": 2000,
+      "variables": {
+        "CreditScore": {
+          "psi": 0.0035557835717440664,
+          "level": "estable",
+          "method": "ks",
+          "statistic": 0.0155,
+          "p_value": 0.8610890317205316,
+          "p_holm": 1.0,
+          "significant": false
+        },
+        "Age": {
+          "psi": 0.006216696098017736,
+          "level": "estable",
+          "method": "ks",
+          "statistic": 0.016,
+          "p_value": 0.8342168286955379,
+          "p_holm": 1.0,
+          "significant": false
+        },
+        "Balance": {
+          "psi": 0.0062392706918019125,
+          "level": "estable",
+          "method": "ks",
+          "statistic": 0.03283333333333333,
+          "p_value": 0.07792203711467058,
+          "p_holm": 0.6233762969173646,
+          "significant": false
+        },
+        "Tenure": {
+          "psi": 0.004553502115338198,
+          "level": "estable",
+          "method": "chi2",
+          "statistic": 6.799834161842865,
+          "p_value": 0.7441970555978616,
+          "p_holm": 1.0,
+          "significant": false
+        },
+        "NumOfProducts": {
+          "psi": 0.0012790689869335006,
+          "level": "estable",
+          "method": "chi2",
+          "statistic": 1.8528115920622459,
+          "p_value": 0.6035105199555915,
+          "p_holm": 1.0,
+          "significant": false
+        },
+        "HasCrCard": {
+          "psi": 6.501079891685924e-05,
+          "level": "estable",
+          "method": "chi2",
+          "statistic": 0.08074018565196439,
+          "p_value": 0.7762968290689973,
+          "p_holm": 1.0,
+          "significant": false
+        },
+        "IsActiveMember": {
+          "psi": 2.5020375095034146e-05,
+          "level": "estable",
+          "method": "chi2",
+          "statistic": 0.028191618010582155,
+          "p_value": 0.866659120015046,
+          "p_holm": 1.0,
+          "significant": false
+        },
+        "Geography": {
+          "psi": 0.0005699887695225698,
+          "level": "estable",
+          "method": "chi2",
+          "statistic": 0.8508646802498949,
+          "p_value": 0.653487195311118,
+          "p_holm": 1.0,
+          "significant": false
+        }
+      },
+      "probability": {
+        "psi": 0.0,
+        "level": "estable"
+      },
+      "alarm": false,
+      "alarm_on": [],
+      "unlabeled": {
+        "contact_rate": 0.3105,
+        "mean_predicted": 0.2061489351594032,
+        "expected_benefit_eur": 60163.08138504872
+      },
+      "labeled": {
+        "churn_rate": 0.2035,
+        "ap": 0.6964122660228445,
+        "brier": 0.10098221450134434,
+        "calibration_gap": 0.002648935159403204,
+        "benefit_model_eur": 61950.0,
+        "benefit_everyone_eur": 22100.0,
+        "benefit_nobody_eur": 0.0
+      },
+      "degradation": {
+        "calibration_out": false,
+        "brier_ratio": 1.0,
+        "brier_out": false,
+        "degraded": false
+      }
+    },
+    "S1": {
+      "description": "Envejecimiento: pesos ∝ exp(0,05·(Age - mediana))",
+      "n": 2000,
+      "variables": {
+        "CreditScore": {
+          "psi": 0.004384140920281394,
+          "level": "estable",
+          "method": "ks",
+          "statistic": 0.019166666666666665,
+          "p_value": 0.6365612931150005,
+          "p_holm": 1.0,
+          "significant": false
+        },
+        "Age": {
+          "psi": 0.3274567171439288,
+          "level": "alerta",
+          "method": "ks",
+          "statistic": 0.2305,
+          "p_value": 2.3793411805081503e-70,
+          "p_holm": 1.9034729444065203e-69,
+          "significant": true
+        },
+        "Balance": {
+          "psi": 0.008424516892940201,
+          "level": "estable",
+          "method": "ks",
+          "statistic": 0.034,
+          "p_value": 0.06164401769879359,
+          "p_holm": 0.3082200884939679,
+          "significant": false
+        },
+        "Tenure": {
+          "psi": 0.003381987481733286,
+          "level": "estable",
+          "method": "chi2",
+          "statistic": 5.098126209088456,
+          "p_value": 0.8845273639988499,
+          "p_holm": 1.0,
+          "significant": false
+        },
+        "NumOfProducts": {
+          "psi": 0.012979135494557847,
+          "level": "estable",
+          "method": "chi2",
+          "statistic": 19.302379483367474,
+          "p_value": 0.00023672968220105826,
+          "p_holm": 0.0015220850211812539,
+          "significant": true
+        },
+        "HasCrCard": {
+          "psi": 0.0008305468200554777,
+          "level": "estable",
+          "method": "chi2",
+          "statistic": 1.191082540397855,
+          "p_value": 0.275111303788831,
+          "p_holm": 0.8253339113664929,
+          "significant": false
+        },
+        "IsActiveMember": {
+          "psi": 0.009281236131551065,
+          "level": "estable",
+          "method": "chi2",
+          "statistic": 13.674030609259678,
+          "p_value": 0.0002174407173116077,
+          "p_holm": 0.0015220850211812539,
+          "significant": true
+        },
+        "Geography": {
+          "psi": 0.002149476292251167,
+          "level": "estable",
+          "method": "chi2",
+          "statistic": 3.207539276447267,
+          "p_value": 0.20113687385455367,
+          "p_holm": 0.8045474954182147,
+          "significant": false
+        }
+      },
+      "probability": {
+        "psi": 0.08130747065863161,
+        "level": "estable"
+      },
+      "alarm": true,
+      "alarm_on": [
+        "Age"
+      ],
+      "unlabeled": {
+        "contact_rate": 0.422,
+        "mean_predicted": 0.26803428117223166,
+        "expected_benefit_eur": 89597.109085384
+      },
+      "labeled": {
+        "churn_rate": 0.254,
+        "ap": 0.7478897900240812,
+        "brier": 0.10998635450924707,
+        "calibration_gap": 0.014034281172231655,
+        "benefit_model_eur": 86800.0,
+        "benefit_everyone_eur": 52400.0,
+        "benefit_nobody_eur": 0.0
+      },
+      "degradation": {
+        "calibration_out": false,
+        "brier_ratio": 1.0891656026000782,
+        "brier_out": false,
+        "degraded": false
+      }
+    },
+    "S2": {
+      "description": "Proporción de Germany x 2 (composición exacta)",
+      "n": 2000,
+      "variables": {
+        "CreditScore": {
+          "psi": 0.005682866902016926,
+          "level": "estable",
+          "method": "ks",
+          "statistic": 0.018833333333333334,
+          "p_value": 0.6583360619576129,
+          "p_holm": 1.0,
+          "significant": false
+        },
+        "Age": {
+          "psi": 0.011108767744072514,
+          "level": "estable",
+          "method": "ks",
+          "statistic": 0.0275,
+          "p_value": 0.20478676020497116,
+          "p_holm": 0.8191470408198847,
+          "significant": false
+        },
+        "Balance": {
+          "psi": 0.06809159631506828,
+          "level": "estable",
+          "method": "ks",
+          "statistic": 0.11566666666666667,
+          "p_value": 6.51237788293925e-18,
+          "p_holm": 4.558664518057475e-17,
+          "significant": true
+        },
+        "Tenure": {
+          "psi": 0.023576169500242695,
+          "level": "estable",
+          "method": "chi2",
+          "statistic": 35.07434350140588,
+          "p_value": 0.00012126952052526943,
+          "p_holm": 0.0007276171231516166,
+          "significant": true
+        },
+        "NumOfProducts": {
+          "psi": 0.00709772834270936,
+          "level": "estable",
+          "method": "chi2",
+          "statistic": 10.61520862214404,
+          "p_value": 0.013999394838134512,
+          "p_holm": 0.06999697419067255,
+          "significant": false
+        },
+        "HasCrCard": {
+          "psi": 0.0006880921311997181,
+          "level": "estable",
+          "method": "chi2",
+          "statistic": 0.968672345892325,
+          "p_value": 0.3250115153171455,
+          "p_holm": 0.9750345459514365,
+          "significant": false
+        },
+        "IsActiveMember": {
+          "psi": 4.905859326876897e-05,
+          "level": "estable",
+          "method": "chi2",
+          "statistic": 0.06023126846655132,
+          "p_value": 0.8061307840080131,
+          "p_holm": 1.0,
+          "significant": false
+        },
+        "Geography": {
+          "psi": 0.27528755787950265,
+          "level": "alerta",
+          "method": "chi2",
+          "statistic": 437.11985699033346,
+          "p_value": 1.204007214848309e-95,
+          "p_holm": 9.632057718786471e-95,
+          "significant": true
+        }
+      },
+      "probability": {
+        "psi": 0.055434322764182156,
+        "level": "estable"
+      },
+      "alarm": true,
+      "alarm_on": [
+        "Geography"
+      ],
+      "unlabeled": {
+        "contact_rate": 0.3825,
+        "mean_predicted": 0.2446124906022722,
+        "expected_benefit_eur": 77453.99498802256
+      },
+      "labeled": {
+        "churn_rate": 0.252,
+        "ap": 0.7232730595021961,
+        "brier": 0.11911621690108015,
+        "calibration_gap": -0.0073875093977278095,
+        "benefit_model_eur": 82050.0,
+        "benefit_everyone_eur": 51200.0,
+        "benefit_nobody_eur": 0.0
+      },
+      "degradation": {
+        "calibration_out": false,
+        "brier_ratio": 1.1795762005149373,
+        "brier_out": true,
+        "degraded": true
+      }
+    },
+    "S3": {
+      "description": "IsActiveMember = 0 en el 70 % (composición exacta)",
+      "n": 2000,
+      "variables": {
+        "CreditScore": {
+          "psi": 0.009115873369760247,
+          "level": "estable",
+          "method": "ks",
+          "statistic": 0.027166666666666665,
+          "p_value": 0.21627718160895462,
+          "p_holm": 1.0,
+          "significant": false
+        },
+        "Age": {
+          "psi": 0.023783384765310188,
+          "level": "estable",
+          "method": "ks",
+          "statistic": 0.0235,
+          "p_value": 0.37601590035053023,
+          "p_holm": 1.0,
+          "significant": false
+        },
+        "Balance": {
+          "psi": 0.012523455075539798,
+          "level": "estable",
+          "method": "ks",
+          "statistic": 0.027666666666666666,
+          "p_value": 0.19922060826259505,
+          "p_holm": 1.0,
+          "significant": false
+        },
+        "Tenure": {
+          "psi": 0.003595725522329848,
+          "level": "estable",
+          "method": "chi2",
+          "statistic": 5.405798834698537,
+          "p_value": 0.8624760829137355,
+          "p_holm": 1.0,
+          "significant": false
+        },
+        "NumOfProducts": {
+          "psi": 0.001451917526594517,
+          "level": "estable",
+          "method": "chi2",
+          "statistic": 2.067754069119241,
+          "p_value": 0.5584638295130324,
+          "p_holm": 1.0,
+          "significant": false
+        },
+        "HasCrCard": {
+          "psi": 0.0026573180939524913,
+          "level": "estable",
+          "method": "chi2",
+          "statistic": 3.9171307017609602,
+          "p_value": 0.047796391312143,
+          "p_holm": 0.334574739185001,
+          "significant": false
+        },
+        "IsActiveMember": {
+          "psi": 0.19595797135663706,
+          "level": "moderado",
+          "method": "chi2",
+          "statistic": 279.4261438310374,
+          "p_value": 1.0014973148174647e-62,
+          "p_holm": 8.011978518539718e-62,
+          "significant": true
+        },
+        "Geography": {
+          "psi": 0.0006409265758437214,
+          "level": "estable",
+          "method": "chi2",
+          "statistic": 0.9551478840815761,
+          "p_value": 0.6202864186567831,
+          "p_holm": 1.0,
+          "significant": false
+        }
+      },
+      "probability": {
+        "psi": 0.013589914288808857,
+        "level": "estable"
+      },
+      "alarm": false,
+      "alarm_on": [],
+      "unlabeled": {
+        "contact_rate": 0.349,
+        "mean_predicted": 0.22870489876621025,
+        "expected_benefit_eur": 70941.41516363391
+      },
+      "labeled": {
+        "churn_rate": 0.23,
+        "ap": 0.7428369020506531,
+        "brier": 0.1029501942515474,
+        "calibration_gap": -0.0012951012337897583,
+        "benefit_model_eur": 76700.0,
+        "benefit_everyone_eur": 38000.0,
+        "benefit_nobody_eur": 0.0
+      },
+      "degradation": {
+        "calibration_out": false,
+        "brier_ratio": 1.019488379809465,
+        "brier_out": false,
+        "degraded": false
+      }
+    },
+    "S4": {
+      "description": "Tasa de abandono del 35 % por etiqueta (composición exacta)",
+      "n": 2000,
+      "variables": {
+        "CreditScore": {
+          "psi": 0.011736272405145267,
+          "level": "estable",
+          "method": "ks",
+          "statistic": 0.017666666666666667,
+          "p_value": 0.7338663527749291,
+          "p_holm": 0.9133539130214445,
+          "significant": false
+        },
+        "Age": {
+          "psi": 0.022736838603797545,
+          "level": "estable",
+          "method": "ks",
+          "statistic": 0.05433333333333333,
+          "p_value": 0.0002789167222500602,
+          "p_holm": 0.0022313337780004816,
+          "significant": true
+        },
+        "Balance": {
+          "psi": 0.012713865146960867,
+          "level": "estable",
+          "method": "ks",
+          "statistic": 0.04033333333333333,
+          "p_value": 0.014976427233428673,
+          "p_holm": 0.08985856340057204,
+          "significant": false
+        },
+        "Tenure": {
+          "psi": 0.006531362878360718,
+          "level": "estable",
+          "method": "chi2",
+          "statistic": 9.817176182750881,
+          "p_value": 0.45667695651072227,
+          "p_holm": 0.9133539130214445,
+          "significant": false
+        },
+        "NumOfProducts": {
+          "psi": 0.010107052675941428,
+          "level": "estable",
+          "method": "chi2",
+          "statistic": 15.217071989097121,
+          "p_value": 0.0016402353367572491,
+          "p_holm": 0.011481647357300744,
+          "significant": true
+        },
+        "HasCrCard": {
+          "psi": 0.0010290957465594111,
+          "level": "estable",
+          "method": "chi2",
+          "statistic": 1.4846826360383623,
+          "p_value": 0.22304331519668671,
+          "p_holm": 0.6691299455900601,
+          "significant": false
+        },
+        "IsActiveMember": {
+          "psi": 0.0028097147806581922,
+          "level": "estable",
+          "method": "chi2",
+          "statistic": 4.109461403850217,
+          "p_value": 0.042643940888784246,
+          "p_holm": 0.17057576355513698,
+          "significant": false
+        },
+        "Geography": {
+          "psi": 0.004988984344383281,
+          "level": "estable",
+          "method": "chi2",
+          "statistic": 7.610942855702584,
+          "p_value": 0.022248706033666032,
+          "p_holm": 0.11124353016833016,
+          "significant": false
+        }
+      },
+      "probability": {
+        "psi": 0.03861027768802097,
+        "level": "estable"
+      },
+      "alarm": false,
+      "alarm_on": [],
+      "unlabeled": {
+        "contact_rate": 0.386,
+        "mean_predicted": 0.25363623994687245,
+        "expected_benefit_eur": 84133.53579090093
+      },
+      "labeled": {
+        "churn_rate": 0.35,
+        "ap": 0.8332005405234006,
+        "brier": 0.1417714395313172,
+        "calibration_gap": -0.09636376005312752,
+        "benefit_model_eur": 122200.0,
+        "benefit_everyone_eur": 110000.0,
+        "benefit_nobody_eur": 0.0
+      },
+      "degradation": {
+        "calibration_out": true,
+        "brier_ratio": 1.4039248419277819,
+        "brier_out": true,
+        "degraded": true
+      }
+    }
+  },
+  "expectations": {
+    "E1": {
+      "description": "S0 sin alarma y sin degradación",
+      "met": true
+    },
+    "E2": {
+      "description": "S1-S3: alarma en la variable desplazada y calibración dentro de ±3 pp",
+      "by_scenario": {
+        "S1": {
+          "variable": "Age",
+          "alarm_on_variable": true,
+          "calibration_within": true,
+          "met": true
+        },
+        "S2": {
+          "variable": "Geography",
+          "alarm_on_variable": true,
+          "calibration_within": true,
+          "met": true
+        },
+        "S3": {
+          "variable": "IsActiveMember",
+          "alarm_on_variable": false,
+          "calibration_within": true,
+          "met": false
+        }
+      },
+      "met": false
+    },
+    "E3": {
+      "description": "S4: PSI de variables ≤ 0,25 y calibración fuera de ±3 pp",
+      "variables_quiet": true,
+      "calibration_out": true,
+      "met": true
+    },
+    "E4": {
+      "description": "La tasa de contacto se aleja más de 2 pp de S0 en S1-S4",
+      "by_scenario": {
+        "S1": {
+          "contact_rate_change": 0.11149999999999999,
+          "met": true
+        },
+        "S2": {
+          "contact_rate_change": 0.07200000000000001,
+          "met": true
+        },
+        "S3": {
+          "contact_rate_change": 0.03849999999999998,
+          "met": true
+        },
+        "S4": {
+          "contact_rate_change": 0.07550000000000001,
+          "met": true
+        }
+      },
+      "met": true
+    }
+  }
+}

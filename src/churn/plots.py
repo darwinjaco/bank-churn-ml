@@ -160,6 +160,39 @@ def shap_importance_figure(importance: dict, path: Path) -> Path:
     return _save(fig, path)
 
 
+def monitoring_psi_figure(result: dict, path: Path) -> Path:
+    """PSI por variable y escenario con los umbrales preregistrados (spec 006 §4.5)."""
+    from matplotlib.colors import BoundaryNorm, ListedColormap
+
+    scenarios = result["scenarios"]
+    names = list(scenarios)
+    rows = [*next(iter(scenarios.values()))["variables"], "probabilidad"]
+    values = [
+        [
+            scenarios[name]["probability"]["psi"]
+            if row == "probabilidad"
+            else scenarios[name]["variables"][row]["psi"]
+            for name in names
+        ]
+        for row in rows
+    ]
+    cmap = ListedColormap(["#e8f1f5", "#f2c879", "#d9534f"])
+    norm = BoundaryNorm([0.0, 0.10, 0.25, 10.0], cmap.N)
+    fig, ax = plt.subplots(figsize=(7, 4.6), constrained_layout=True)
+    ax.imshow(values, cmap=cmap, norm=norm, aspect="auto")
+    for i, line in enumerate(values):
+        for j, value in enumerate(line):
+            ax.text(j, i, f"{value:.2f}", ha="center", va="center", fontsize=9)
+    labels = [
+        f"{name}\ncalibración {100 * scenarios[name]['labeled']['calibration_gap']:+.1f} pp"
+        for name in names
+    ]
+    ax.set_xticks(range(len(names)), labels, fontsize=8)
+    ax.set_yticks(range(len(rows)), rows)
+    ax.set_title("PSI frente a la referencia: estable < 0,10 · moderado · alerta > 0,25")
+    return _save(fig, path)
+
+
 def main() -> int:
     results = json.loads(HYPOTHESES_FILE.read_text(encoding="utf-8"))
     for path in generate_figures(load_exploration(), results, FIGURES_DIR):

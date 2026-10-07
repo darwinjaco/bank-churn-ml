@@ -1,12 +1,21 @@
-"""Explicación en lenguaje natural (spec 005 §6): LLM opcional con plantilla determinista."""
+"""Explicación en lenguaje natural (spec 005 §6): LLM opcional con plantilla determinista.
+
+El número de llamadas al LLM está limitado por hora (spec 006 §3).
+"""
 
 from __future__ import annotations
 
 import json
 import os
+import threading
+import time
+from collections import deque
 from collections.abc import Callable
 
 LLM_TIMEOUT_S = 10.0
+DEFAULT_MAX_CALLS_PER_HOUR = 30
+WINDOW_S = 3_600.0
+RATE_LIMIT_REASON = "límite de llamadas por hora"
 SYSTEM_PROMPT = (
     "Eres analista de retención de un banco. Redacta en español, en 2 o 3 frases, una "
     "recomendación para el equipo comercial a partir de los datos JSON. Usa solo esos datos; "
@@ -63,6 +72,44 @@ def llm_config() -> dict | None:
     return config if all(config.values()) else None
 
 
+def max_calls_per_hour() -> int:
+    """LLM_MAX_CALLS_PER_HOUR: entero ≥ 0 (0 desactiva el LLM); otro valor → 30."""
+    raw = os.getenv("LLM_MAX_CALLS_PER_HOUR", "").strip()
+    try:
+        value = int(raw)
+    except ValueError:
+        return DEFAULT_MAX_CALLS_PER_HOUR
+    return value if value >= 0 else DEFAULT_MAX_CALLS_PER_HOUR
+
+
+class HourlyLimiter:
+    """Ventana deslizante de una hora, en memoria y segura entre hilos (sin estado en disco)."""
+
+    def __init__(self, clock: Callable[[], float] = time.monotonic, window: float = WINDOW_S):
+        self._clock = clock
+        self._window = window
+        self._calls: deque[float] = deque()
+        self._lock = threading.Lock()
+
+    def try_acquire(self, limit: int) -> bool:
+        """Registra un intento si cabe en la ventana; False si se alcanzó el límite."""
+        with self._lock:
+            now = self._clock()
+            while self._calls and now - self._calls[0] >= self._window:
+                self._calls.popleft()
+            if len(self._calls) >= limit:
+                return False
+            self._calls.append(now)
+            return True
+
+    def reset(self) -> None:
+        with self._lock:
+            self._calls.clear()
+
+
+LIMITER = HourlyLimiter()
+
+
 def _openai_client(base_url: str, api_key: str):
     from openai import OpenAI
 
@@ -73,13 +120,16 @@ def explain(
     customer: dict,
     prediction: dict,
     client_factory: Callable = _openai_client,
+    limiter: HourlyLimiter = LIMITER,
 ) -> dict:
-    """Texto del LLM si está configurado y responde; si no, la plantilla."""
+    """Texto del LLM si está configurado, dentro del límite y responde; si no, la plantilla."""
     facts = build_facts(customer, prediction)
     fallback = template_text(facts)
     config = llm_config()
     if config is None:
         return {"text": fallback, "source": "template", "reason": "LLM no configurado"}
+    if not limiter.try_acquire(max_calls_per_hour()):  # Cuenta intentos, también los fallidos.
+        return {"text": fallback, "source": "template", "reason": RATE_LIMIT_REASON}
     try:
         client = client_factory(config["base_url"], config["api_key"])
         response = client.chat.completions.create(

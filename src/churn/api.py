@@ -3,21 +3,27 @@
 from __future__ import annotations
 
 import json
+import math
 from collections.abc import Callable
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
+from functools import cached_property
 from typing import Literal
 
 import numpy as np
 import pandas as pd
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
-from churn import explain, narrative
+from churn import __version__, explain, narrative
 from churn.config import PROJECT_ROOT
 
 METADATA_FILE = PROJECT_ROOT / "reports" / "model_metadata.json"
 FINAL_FILE = PROJECT_ROOT / "reports" / "final_test.json"
+MONITORING_FILE = PROJECT_ROOT / "reports" / "monitoring.json"
 MAX_BATCH = 1_000
 N_REASONS = 3
 
@@ -25,7 +31,7 @@ N_REASONS = 3
 class Customer(BaseModel):
     """Contrato de entrada (spec 001); campos extra como Gender o identificadores dan 422."""
 
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
 
     CreditScore: int = Field(ge=300, le=900)
     Age: int = Field(ge=18, le=100)
@@ -51,10 +57,16 @@ class Service:
     metadata: dict
     artifact_sha256: str
     final_test: dict | None = None
+    monitoring: dict | None = None
 
     @property
     def threshold(self) -> float:
         return float(self.metadata["threshold"])
+
+    @cached_property
+    def explainer(self):
+        """Explicador SHAP creado una sola vez por proceso (spec 005 §6)."""
+        return explain.tree_explainer(self.model)
 
     def _frame(self, customers: list[Customer]) -> pd.DataFrame:
         return pd.DataFrame([c.model_dump(exclude={"EstimatedSalary"}) for c in customers])
@@ -77,7 +89,7 @@ class Service:
             for p, b in zip(probability, benefit, strict=True)
         ]
         if reasons:
-            shap_result = explain.compute_shap(self.model, frame)
+            shap_result = explain.compute_shap(self.model, frame, self.explainer)
             for row, item in enumerate(out):
                 order = np.argsort(-np.abs(shap_result["values"][row]))[:N_REASONS]
                 item["top_reasons"] = [
@@ -97,9 +109,26 @@ class Service:
 def load_service() -> Service:
     from churn.artifact import MODEL_SHA256, load_model
 
+    def optional(path):
+        return json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
+
     metadata = json.loads(METADATA_FILE.read_text(encoding="utf-8"))
-    final = json.loads(FINAL_FILE.read_text(encoding="utf-8")) if FINAL_FILE.exists() else None
-    return Service(load_model(), metadata, MODEL_SHA256, final)
+    service = Service(
+        load_model(), metadata, MODEL_SHA256, optional(FINAL_FILE), optional(MONITORING_FILE)
+    )
+    _ = service.explainer  # Se carga al arrancar, no en la primera petición.
+    return service
+
+
+def json_safe(value):
+    """NaN e infinitos como texto: el error 422 debe poder serializarse en JSON."""
+    if isinstance(value, float) and not math.isfinite(value):
+        return str(value)
+    if isinstance(value, dict):
+        return {key: json_safe(item) for key, item in value.items()}
+    if isinstance(value, list | tuple):
+        return [json_safe(item) for item in value]
+    return value
 
 
 def create_app(service_factory: Callable[[], Service] = load_service) -> FastAPI:
@@ -110,10 +139,15 @@ def create_app(service_factory: Callable[[], Service] = load_service) -> FastAPI
 
     app = FastAPI(
         title="Bank churn → retention decisions",
-        version="1.0",
+        version=__version__,
         description="Probabilidad calibrada de abandono y decisión de contacto (specs 004 y 005).",
         lifespan=lifespan,
     )
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_error(request: Request, error: RequestValidationError) -> JSONResponse:
+        detail = json_safe(jsonable_encoder(error.errors()))
+        return JSONResponse(status_code=422, content={"detail": detail})
 
     def service(request: Request) -> Service:
         return request.app.state.service
@@ -148,6 +182,13 @@ def create_app(service_factory: Callable[[], Service] = load_service) -> FastAPI
                 "n": svc.final_test["n"],
             }
         return info
+
+    @app.get("/monitoring")
+    def monitoring(request: Request) -> dict:
+        report = service(request).monitoring
+        if report is None:
+            raise HTTPException(status_code=404, detail="Reporte de monitoreo no disponible.")
+        return report
 
     @app.post("/predict")
     def predict(customer: Customer, request: Request) -> dict:

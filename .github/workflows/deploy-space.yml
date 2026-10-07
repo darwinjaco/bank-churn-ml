@@ -1,0 +1,54 @@
+# Sincroniza la demo con Hugging Face Spaces (spec 006 §2.4).
+# Requiere: secreto HF_TOKEN (token de escritura) y variable HF_SPACE (<usuario-hf>/bank-churn-ml),
+# y el Space creado de antemano (SDK Docker, plantilla Blank).
+name: Deploy Space
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+concurrency:
+  group: deploy-space
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check configuration
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_SPACE: ${{ vars.HF_SPACE }}
+        run: |
+          if [ -z "${HF_TOKEN}" ] || [ -z "${HF_SPACE}" ]; then
+            echo "::error::Faltan el secreto HF_TOKEN o la variable HF_SPACE (Settings → Secrets and variables → Actions)."
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build Space folder
+        run: python scripts/build_space.py --out "${RUNNER_TEMP}/space"
+
+      - name: Push to Hugging Face
+        working-directory: ${{ runner.temp }}/space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_SPACE: ${{ vars.HF_SPACE }}
+        run: |
+          git init --quiet --initial-branch=main
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add --all
+          git commit --quiet --message "Deploy ${GITHUB_SHA::7} (${GITHUB_REF_NAME})"
+          # El token solo viaja en la URL de este comando; GitHub lo enmascara en el log.
+          git push --quiet --force "https://hf:${HF_TOKEN}@huggingface.co/spaces/${HF_SPACE}" main
+          echo "Space actualizado: https://huggingface.co/spaces/${HF_SPACE}"

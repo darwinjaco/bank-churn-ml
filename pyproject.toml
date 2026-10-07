@@ -1,6 +1,6 @@
 [project]
 name = "churn"
-version = "0.1.0"
+version = "1.0.0"
 description = "Bank customer churn prediction and profit-driven retention decisions."
 readme = "README.md"
 license = "MIT"
@@ -33,6 +33,7 @@ churn-select = "churn.experiments:main"
 churn-decide = "churn.decide:main"
 churn-audit = "churn.run_audit:main"
 churn-final = "churn.final_eval:main"
+churn-monitor = "churn.monitoring:main"
 
 [build-system]
 requires = ["uv_build>=0.8.17,<0.9.0"]

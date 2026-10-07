@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Estado | Implementada v1.0; Docker verificado con modelo local; falta repetir con el Release |
+| Estado | Implementada v1.1 (enmienda de la semana 8, §10); Docker verificado con modelo local; falta repetir con el Release |
 | Responsable | Darwin Jacome Cuenca |
 | Semana | 7 (16–22 de noviembre de 2026) |
 | Dependencias | [002](002-modeling-and-evaluation.md) (artefacto congelado), [004](004-decision-layer.md) (regla de decisión) |
@@ -37,10 +37,11 @@ Navegador ──▶ Streamlit (dashboard) ──HTTP──▶ FastAPI ──▶ 
 | `POST /predict` | Un cliente | `churn_probability` (calibrada), `contact` (bool), `expected_benefit_eur`, `threshold`, `top_reasons` (3 contribuciones SHAP con signo) |
 | `POST /predict/batch` | Lista de 1 a 1.000 clientes | Lista de predicciones (sin razones) y resumen: contactados y beneficio esperado total |
 | `POST /explain` | Un cliente | Texto breve en español con la recomendación y sus razones; `source` = `llm` o `template` |
+| `GET /monitoring` | — | Reporte del monitoreo simulado (spec 006 §4.9); 404 si no existe (v1.1) |
 
 ## 5. Contrato de entrada (Pydantic)
 
-Mismos rangos que el contrato de datos (spec 001): `CreditScore` 300–900, `Age` 18–100, `Tenure` 0–10, `Balance` ≥ 0, `NumOfProducts` 1–4, `HasCrCard` y `IsActiveMember` ∈ {0, 1}, `Geography` ∈ {France, Germany, Spain}. `EstimatedSalary` es opcional y se ignora (excluida por E-03). **Campos extra prohibidos**: un `Gender` o un identificador devuelve 422.
+Mismos rangos que el contrato de datos (spec 001): `CreditScore` 300–900, `Age` 18–100, `Tenure` 0–10, `Balance` ≥ 0, `NumOfProducts` 1–4, `HasCrCard` y `IsActiveMember` ∈ {0, 1}, `Geography` ∈ {France, Germany, Spain}. `EstimatedSalary` es opcional y se ignora (excluida por E-03). **Campos extra prohibidos**: un `Gender` o un identificador devuelve 422. Los números no finitos (NaN, ±infinito) también devuelven 422 (v1.1).
 
 ## 6. Reglas
 
@@ -48,7 +49,7 @@ Mismos rangos que el contrato de datos (spec 001): `CreditScore` 300–900, `Age
 - El modelo y el explicador SHAP se cargan una vez al arrancar.
 - Las razones SHAP explican la probabilidad sin calibrar (spec 002 §11.1); se presentan como factores del modelo, no como causas.
 - **LLM opcional** (`/explain`): cliente compatible con OpenAI configurado por `LLM_BASE_URL`, `LLM_API_KEY` y `LLM_MODEL` (por ejemplo, NVIDIA NIM u OpenRouter). Solo recibe las variables del cliente, la probabilidad, la decisión y las razones SHAP: nunca identificadores. Sin clave, con error o con tiempo de espera superado (10 s), se usa una plantilla determinista. La clave vive solo en variables de entorno o secretos del Space, nunca en el repositorio.
-- Sin autenticación ni límite de uso: es una demo de portafolio (limitación documentada).
+- Sin autenticación: es una demo de portafolio (limitación documentada). El LLM tiene límite de llamadas por hora desde la spec 006 §3.
 
 ## 7. Dashboard
 
@@ -72,3 +73,13 @@ Mismos rangos que el contrato de datos (spec 001): `CreditScore` 300–900, `Age
 - [x] Hash del artefacto verificado en build y al arrancar (réplica de los pasos de la imagen; build real pendiente).
 - [x] Sin clave de LLM, `/explain` responde con la plantilla.
 - [ ] CI en verde con cobertura ≥ 85 % (local: 194 tests, 98 %; CI tras el push).
+
+## 10. Enmienda v1.1 (7 de octubre de 2026, semana 8)
+
+Motivo: revisión completa del código antes del cierre (registro S12). No cambia el modelo, el umbral ni los supuestos; los criterios de §9 se mantienen.
+
+- **Contrato:** `allow_inf_nan=False` y manejador de errores de validación que serializa NaN e infinitos como texto. Antes, un `Balance` o `EstimatedSalary` NaN o infinito devolvía **500**: la validación lo rechazaba, pero FastAPI no podía serializar el error. Ahora devuelve 422, también en el lote.
+- **§6 cumplida literalmente:** el explicador SHAP se crea una vez por proceso, al arrancar (antes se creaba en cada petición; ~0,02 s, sin cambio en los resultados).
+- **`GET /monitoring`** y pestaña **Monitoreo** del dashboard (spec 006 §4.9).
+- **Dashboard:** un cliente HTTP por proceso (`st.cache_resource`); los errores 422 de la API se muestran por fila en lugar de una traza; el lote rechaza celdas vacías y decimales en columnas enteras antes de enviar (antes `Age = 52.7` se truncaba a 52 sin aviso).
+- **`scripts/verify-docker.ps1`:** cada comprobación es una aserción (SHA-256 servido, probabilidad 0,947 y contactar para el cliente de referencia, 422 con `Gender`, `/explain` y `/monitoring`) y se añade la imagen del Space (Dockerfile derivado, `ROLE=all`, puerto 7860, API interna).

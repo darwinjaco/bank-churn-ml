@@ -1,4 +1,4 @@
-"""LLM opcional: plantilla sin clave o con fallo; datos enviados sin identificadores."""
+"""LLM opcional: plantilla sin clave, con fallo o sobre el límite; datos sin identificadores."""
 
 import json
 from types import SimpleNamespace
@@ -42,6 +42,14 @@ class FakeClient:
         return SimpleNamespace(choices=[SimpleNamespace(message=message)])
 
 
+@pytest.fixture(autouse=True)
+def fresh_limiter(monkeypatch):
+    narrative.LIMITER.reset()
+    monkeypatch.delenv("LLM_MAX_CALLS_PER_HOUR", raising=False)
+    yield
+    narrative.LIMITER.reset()
+
+
 @pytest.fixture
 def configured(monkeypatch):
     monkeypatch.setenv("LLM_BASE_URL", "https://example.invalid/v1")
@@ -82,3 +90,66 @@ def test_no_contact_template_and_no_reasons():
     facts = narrative.build_facts(CUSTOMER, {**PREDICTION, "contact": False, "top_reasons": []})
     text = narrative.template_text(facts)
     assert "No se recomienda" in text and "Factores" not in text
+
+
+class FakeClock:
+    def __init__(self):
+        self.now = 1_000.0
+
+    def __call__(self):
+        return self.now
+
+
+def test_rate_limit_falls_back_to_template(configured, monkeypatch):
+    monkeypatch.setenv("LLM_MAX_CALLS_PER_HOUR", "2")
+    limiter = narrative.HourlyLimiter(clock=FakeClock())
+    fake = FakeClient("Texto del LLM.")
+    results = [
+        narrative.explain(CUSTOMER, PREDICTION, lambda url, key: fake, limiter=limiter)
+        for _ in range(3)
+    ]
+    assert [r["source"] for r in results] == ["llm", "llm", "template"]
+    assert results[-1]["reason"] == narrative.RATE_LIMIT_REASON
+
+
+def test_failed_attempts_also_count(configured, monkeypatch):
+    monkeypatch.setenv("LLM_MAX_CALLS_PER_HOUR", "1")
+    limiter = narrative.HourlyLimiter(clock=FakeClock())
+    failing = FakeClient(error=TimeoutError())
+    first = narrative.explain(CUSTOMER, PREDICTION, lambda url, key: failing, limiter=limiter)
+    second = narrative.explain(CUSTOMER, PREDICTION, lambda url, key: failing, limiter=limiter)
+    assert first["reason"] == "TimeoutError"
+    assert second["reason"] == narrative.RATE_LIMIT_REASON
+
+
+def test_window_slides_after_one_hour():
+    clock = FakeClock()
+    limiter = narrative.HourlyLimiter(clock=clock)
+    assert limiter.try_acquire(2)  # t = 0 s
+    clock.now += 600
+    assert limiter.try_acquire(2)  # t = 600 s
+    assert not limiter.try_acquire(2)
+    clock.now += narrative.WINDOW_S - 600 - 1
+    assert not limiter.try_acquire(2)  # t = 3.599 s: las dos siguen en la ventana
+    clock.now += 1
+    assert limiter.try_acquire(2)  # t = 3.600 s: sale la primera
+    assert not limiter.try_acquire(2)
+
+
+def test_zero_disables_llm(configured, monkeypatch):
+    monkeypatch.setenv("LLM_MAX_CALLS_PER_HOUR", "0")
+    fake = FakeClient("No debería llamarse.")
+    result = narrative.explain(CUSTOMER, PREDICTION, lambda url, key: fake)
+    assert result["source"] == "template" and fake.sent is None
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [(None, 30), ("", 30), ("abc", 30), ("-5", 30), ("2.5", 30), (" 12 ", 12), ("0", 0)],
+)
+def test_max_calls_per_hour_parsing(monkeypatch, raw, expected):
+    if raw is None:
+        monkeypatch.delenv("LLM_MAX_CALLS_PER_HOUR", raising=False)
+    else:
+        monkeypatch.setenv("LLM_MAX_CALLS_PER_HOUR", raw)
+    assert narrative.max_calls_per_hour() == expected

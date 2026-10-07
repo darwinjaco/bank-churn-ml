@@ -8,8 +8,8 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Inicio previsto | 5 de octubre de 2026 |
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
-| Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 7 implementada; pendiente: Release del modelo y `docker compose up` del responsable |
+| Última actualización | 7 de octubre de 2026 |
+| Fase actual | Semana 8 implementada y verificada en local; pendientes del responsable: push y CI, Release `model-v1.0`, Docker con el Release, Space (B-03), GIF y etiqueta `v1.0.0` |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -29,12 +29,12 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 |---|---|---|---|---|
 | Semana 1 | 5–11 oct | Repo, uv, Ruff, pytest, pre-commit, CI mínimo, specs 001–002 y Pandera | Tests pasan en CI | Completada el 6 de octubre: validación local y CI remoto verificados |
 | Semana 2 | 12–18 oct | EDA, hipótesis y auditoría de productos 3–4 y balance cero | Hipótesis contrastadas con pruebas estadísticas, tamaños de efecto e incertidumbre | Completada y revisada el 6 de octubre; correcciones interpretativas incorporadas |
-| Semana 3 | 19–25 oct | Pipeline, división estratificada, Dummy/LogReg y MLflow | Modelos de referencia registrados en MLflow | Baselines implementadas y registradas; revisión pendiente |
-| Semana 4 | 26 oct–1 nov | RF, XGBoost, validación cruzada y ajuste acotado | Tabla de media ± desviación estándar por modelo | Compuerta documental en curso; bloqueo B-02 antes de entrenar |
+| Semana 3 | 19–25 oct | Pipeline, división estratificada, Dummy/LogReg y MLflow | Modelos de referencia registrados en MLflow | Completada y publicada (CI remoto en verde) |
+| Semana 4 | 26 oct–1 nov | RF, XGBoost, validación cruzada y ajuste acotado | Tabla de media ± desviación estándar por modelo | Completada y publicada (`a868641..7013dfc`, CI #26); B-02 resuelto |
 | Semana 5 | 2–8 nov | Calibración (E-04) y umbral monetario analítico (opción A); deciles y sensibilidad excluidos por decisión del responsable | Umbral justificado por beneficio esperado bajo supuestos explícitos | Completada |
 | Semana 6 | 9–15 nov | SHAP, errores, segmentos, E-01, ficha del modelo y evaluación final (con confirmación) | Limitaciones documentadas | Completada |
-| Semana 7 | 16–22 nov | FastAPI, Streamlit, tests de API y Docker Compose | `docker compose up` funciona desde cero | Implementada; pendiente Release y prueba de Docker |
-| Semana 8 | 23–29 nov | Cambio de distribución simulado, despliegue y README final | URL pública y reproducibilidad verificadas | Pendiente |
+| Semana 7 | 16–22 nov | FastAPI, Streamlit, tests de API y Docker Compose | `docker compose up` funciona desde cero | Implementada; Docker verificado con modelo local; pendiente Release, Docker con Release y CI |
+| Semana 8 | 23–29 nov | Cambio de distribución simulado, despliegue y README final | URL pública y reproducibilidad verificadas | Implementada y verificada en local (S12); despliegue pendiente (B-03) |
 
 **Prioridad de alcance:** proteger la capa de decisión de la semana 5. Si hay retrasos, reducir primero el monitoreo de cambios de distribución de la semana 8 y registrar el ajuste.
 
@@ -43,11 +43,11 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 | Especificación | Tema | Estado | Momento previsto |
 |---|---|---|---|
 | 001 | Visión general y contrato de datos | Completada: verificación local y remota | Semana 1 |
-| 002 | Modelado y evaluación | Baselines implementadas; protocolo de semana 4 v1.2 y bloqueo B-02 | Semanas 3–5 |
+| 002 | Modelado y evaluación | Completada v1.6: selección, calibración, auditoría y evaluación final en prueba (una vez) | Semanas 3–6 |
 | 003 | [EDA e hipótesis preregistradas](../specs/003-eda-and-hypotheses.md) | Implementada v1.1 y revisada; H1–H6 congeladas en v1.0 | Semana 2 |
-| 004 | Capa de decisión y beneficio esperado | Aprobada v1.0 (opción A) | Semana 5 |
-| 005 | API y dashboard | Implementada v1.0 (Docker pendiente del Release) | Semana 7 |
-| 006 | Operación: tests, Docker, CI y monitoreo | Pendiente de redacción | Antes de ampliar operación y serving |
+| 004 | Capa de decisión y beneficio esperado | Implementada v1.0 (opción A) | Semana 5 |
+| 005 | API y dashboard | Implementada v1.1 (enmienda de la revisión de la semana 8); Docker con Release y CI pendientes | Semana 7 |
+| 006 | [Despliegue, monitoreo simulado y cierre](../specs/006-deployment-monitoring-release.md) | Implementada v1.0 en local; despliegue público pendiente (B-03) | Semana 8 |
 
 ## 4. Punto de partida — 6 de octubre de 2026
 
@@ -477,7 +477,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 |---|---|
 | Fecha de apertura | 6 de octubre de 2026 |
 | Fechas planificadas | 19–25 de octubre de 2026 |
-| Estado | Completada técnicamente; pendiente de revisión |
+| Estado | Completada y publicada (CI remoto en verde; ver S08) |
 | Objetivo | Tres baselines fijas con CV exclusivamente de entrenamiento, transformaciones seguras y trazabilidad MLflow |
 
 | Tarea | Estado | Commit requerido |
@@ -576,7 +576,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 |---|---|
 | Fecha de apertura | 6 de octubre de 2026 |
 | Fechas planificadas | 26 de octubre–1 de noviembre de 2026 |
-| Estado | En curso: T1; B-02 resuelto y versionado |
+| Estado | Completada y publicada (`a868641..7013dfc`, CI #26 en verde); B-02 resuelto |
 | Objetivo | Fijar el protocolo antes de entrenar, comparar familias en FASE B y ejecutar E-03/E-02 sin consultar prueba |
 
 | Tarea | Estado | Commit requerido |
@@ -891,7 +891,183 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - Resultado: `verify-docker.ps1 -LocalModel` completo y dashboard operativo en `http://localhost:8501`, según confirmación del responsable.
 - Pendiente: repetir con el Release publicado (variante por defecto, la que usará Hugging Face) y CI en verde tras el push.
 
-## 6. Plantilla para nuevas secciones
+### S12 — Semana 8: despliegue, monitoreo simulado y cierre
+
+| Campo | Valor |
+|---|---|
+| Fecha de apertura | 7 de octubre de 2026 |
+| Fechas planificadas | 23–29 de noviembre de 2026 |
+| Estado | T0, T1, T3–T6 implementadas y verificadas en local; T2 y la publicación de T7 pendientes del responsable |
+| Objetivo | Demo pública en Hugging Face Spaces, monitoreo simulado preregistrado y cierre del portafolio |
+| Base | `30c0809`; T0 publicado en `d0e8e6c`, con CI remoto en verde; estado final preparado para publicación consolidada |
+
+| Tarea | Estado | Commit requerido |
+|---|---|---|
+| T0 | Publicada (`d0e8e6c`, CI remoto en verde) | `docs: spec 006 deployment and monitoring, week 8 plan (SDD gate)` |
+| T1 | Completada (pendiente de commit) | `build: hugging face space sync` |
+| T2 | Pendiente del responsable (B-03) | `docs: public deployment verified` |
+| T3 | Implementada y probada; secretos del Space pendientes | `feat: rate limit for optional LLM` |
+| T4 | Completada (pendiente de commit) | `feat: simulated drift monitoring` |
+| T5 | Completada salvo el GIF (responsable) | `docs: final portfolio readme` |
+| T6 | Completada en local; `docker build` pendiente del responsable | `chore: final cleanup and reproducibility check` |
+| T7 | Documentación completada; etiqueta `v1.0.0` pendiente | `docs: week 8 close and project completion` |
+
+**Nota de proceso.** Por decisión del responsable, Claude edita la carpeta de trabajo y el responsable hace los commits al final. La compuerta SDD se respeta en el orden del historial (T0 primero), pero no en el tiempo: el código se escribió antes del commit de la spec. Solo se verificó el estado final; los commits intermedios no se probaron uno por uno.
+
+#### T0 — Compuerta
+
+- Decisiones del responsable (7 de octubre de 2026): **D1 = A** (PSI + KS/chi² propios, sin Evidently), **D2 = A** (LLM activado con límite por hora y plantilla de respaldo) y **D3** Space público `<usuario-hf>/bank-churn-ml`.
+- **B-03:** el responsable aún no tiene cuenta de Hugging Face; se usa `darwinjaco` como usuario provisional (README, `deploy/space/README.md`). El código no depende del nombre: el workflow usa la variable `HF_SPACE`.
+- Spec 006 v1.0 y [plan de semana 8](plan-semana-8.md). Umbrales de PSI, escenarios, expectativas E1–E4 y **notas a priori** (§4.7: PSI analítico ≈ 0,20 en S3 y ≈ 0,27 en S2; Brier sensible a la mezcla) escritos antes de ejecutar el monitoreo.
+- Decisión de diseño tomada en T0, no como contingencia: el Dockerfile del Space se deriva solo con la variante `release` (D-19), porque el contexto `localmodel` no existe en el builder de Hugging Face.
+
+#### T1 — Sincronización con Hugging Face
+
+- `scripts/build_space.py` (solo biblioteca estándar): copia `pyproject.toml`, `uv.lock`, `src/churn/*.py`, `dashboard/*.py`, `docker/start.sh`, `model_metadata.json`, `final_test.json`, `monitoring.json` y el README del Space; deriva el Dockerfile (cada sustitución debe ocurrir exactamente una vez) y falla ante binarios, `data/`, `models/`, `mlruns/`, `.env`, CSV, `.joblib` o `.parquet`.
+- `deploy/space/README.md`: cabecera YAML (`sdk: docker`, `app_port: 7860`, `license: mit`, `short_description` de 58 caracteres) y aviso de datos sintéticos y de que no es asesoría financiera.
+- `.github/workflows/deploy-space.yml`: `workflow_dispatch` y etiquetas `v*`; falla si faltan `HF_TOKEN` o `HF_SPACE`; el token solo se expone en los dos pasos que lo usan, nunca en `checkout` ni `setup-python`.
+- `tests/test_build_space.py` (13 tests): lista exacta de archivos, cabecera YAML, Dockerfile solo `release`, cada `COPY` del Dockerfile existe en el Space, detección de cambios incompatibles y rechazo de seis tipos de archivo prohibido.
+
+#### T3 — Límite del LLM
+
+- `narrative.py`: `HourlyLimiter` (ventana deslizante de 3.600 s, en memoria, con *lock*) y `LLM_MAX_CALLS_PER_HOUR` (vacío = 30; 0 desactiva; valor no entero o negativo → 30). Cuenta también los intentos fallidos. Sobre el límite → plantilla con `reason="límite de llamadas por hora"`.
+- Tests: límite, intentos fallidos, ventana deslizante con reloj simulado, 0 desactiva y siete casos de lectura de la variable. `.env.example` y `docker-compose.yml` actualizados.
+- Pendiente del responsable: secretos `LLM_BASE_URL`, `LLM_API_KEY` y `LLM_MODEL` en el Space y comprobar `source="llm"` en la demo.
+
+#### T4 — Monitoreo simulado
+
+- `src/churn/monitoring.py`, CLI `churn-monitor` → [`reports/monitoring.md`](../reports/monitoring.md), `reports/monitoring.json` y `reports/figures/monitoring_psi.png` (47 KB). Carga solo con `load_exploration()` (entrenamiento y validación); un test comprueba que el módulo no menciona la partición de prueba y otro que `load_partitions()` excluye sus filas.
+- Control de reproducibilidad: S0 reproduce `decision.json` (621 contactados, 61.950 €).
+
+| | S0 | S1 Age | S2 Germany | S3 inactivos | S4 prevalencia |
+|---|---|---|---|---|---|
+| PSI máximo (variable) | 0,006 | **0,327** Age | **0,275** Geography | 0,196 IsActiveMember | 0,023 Age |
+| PSI probabilidad | 0,000 | 0,081 | 0,055 | 0,014 | 0,039 |
+| Calibración global | +0,3 pp | +1,4 pp | −0,7 pp | −0,1 pp | **−9,6 pp** |
+| Brier / S0 | 1,00 | 1,09 | **1,18** | 1,02 | **1,40** |
+| Tasa de contacto | 31,1 % | 42,2 % | 38,2 % | 34,9 % | 38,6 % |
+
+- **E1 cumplida.** **E2 no cumplida:** S3 queda en 0,196 (nota a priori ≈ 0,20); S1 y S2 sí alarman con calibración dentro de ±3 pp. **E3 cumplida:** la prevalencia del 35 % descalibra el modelo −9,6 pp sin ninguna alarma de PSI. **E4 cumplida** (+3,8 a +11,1 pp).
+- S2 figura como "degradación" solo por el Brier (1,18 × S0) con la calibración dentro de rango: es el efecto de mezcla anticipado en la nota 3 de §4.7, no un deterioro del modelo. Se reporta sin reinterpretar el criterio.
+- `monitoring.json` registra `git_commit` = `30c0809`, el padre de los cambios sin commit; los resultados son deterministas (semilla 2028) y se pueden regenerar con `uv run churn-monitor`.
+- Opcional de §4.9 implementado: `GET /monitoring` y pestaña **Monitoreo** del dashboard.
+- Tests (11): PSI = 0 con distribuciones idénticas, PSI calculado a mano (0,16946), ε en bins vacíos, deciles con masa puntual en cero e intervalos cerrados por la derecha, escenarios deterministas que alcanzan la proporción objetivo, E1/E3 reproducidas con datos sintéticos, sin partición de prueba y CLI con reportes.
+
+#### T5 — README final y ejemplo
+
+- README de portafolio: resumen en inglés, resultados de prueba y políticas, diagrama Mermaid, tabla de etapas con evidencia, monitoreo, decisiones técnicas, limitaciones, trabajo futuro e inicio rápido. Las secciones semanales pasan a [`docs/historial-semanal.md`](historial-semanal.md) sin cambios de contenido (solo rutas relativas).
+- `examples/clientes_ejemplo.csv`: 20 clientes **sintéticos** generados por `scripts/make_example_csv.py` (semilla 20261123), con identificadores ficticios `EJ-01…` y ningún cliente alemán con saldo cero (regularidad de H5). Tests: el archivo coincide con el generador y cada fila pasa el contrato de la API. Con el modelo real: 13 de 20 a contactar.
+- Pendiente del responsable: GIF de demo (20–30 s; si supera 500 KB, como asset de un Release).
+
+#### Revisión completa del código (T6)
+
+| # | Hallazgo | Corrección |
+|---|---|---|
+| 1 | `Balance` o `EstimatedSalary` NaN o infinito → **HTTP 500**: FastAPI no podía serializar el error 422 que contenía `nan` (afectaba al lote del dashboard con una celda vacía) | `allow_inf_nan=False` y manejador que serializa los valores no finitos; tests con NaN, +inf y lote |
+| 2 | Dashboard: un 422 de la API en el lote (edad 15, país desconocido) producía una traza de Python | `ApiError` con mensaje por fila (`fila 4, Age: ...`); todas las llamadas capturadas |
+| 3 | `prepare_batch` truncaba `Age = 52.7` a 52 sin aviso y dejaba pasar celdas vacías | Rechazo explícito de vacíos, no numéricos y decimales en columnas enteras |
+| 4 | El explicador SHAP se creaba en cada petición, contra la spec 005 §6 | Se crea una vez por proceso, al arrancar (`Service.explainer`) |
+| 5 | Pestaña Monitoreo: columnas con texto y números rompían la conversión a Arrow (encontrado en la prueba de humo) | Valores formateados como texto; test con `pyarrow` |
+| 6 | `verify-docker.ps1` imprimía resultados sin comprobarlos y no probaba la imagen del Space | Aserciones (SHA-256, 0,947, contactar, 422, `/explain`, `/monitoring`) y etapa `ROLE=all` con el Dockerfile derivado |
+| 7 | Cliente HTTP nuevo en cada re-ejecución de Streamlit | `st.cache_resource` |
+| 8 | Versión del paquete 0.1.0 frente a la etiqueta prevista `v1.0.0` | 1.0.0 en `pyproject.toml`, `uv.lock` (`uv lock --check` en verde), `__init__` y la API |
+| 9 | Documentación desactualizada: §2, §3, S07 y S08 de este registro; ruta local absoluta en `contexto-proyecto.md`; `.env.example` con un valor; la spec 006 contenía literalmente los patrones de secretos que debía buscar | Actualizados; patrones escritos con `[-]`/`[/]` para que la búsqueda no se encuentre a sí misma |
+
+Sin defectos en los módulos de análisis (semanas 2–6): ya produjeron los resultados versionados y conservan sus protecciones (`InputGuard`, `load_test_once`, hashes). Los 147 avisos de pytest son deprecaciones de terceros (SHAP, MLflow) y el `penalty="l2"` ya registrado como trabajo futuro.
+
+**Comprobaciones ejecutadas (Linux, Python 3.11.16, entorno aparte; nunca sobre el `.venv` de Windows):**
+
+- Carpeta de trabajo (con CSV y modelo): `uv sync --locked --all-groups`; `ruff check .` y `ruff format --check .` en verde; `pytest --cov=churn --cov-fail-under=85`: **243 aprobados, 98,25 %**. `uv lock --check` en verde.
+- Prueba de humo con el modelo real: `uvicorn` + `AppTest` del dashboard. `/health` con el SHA-256 publicado; cliente de referencia **94,7 % y contactar**; cuatro pestañas sin excepciones; lote de ejemplo 13/20; lote inválido → mensaje por fila.
+- **Clon limpio** (`git clone` de `30c0809` + cambios versionables; sin CSV, modelo ni `mlruns`): `uv sync --locked --all-groups`; Ruff y formato en verde; hooks de pre-commit en verde (trailing-whitespace, end-of-file, check-yaml, check-toml, archivos > 500 KB, claves privadas y nbstripout; ejecutados con las mismas versiones instaladas desde PyPI porque el proxy del entorno bloquea `git fetch` de GitHub); `pytest`: **240 aprobados, 3 omitidos** (CSV y modelo ausentes, como en CI), **98,16 %**; `build_space.py`: 41 archivos, 792 KB.
+- Búsquedas en el clon: rutas absolutas → solo la de `contexto-proyecto.md` (corregida); secretos → solo el texto de la spec 006 (reescrito); CSV versionados → solo `examples/clientes_ejemplo.csv`; TODO/FIXME → ninguno en archivos de texto; notebook sin salidas.
+- **No verificado aquí:** `docker build` (el entorno no tiene Docker), CI remoto y despliegue público.
+
+#### Comprobaciones para publicación desde Windows
+
+- Solicitud del responsable: subir todos los cambios de la semana 8. Se consolida
+  la publicación en dos commits según la enmienda del plan: T0 primero y el estado
+  final después. Se mantiene la desviación temporal de SDD ya documentada.
+- CI remoto de la base `30c0809` confirmado en verde antes de versionar:
+  https://github.com/darwinjaco/bank-churn-ml/actions/runs/37568126713.
+- Comandos ejecutados: `git status -sb`, `git diff --stat`,
+  `git log --oneline -10`, `git remote -v`, `git diff --check`, revisión del diff
+  de código y configuración, y `gh run list --branch main --limit 5 --json databaseId,headSha,status,conclusion,workflowName,url`.
+- `uv sync --locked`, `uv run ruff check .` y `uv run ruff format --check .`:
+  sincronización, lint y formato satisfactorios.
+- `git add --all` seguido de `uv run pre-commit run --all-files`: todos los hooks
+  en verde, incluidos los archivos nuevos. Búsqueda de secretos con
+  `git grep --cached -l -I -E` sin coincidencias; `git ls-files "*.csv"` devuelve
+  únicamente el ejemplo sintético.
+- Primeras ejecuciones de `uv run pytest --cov=churn --cov-report=term-missing --cov-fail-under=85`
+  bloqueadas por paquetes incompletos del entorno local (`python-dateutil` y
+  `protobuf`). Se ejecutó `uv sync --locked --reinstall-package python-dateutil`
+  y después `uv sync --locked --all-groups --reinstall`, sin cambiar dependencias
+  ni el lockfile. Ruff y formato repetidos tras reparar el entorno: en verde.
+- Suite completa con el comando requerido: **243 aprobados, cobertura 98,25 %**
+  (mínimo 85 %), 147 avisos de terceros ya documentados. La evaluación final real
+  no se volvió a ejecutar; los tests de esa ruta usan datos sintéticos.
+- `git commit -m "docs: spec 006 deployment and monitoring, week 8 plan (SDD gate)"`
+  y `git push origin main`: T0 publicado como `d0e8e6c`, con hooks satisfactorios.
+  `gh run watch 37571345750 --exit-status --interval 10`: CI remoto en verde
+  (1 min 22 s), antes del commit consolidado del estado final:
+  https://github.com/darwinjaco/bank-churn-ml/actions/runs/37571345750.
+- Siguiente paso: publicar el estado final y comprobar el CI de ese commit y la
+  sincronización con `origin/main`. T1 y T3–T7 se agrupan conforme a la enmienda
+  del plan; el despliegue público, el GIF y la etiqueta conservan sus pendientes.
+
+#### Pendientes del responsable (en orden)
+
+1. Commits según el plan de semana 8 y `git push origin main`; revisar el CI.
+2. Release `model-v1.0` con `models/model.joblib` (repositorio público: confirmado por la API de GitHub).
+3. `pwsh -File scripts/verify-docker.ps1` sin `-LocalModel`: ahora incluye la imagen del Space.
+4. Cuenta y token de Hugging Face (B-03); crear el Space vacío (Docker, *Blank*, público); secreto `HF_TOKEN` y variable `HF_SPACE` en GitHub; si el usuario no es `darwinjaco`, corregir README y `deploy/space/README.md`.
+5. Ejecutar *Deploy Space* (T2) y verificar §2.5; secretos del LLM en el Space (T3).
+6. GIF de demo (T5) y etiqueta/Release `v1.0.0` (T7).
+
+## 6. Estado del proyecto y Definition of Done
+
+Estado al 7 de octubre de 2026, contra la *Definition of Done* del plan maestro (punto 37). ✅ = verificado; ⏳ = implementado, falta una acción externa del responsable; ↔ = desviación justificada.
+
+| Ítem | Estado | Evidencia o justificación |
+|---|---|---|
+| Dataset documentado | ✅ | [spec 001](../specs/001-overview-and-data-contract.md) §2 y §6; [calidad](../reports/data_quality.json) |
+| Data contract definido | ✅ | Spec 001 §4–5; Pandera (`validation.py`) y Pydantic en la API |
+| SDD completo | ✅ | Specs 001–006 con enmiendas versionadas; planes semanales en `docs/` |
+| EDA terminado | ✅ | [Notebook](../notebooks/01_eda.ipynb) delgado y figuras generadas por código |
+| Hipótesis analizadas | ✅ | H1–H6 preregistradas ([reporte](../reports/eda_hypotheses.md)) |
+| Preprocessing reproducible | ✅ | `pipeline.py`: `ColumnTransformer` aprendido solo en entrenamiento; `InputGuard` rechaza `Gender` |
+| Feature engineering documentado | ✅ | Spec 002: FS-RAW, FS-EDA y FS-TREE; `features.py` sin estado externo |
+| Train/Validation/Test definido | ✅ | 60/20/20 estratificado, semilla 42, [manifiesto](../reports/split_manifest.json) con hashes |
+| Baseline implementado | ✅ | Dummy y LogReg ([baselines](../reports/baselines.md)) |
+| Logistic Regression | ✅ | FS-RAW y FS-EDA; FASE B 0,655 ± 0,027 |
+| Random Forest | ✅ | Modelo final; FASE B 0,686 ± 0,018 |
+| XGBoost | ✅ | FASE B 0,697 ± 0,018; descartado por parsimonia (regla §6 preregistrada) |
+| Neural Network (opcional) | ↔ | No evaluada: 10.000 filas tabulares y regla de parsimonia; registrada como desviación en el README |
+| Cross-validation | ✅ | Estratificada; FASE B 5×2 con pliegues nuevos (semilla 2027) |
+| Hyperparameter tuning | ✅ | `RandomizedSearchCV` con espacios preregistrados ([tuning](../reports/tuning.json)) |
+| Experiment tracking | ✅ | MLflow con commit, hash del CSV y del manifiesto en cada corrida (local, fuera de Git) |
+| Métricas comparadas | ✅ | [Selección](../reports/model_selection.md): AP, ROC-AUC, Brier y log loss por familia |
+| Threshold optimizado | ↔ | Umbral **analítico** t\* = c/(s·V) = 1/6 (spec 004), no ajustado con datos para no sobreajustarlo; opciones B y C como trabajo futuro |
+| Calibration evaluada | ✅ | E-04: sigmoide elegida por Brier; curvas de fiabilidad |
+| SHAP | ✅ | Global, por grupos y local con aditividad comprobada; 3 razones por cliente en la API |
+| Error analysis | ✅ | Perfiles VP/FP/FN/VN y zona del umbral ([auditoría](../reports/audit.md)) |
+| Segment analysis | ✅ | Geografía, edad, productos, actividad, saldo y E-01 por género (alerta en precisión documentada) |
+| Modelo serializado | ✅ | `CalibratedModel` (pipeline + calibrador) en `model.joblib`, SHA-256 fijado; metadata versionada |
+| Pipeline de inferencia | ✅ | `api.Service` (en lugar del `predict.py` del plan); devuelve probabilidad, decisión y beneficio en vez de un `risk_level` arbitrario |
+| FastAPI | ✅ | Spec 005 v1.1; 20 tests de API |
+| Streamlit | ✅ | Cuatro pestañas; prueba de humo con `AppTest` y la API real |
+| Tests | ✅ | 243 tests (98,25 %); 240 + 3 omitidos en un clon limpio sin datos (98,16 %) |
+| Linting | ✅ | Ruff, formato y hooks de pre-commit en verde (S12) |
+| Docker | ⏳ | Verificado en Windows con el modelo local (S11); falta repetirlo con el Release y la imagen del Space |
+| CI/CD | ⏳ | Semana 7 publicada; CI de `30c0809` en verde. Workflow *Deploy Space* listo; publicación y CI de semana 8 en curso |
+| Deployment | ⏳ | Space pendiente de la cuenta de Hugging Face (B-03) |
+| README profesional | ⏳ | Redactado; faltan el GIF y la URL pública activa |
+| Reproducibilidad verificada | ✅ / ⏳ | Pipeline completo reproducido desde un clon limpio (S08–S10); tests y hooks desde un clon limpio (S12); `docker build` desde un clon limpio pendiente |
+
+**Lo que aporta el proyecto más allá del checklist:** decisión económica explícita en lugar de una métrica aislada, preregistro de hipótesis, reglas y umbrales (con expectativas que se reportan aunque no se cumplan, como E2), una única evaluación en prueba protegida por código, y un monitoreo que demuestra un límite real: el cambio de prevalencia degrada el modelo sin alarmas de entrada.
+
+## 7. Plantilla para nuevas secciones
 
 ```markdown
 ### SXX — Nombre de la sección

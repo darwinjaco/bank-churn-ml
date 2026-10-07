@@ -160,3 +160,36 @@ def test_explain_endpoint_uses_template_without_key(client, monkeypatch):
     body = client.post("/explain", json=CUSTOMER).json()
     assert body["source"] == "template" and body["prediction"]["top_reasons"]
     assert client.post("/explain", json={**CUSTOMER, "Gender": "Male"}).status_code == 422
+
+
+@pytest.mark.parametrize(
+    "change",
+    [{"Balance": float("nan")}, {"Balance": float("inf")}, {"EstimatedSalary": float("nan")}],
+)
+def test_non_finite_numbers_return_422_not_500(client, change):
+    import json
+
+    payload = json.dumps({**CUSTOMER, **change})  # Python serializa NaN/Infinity sin error.
+    headers = {"content-type": "application/json"}
+    response = client.post("/predict", content=payload, headers=headers)
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["loc"][-1] in change
+    batch = json.dumps({"customers": [{**CUSTOMER, **change}]})
+    assert client.post("/predict/batch", content=batch, headers=headers).status_code == 422
+
+
+def test_shap_explainer_is_created_once(client):
+    service = client.app.state.service
+    client.post("/predict", json=CUSTOMER)
+    first = service.explainer
+    client.post("/predict", json=CUSTOMER)
+    assert service.explainer is first
+
+
+def test_monitoring_endpoint(model):
+    service = api.Service(model, METADATA, "b" * 64, None, {"expectations": {"E1": {"met": True}}})
+    with TestClient(api.create_app(lambda: service)) as test_client:
+        assert test_client.get("/monitoring").json()["expectations"]["E1"]["met"]
+    empty = api.Service(model, METADATA, "b" * 64)
+    with TestClient(api.create_app(lambda: empty)) as test_client:
+        assert test_client.get("/monitoring").status_code == 404
