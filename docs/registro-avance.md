@@ -841,8 +841,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T2 | Completada (`0e473a1`) | `feat: model artifact download with hash check` |
 | T3 | Completada (`8d96805`) | `feat: FastAPI service` |
 | T4 | Completada (`ae3e9e0`) | `feat: optional LLM explanation with template fallback` |
-| T5 | Completada (commit local) | `feat: Streamlit dashboard` |
-| T6 | Pendiente | `build: docker image and compose` |
+| T5 | Completada (`11867df`) | `feat: Streamlit dashboard` |
+| T6 | Completada (commit local); `docker build` real pendiente | `build: docker image and compose` |
 | T7 | Pendiente | `docs: week 7 api, dashboard and docker` |
 
 #### T0 — Compuerta
@@ -871,6 +871,13 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - `ui.py` (sin Streamlit, testeado): cliente HTTP (`API_URL`, por defecto `http://localhost:8000`), `prepare_batch` (solo columnas del contrato: descarta `Gender`, identificadores y salario; 1–1.000 filas), `results_table`, `reason_rows` y formato en euros.
 - `dashboard/app.py`: pestañas Cliente (formulario → probabilidad, decisión, beneficio, razones SHAP y texto con su origen), Lote (CSV → resumen, tabla ordenada y descarga) y Modelo (regla, supuestos y evaluación final). No carga el modelo: todo pasa por la API.
 - Prueba de humo con `streamlit.testing.AppTest` y la API real levantada con `uvicorn`: sin excepciones; cliente de 52 años, inactivo, de Alemania → 90,4 %, contactar, 221 €, razones Age, IsActiveMember y Geography=Germany; pestaña Modelo con AP 0,705 y 61.600 €.
+
+#### T6 — Docker
+
+- `Dockerfile` (una imagen: `python:3.11-slim`, `uv` 0.12.13, dependencias con `--locked --no-dev`, usuario 1000 para Spaces, sin CSV): copia código, dashboard, `model_metadata.json` y `final_test.json`; descarga el modelo del Release y **el build falla si el SHA-256 no coincide** (`ARG MODEL_URL`). `docker/start.sh` con `ROLE=api|dashboard|all` (en `all`, la API escucha en 127.0.0.1:8000 y Streamlit en 7860 con XSRF desactivado para el iframe de Spaces). `docker-compose.yml` con dos servicios (API 8000 con *healthcheck*, dashboard 8501 que espera a la API) y variables LLM opcionales. `.dockerignore` y `.env.example`.
+- `artifact.py`: permisos 0644 al guardar el modelo (el temporal nace con 0600).
+- **Limitación del entorno de verificación:** el proxy de Claude bloquea Docker Hub, GHCR, ECR y MCR, así que no pudo ejecutarse `docker build` (ni `docker build --check`, que también resuelve la imagen base). Verificaciones hechas: `docker compose config` válido; `shellcheck` sin avisos; **réplica exacta de los pasos de la imagen** en un directorio limpio (mismos archivos copiados, `uv sync --locked --no-dev`, descarga del modelo por HTTP con verificación del hash y `ROLE=all bash docker/start.sh`): `/health` con el SHA-256 publicado, `/predict` 0,947 y contactar, `Gender` → 422, `/explain` con plantilla y Streamlit `/_stcore/health` = ok.
+- Pendiente: `docker compose up --build` real (equipo del responsable o build de Hugging Face en la semana 8), que requiere publicar antes el Release `model-v1.0`.
 
 ## 6. Plantilla para nuevas secciones
 

@@ -63,6 +63,7 @@ def ensure_model(
             if actual != expected:
                 raise ArtifactIntegrityError(f"SHA-256 descargado {actual} != esperado {expected}")
             temporary.replace(path)
+            path.chmod(0o644)  # El temporal nace con 0600; la imagen corre con otro usuario.
         finally:
             temporary.unlink(missing_ok=True)
     actual = sha256_file(path)
