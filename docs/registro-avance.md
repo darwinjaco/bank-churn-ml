@@ -836,8 +836,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 
 | Tarea | Estado | Commit requerido |
 |---|---|---|
-| T0 | Completada (commit local) | `docs: spec 005 api and dashboard, week 7 plan (SDD gate)` |
-| T1 | Pendiente | `build: add serving dependencies` |
+| T0 | Completada (`ce0abeb`) | `docs: spec 005 api and dashboard, week 7 plan (SDD gate)` |
+| T1 | Completada (commit local) | `build: add serving dependencies` |
 | T2 | Pendiente | `feat: model artifact download with hash check` |
 | T3 | Pendiente | `feat: FastAPI service` |
 | T4 | Pendiente | `feat: optional LLM explanation with template fallback` |

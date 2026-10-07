@@ -7,14 +7,18 @@ license = "MIT"
 authors = [{ name = "Darwin Jacome Cuenca" }]
 requires-python = ">=3.11,<3.13"
 dependencies = [
+    "fastapi>=0.142.2",
     "mlflow>=3.16.1",
     "numpy>=2.4.6",
+    "openai>=3.26.0",
     "pandas>=3.0.6",
     "pandera>=0.24",
     "scikit-learn>=1.9.1",
     "scipy>=1.17.1",
     "shap>=0.51",
     "statsmodels>=0.15.0",
+    "streamlit>=1.65.0",
+    "uvicorn>=0.30",
     "xgboost-cpu>=3.2",
 ]
 
@@ -35,6 +39,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "httpx>=0.28.1",
     "pre-commit>=4.6.2",
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
