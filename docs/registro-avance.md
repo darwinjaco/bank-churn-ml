@@ -759,7 +759,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 |---|---|
 | Fecha de apertura | 7 de octubre de 2026 |
 | Fechas planificadas | 9–15 de noviembre de 2026 |
-| Estado | En curso: T0 |
+| Estado | T0–T5 completadas; T6 (prueba) espera confirmación |
 | Objetivo | Explicar el modelo congelado, auditar errores, segmentos y género (E-01) en validación, redactar la ficha y, con confirmación, hacer la única evaluación en prueba |
 
 | Tarea | Estado | Commit requerido |
@@ -768,8 +768,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T1 | Completada (`928bea6`) | `build: add shap` |
 | T2 | Completada (`a28f6aa`) | `feat: SHAP explanations with grouped features` |
 | T3 | Completada (`2ee7455`) | `feat: error, segment and E-01 fairness audit` |
-| T4 | Completada (`6e398a3` código; resultados en commit local) | `chore: explainability and audit results` |
-| T5 | Pendiente | `docs: week 6 audit and model card` |
+| T4 | Completada (`6e398a3` código, `97b4aed` resultados) | `chore: explainability and audit results` |
+| T5 | Completada (commit local) | `docs: week 6 audit and model card` |
 | T6 | Pendiente; requiere confirmación del responsable | `feat: final test evaluation` |
 
 #### T0 — Compuerta
@@ -804,6 +804,11 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - **E-01 (Gender):** tasa de contacto 31,2 % frente a 31,0 % (Δ +0,002, IC [−0,039; 0,044]); sensibilidad 77,5 % frente a 74,7 % (Δ +0,027, IC [−0,057; 0,109]); brecha de calibración −1,8 frente a +1,9 pp (Δ −0,038, IC [−0,067; −0,009], |Δ| < 0,05: sin alerta); **precisión 59,6 % frente a 42,2 % (Δ +0,174, IC [0,103; 0,252]): alerta preregistrada.** Las tasas base difieren (24,0 % frente a 17,5 %), por lo que con igual tasa de contacto la precisión es mayor en mujeres; además, al excluir `Gender` el modelo subestima levemente a las mujeres y sobrestima a los hombres. Solo se reporta, según §11.4.
 - Verificación independiente (sin importar `churn`): métricas por género, ranking SHAP y segmento 18–29 idénticos.
 - Figura `shap_importance.png` revisada.
+
+#### T5 — Reportes y ficha del modelo
+
+- `model_card.py` genera `reports/audit.md` (SHAP global y local, perfiles de error, segmentos, E-01 con IC y lectura) y `reports/model_card.md` (resumen, uso previsto y no previsto, datos, variables, selección, calibración y decisión, explicabilidad y equidad, limitaciones, evaluación final "pendiente" y trazabilidad), ambos desde los JSON; test que compara cifras y salida de la CLI. README con la sección de la semana 6.
+- Siguiente: T6, la única evaluación en prueba (§11.6), solo con confirmación explícita del responsable.
 
 ## 6. Plantilla para nuevas secciones
 

@@ -14,7 +14,7 @@ El dataset no contiene ingresos del banco, valor de vida del cliente (CLV), cost
 
 ## Estado actual
 
-- Implementados: contrato, división, EDA, figuras corregidas, transformadores sin fuga, baselines con MLflow, ajuste en dos fases, regla de selección, ablaciones E-02/E-03, calibración E-04, capa de decisión y artefacto congelado.
+- Implementados: contrato, división, EDA, figuras corregidas, transformadores sin fuga, baselines con MLflow, ajuste en dos fases, regla de selección, ablaciones E-02/E-03, calibración E-04, capa de decisión, artefacto congelado, SHAP, auditoría E-01 y ficha del modelo.
 - Configurados: uv, Ruff, pytest, pre-commit y GitHub Actions; cobertura mínima en CI del 85 %.
 - Documentadas: especificaciones 001–003; modelado v1.1 fija FS-RAW/FS-EDA y CV exclusiva de entrenamiento. EDA v1.1 conserva H1–H6 y resuelve B-01.
 - Verificados localmente: 90 tests aprobados y cobertura del 98,56 %, además de Ruff, formato y pre-commit.
@@ -228,7 +228,22 @@ uv run churn-decide                       # E-04, decisión, artefacto en models
 uv run python -m churn.decision_report
 ```
 
-Estado de cierre: semanas 1–5 publicadas con CI en verde y reproducidas desde un clon limpio. Semanas 6–8 sin iniciar. La división se adelantó a semana 2 para reservar la prueba antes del EDA.
+### Semana 6: explicabilidad, auditoría y ficha del modelo
+
+Sobre validación, con el artefacto congelado de la semana 5 (spec 002 v1.6 §11):
+
+- **SHAP** (aditividad comprobada): las variables más influyentes son Age, NumOfProducts, IsActiveMember y Geography=Germany, en línea con las hipótesis H1–H4. Importancia predictiva, no causal.
+- **Errores:** los abandonos no detectados son clientes más jóvenes y activos; en el tramo 18-29 no se contacta al 65% de quienes se van (n = 26).
+- **E-01 (género, solo auditoría):** misma tasa de contacto (31.2% frente a 31.0%) y sensibilidad sin diferencia detectable. **Alerta preregistrada en precisión** (59.6% frente a 42.2%), coherente con tasas base distintas; al excluir `Gender` hay una leve descalibración opuesta por género, bajo el umbral de alerta.
+
+Reportes: [audit.md](reports/audit.md) y la [ficha del modelo](reports/model_card.md).
+
+```powershell
+uv run churn-audit
+uv run python -m churn.model_card
+```
+
+Estado de cierre: semanas 1–5 publicadas y reproducidas desde un clon limpio; semana 6 implementada (evaluación final en prueba pendiente de confirmación). Semanas 7–8 sin iniciar. La división se adelantó a semana 2 para reservar la prueba antes del EDA.
 
 ## Publicación y seguimiento
 
