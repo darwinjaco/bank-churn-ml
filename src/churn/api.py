@@ -13,7 +13,7 @@ import pandas as pd
 from fastapi import FastAPI, Request
 from pydantic import BaseModel, ConfigDict, Field
 
-from churn import explain
+from churn import explain, narrative
 from churn.config import PROJECT_ROOT
 
 METADATA_FILE = PROJECT_ROOT / "reports" / "model_metadata.json"
@@ -152,6 +152,14 @@ def create_app(service_factory: Callable[[], Service] = load_service) -> FastAPI
     @app.post("/predict")
     def predict(customer: Customer, request: Request) -> dict:
         return service(request).predict([customer], reasons=True)[0]
+
+    @app.post("/explain")
+    def explain_customer(customer: Customer, request: Request) -> dict:
+        prediction = service(request).predict([customer], reasons=True)[0]
+        return {
+            **narrative.explain(customer.model_dump(exclude={"EstimatedSalary"}), prediction),
+            "prediction": prediction,
+        }
 
     @app.post("/predict/batch")
     def predict_batch(batch: Batch, request: Request) -> dict:

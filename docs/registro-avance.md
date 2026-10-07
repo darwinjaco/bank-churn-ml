@@ -839,8 +839,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T0 | Completada (`ce0abeb`) | `docs: spec 005 api and dashboard, week 7 plan (SDD gate)` |
 | T1 | Completada (`80ab9d0`) | `build: add serving dependencies` |
 | T2 | Completada (`0e473a1`) | `feat: model artifact download with hash check` |
-| T3 | Completada (commit local) | `feat: FastAPI service` |
-| T4 | Pendiente | `feat: optional LLM explanation with template fallback` |
+| T3 | Completada (`8d96805`) | `feat: FastAPI service` |
+| T4 | Completada (commit local) | `feat: optional LLM explanation with template fallback` |
 | T5 | Pendiente | `feat: Streamlit dashboard` |
 | T6 | Pendiente | `build: docker image and compose` |
 | T7 | Pendiente | `docs: week 7 api, dashboard and docker` |
@@ -860,6 +860,11 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - `api.py`: `Customer` (Pydantic, `extra="forbid"`, rangos del contrato; `EstimatedSalary` opcional e ignorada), `Batch` (1–1.000), `Service` (modelo, metadata, SHA-256 y evaluación final cargados una vez en el `lifespan`), endpoints `/health`, `/model`, `/predict` (probabilidad calibrada, contacto, beneficio esperado, umbral y 3 razones SHAP con dirección) y `/predict/batch` (resumen de contactados y beneficio esperado). Umbral y supuestos desde la metadata.
 - Tests (14) con modelo sintético: equivalencia exacta con `predict_proba`, regla y beneficio, salario ignorado, 422 por rango, categoría, `Gender`, `CustomerId` o campo faltante, límites del lote y carga del servicio.
 - Prueba de humo con el artefacto real: `/health` devuelve el SHA-256 publicado y `/predict` responde con la evaluación final disponible en `/model`.
+
+#### T4 — Explicación opcional con LLM
+
+- `narrative.py`: cliente compatible con OpenAI configurado solo por `LLM_BASE_URL`, `LLM_API_KEY` y `LLM_MODEL` (por ejemplo, NVIDIA NIM `https://integrate.api.nvidia.com/v1` u OpenRouter `https://openrouter.ai/api/v1`); tiempo de espera 10 s y sin reintentos. Solo envía las ocho variables del contrato, la probabilidad, la decisión, el beneficio, el umbral y las razones; nunca identificadores ni `Gender`. Sin configuración, con error o con respuesta vacía, devuelve una plantilla determinista. Endpoint `POST /explain`.
+- Tests: plantilla sin clave, respuesta del LLM simulada, ausencia de `CustomerId`, `Surname` y `Gender` en lo enviado, caída por tiempo de espera y respuesta vacía, y `/explain` con 422 para `Gender`.
 
 ## 6. Plantilla para nuevas secciones
 

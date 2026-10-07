@@ -152,3 +152,11 @@ def test_load_service_reads_metadata_and_final(model, monkeypatch, tmp_path):
     service = api.load_service()
     assert service.final_test is None and service.artifact_sha256 == artifact_module.MODEL_SHA256
     assert service.threshold == pytest.approx(1 / 6)
+
+
+def test_explain_endpoint_uses_template_without_key(client, monkeypatch):
+    for name in ("LLM_BASE_URL", "LLM_API_KEY", "LLM_MODEL"):
+        monkeypatch.delenv(name, raising=False)
+    body = client.post("/explain", json=CUSTOMER).json()
+    assert body["source"] == "template" and body["prediction"]["top_reasons"]
+    assert client.post("/explain", json={**CUSTOMER, "Gender": "Male"}).status_code == 422
