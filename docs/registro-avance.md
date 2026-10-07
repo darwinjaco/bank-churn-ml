@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 6 completada (prueba usada una vez); siguiente: semana 7 (API y dashboard, spec 005) |
+| Fase actual | Semana 7: API, dashboard y Docker (spec 005) |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -46,7 +46,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 | 002 | Modelado y evaluación | Baselines implementadas; protocolo de semana 4 v1.2 y bloqueo B-02 | Semanas 3–5 |
 | 003 | [EDA e hipótesis preregistradas](../specs/003-eda-and-hypotheses.md) | Implementada v1.1 y revisada; H1–H6 congeladas en v1.0 | Semana 2 |
 | 004 | Capa de decisión y beneficio esperado | Aprobada v1.0 (opción A) | Semana 5 |
-| 005 | API y dashboard | Pendiente de redacción | Antes de implementar la semana 7 |
+| 005 | API y dashboard | Aprobada v1.0 | Semana 7 |
 | 006 | Operación: tests, Docker, CI y monitoreo | Pendiente de redacción | Antes de ampliar operación y serving |
 
 ## 4. Punto de partida — 6 de octubre de 2026
@@ -759,7 +759,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 |---|---|
 | Fecha de apertura | 7 de octubre de 2026 |
 | Fechas planificadas | 9–15 de noviembre de 2026 |
-| Estado | Completada (T0–T6); pendiente de publicación |
+| Estado | Completada y publicada (CI #29 en verde) |
 | Objetivo | Explicar el modelo congelado, auditar errores, segmentos y género (E-01) en validación, redactar la ficha y, con confirmación, hacer la única evaluación en prueba |
 
 | Tarea | Estado | Commit requerido |
@@ -770,7 +770,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T3 | Completada (`2ee7455`) | `feat: error, segment and E-01 fairness audit` |
 | T4 | Completada (`6e398a3` código, `97b4aed` resultados) | `chore: explainability and audit results` |
 | T5 | Completada (`0b82172`) | `docs: week 6 audit and model card` |
-| T6 | Completada (`764cb00` código; resultados en commit local) | `feat: final test evaluation` |
+| T6 | Completada (`764cb00` código, `6e8e54d` resultados; CI #29 en verde) | `feat: final test evaluation` |
 
 #### T0 — Compuerta
 
@@ -824,6 +824,31 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - Coherente con desarrollo (validación: AP 0,696, Brier 0,1010, 61.950 €; FASE B: AP 0,690 sin salario): sin señales de sobreajuste a la validación.
 - Verificación independiente (script sin `churn`, reproduce la misma evaluación sin tomar decisiones): AP 0,7047, ROC-AUC 0,8616, Brier 0,1017, 634 contactados, 311 capturados, 61.600 €. Coincide.
 - Metadata marcada como completada; una segunda ejecución falla por diseño. Spec 002 §8: todos los criterios cumplidos. Ficha del modelo con la sección de prueba.
+
+### S11 — Semana 7: API, dashboard y Docker
+
+| Campo | Valor |
+|---|---|
+| Fecha de apertura | 7 de octubre de 2026 |
+| Fechas planificadas | 16–22 de noviembre de 2026 |
+| Estado | En curso: T0 |
+| Objetivo | Servir el modelo congelado con FastAPI y Streamlit, reproducible con `docker compose up`, sin CSV ni reentrenamiento |
+
+| Tarea | Estado | Commit requerido |
+|---|---|---|
+| T0 | Completada (commit local) | `docs: spec 005 api and dashboard, week 7 plan (SDD gate)` |
+| T1 | Pendiente | `build: add serving dependencies` |
+| T2 | Pendiente | `feat: model artifact download with hash check` |
+| T3 | Pendiente | `feat: FastAPI service` |
+| T4 | Pendiente | `feat: optional LLM explanation with template fallback` |
+| T5 | Pendiente | `feat: Streamlit dashboard` |
+| T6 | Pendiente | `build: docker image and compose` |
+| T7 | Pendiente | `docs: week 7 api, dashboard and docker` |
+
+#### T0 — Compuerta
+
+- Decisiones del responsable: artefacto por **GitHub Release** con verificación SHA-256 (`579b7fe3…`), despliegue en **Hugging Face Spaces (Docker)** y **LLM opcional** con interfaz compatible con OpenAI (NVIDIA NIM u OpenRouter), desactivado sin clave y con plantilla determinista.
+- Spec 005 v1.0: endpoints `/health`, `/model`, `/predict`, `/predict/batch`, `/explain`; contrato Pydantic con campos extra prohibidos (`Gender` → 422); dashboard que solo consume la API; tests y criterios de aceptación.
 
 ## 6. Plantilla para nuevas secciones
 

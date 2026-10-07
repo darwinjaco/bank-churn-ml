@@ -164,7 +164,7 @@ notebooks/    EDA delgado; lógica reutilizable en src/churn/
 | 002 | [Modelado y evaluación](specs/002-modeling-and-evaluation.md) | v1.5: baselines, selección (Random Forest) y calibración sigmoide implementadas |
 | 003 | [EDA e hipótesis preregistradas](specs/003-eda-and-hypotheses.md) | Implementada v1.1 y revisada |
 | 004 | [Capa de decisión y beneficio esperado](specs/004-decision-layer.md) | Implementada v1.0 (opción A: umbral analítico 1/6) |
-| 005 | API y dashboard | Por redactar antes de la semana 7 |
+| 005 | [API y dashboard](specs/005-api-and-dashboard.md) | Aprobada v1.0 |
 | 006 | Operación: tests, Docker, CI y monitoreo | Por redactar antes de ampliar operación y serving |
 
 ## Cronograma
