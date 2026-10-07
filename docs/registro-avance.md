@@ -766,8 +766,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 |---|---|---|
 | T0 | Completada (`2659ef1`) | `docs: spec 002 v1.6 and week 6 plan (SDD gate)` |
 | T1 | Completada (`928bea6`) | `build: add shap` |
-| T2 | Completada (commit local) | `feat: SHAP explanations with grouped features` |
-| T3 | Pendiente | `feat: error, segment and E-01 fairness audit` |
+| T2 | Completada (`a28f6aa`) | `feat: SHAP explanations with grouped features` |
+| T3 | Completada (commit local) | `feat: error, segment and E-01 fairness audit` |
 | T4 | Pendiente | `chore: explainability and audit results` |
 | T5 | Pendiente | `docs: week 6 audit and model card` |
 | T6 | Pendiente; requiere confirmación del responsable | `feat: final test evaluation` |
@@ -783,6 +783,11 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - `shap>=0.51` añadido (sin paquetes NVIDIA en el lock).
 - `explain.py`: `compute_shap` (TreeExplainer sobre el RF base, clase 1, probabilidad sin calibrar) que **falla si la aditividad no se cumple** (tolerancia 1e-6); `global_importance` (media |SHAP| por variable y por grupo, sumando SHAP por fila dentro del grupo: Geography, saldo y saldo + geografía según R4); `local_explanations` (mayor p, más cercano a t* por encima, menor p; cinco contribuciones de mayor magnitud).
 - Tests con un modelo pequeño: aditividad, orden, agrupaciones, ausencia de `Gender`, selección correcta de los tres clientes y caso sin clientes sobre el umbral.
+
+#### T3 — Auditoría
+
+- `audit.py`: segmentos de §11.3 (`productos` en {1, 2, 3-4}; `Gender` solo para auditar), métricas por segmento (n, tasa observada, p media, brecha de calibración, tasa de contacto, sensibilidad, precisión, abandonos no contactados, beneficio), segmento con mayor proporción de abandonos no contactados, perfiles VP/FP/FN/VN, banda ±0,05 alrededor de t* y E-01 con bootstrap estratificado por género (2.000 réplicas, semilla 42) y la señal de alerta preregistrada.
+- Tests: caso de valores conocidos, denominadores vacíos, regla de alerta en sus cuatro casos, bootstrap determinista que detecta una brecha sembrada y no la marca cuando no existe.
 
 ## 6. Plantilla para nuevas secciones
 
