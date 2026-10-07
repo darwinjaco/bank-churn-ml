@@ -840,8 +840,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T1 | Completada (`80ab9d0`) | `build: add serving dependencies` |
 | T2 | Completada (`0e473a1`) | `feat: model artifact download with hash check` |
 | T3 | Completada (`8d96805`) | `feat: FastAPI service` |
-| T4 | Completada (commit local) | `feat: optional LLM explanation with template fallback` |
-| T5 | Pendiente | `feat: Streamlit dashboard` |
+| T4 | Completada (`ae3e9e0`) | `feat: optional LLM explanation with template fallback` |
+| T5 | Completada (commit local) | `feat: Streamlit dashboard` |
 | T6 | Pendiente | `build: docker image and compose` |
 | T7 | Pendiente | `docs: week 7 api, dashboard and docker` |
 
@@ -865,6 +865,12 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 
 - `narrative.py`: cliente compatible con OpenAI configurado solo por `LLM_BASE_URL`, `LLM_API_KEY` y `LLM_MODEL` (por ejemplo, NVIDIA NIM `https://integrate.api.nvidia.com/v1` u OpenRouter `https://openrouter.ai/api/v1`); tiempo de espera 10 s y sin reintentos. Solo envía las ocho variables del contrato, la probabilidad, la decisión, el beneficio, el umbral y las razones; nunca identificadores ni `Gender`. Sin configuración, con error o con respuesta vacía, devuelve una plantilla determinista. Endpoint `POST /explain`.
 - Tests: plantilla sin clave, respuesta del LLM simulada, ausencia de `CustomerId`, `Surname` y `Gender` en lo enviado, caída por tiempo de espera y respuesta vacía, y `/explain` con 422 para `Gender`.
+
+#### T5 — Dashboard
+
+- `ui.py` (sin Streamlit, testeado): cliente HTTP (`API_URL`, por defecto `http://localhost:8000`), `prepare_batch` (solo columnas del contrato: descarta `Gender`, identificadores y salario; 1–1.000 filas), `results_table`, `reason_rows` y formato en euros.
+- `dashboard/app.py`: pestañas Cliente (formulario → probabilidad, decisión, beneficio, razones SHAP y texto con su origen), Lote (CSV → resumen, tabla ordenada y descarga) y Modelo (regla, supuestos y evaluación final). No carga el modelo: todo pasa por la API.
+- Prueba de humo con `streamlit.testing.AppTest` y la API real levantada con `uvicorn`: sin excepciones; cliente de 52 años, inactivo, de Alemania → 90,4 %, contactar, 221 €, razones Age, IsActiveMember y Geography=Germany; pestaña Modelo con AP 0,705 y 61.600 €.
 
 ## 6. Plantilla para nuevas secciones
 
