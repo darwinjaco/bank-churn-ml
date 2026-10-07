@@ -1,5 +1,9 @@
 # Imagen única para la API, el dashboard o ambos (Hugging Face Spaces). Spec 005.
-FROM python:3.11-slim
+# MODEL_SOURCE=release (por defecto) descarga el modelo del GitHub Release;
+# MODEL_SOURCE=local lo copia del contexto adicional "localmodel" (docker-compose.local.yml).
+ARG MODEL_SOURCE=release
+
+FROM python:3.11-slim AS base
 
 COPY --from=ghcr.io/astral-sh/uv:0.12.13 /uv /uvx /bin/
 
@@ -26,10 +30,17 @@ COPY docker/start.sh ./docker/start.sh
 COPY reports/model_metadata.json reports/final_test.json ./reports/
 RUN uv sync --locked --no-dev
 
-# 3) Modelo desde el GitHub Release; el build falla si el SHA-256 no coincide.
+# 3) Modelo. En ambas variantes el build falla si el SHA-256 no coincide.
+FROM base AS model-release
 ARG MODEL_URL=https://github.com/darwinjaco/bank-churn-ml/releases/download/model-v1.0/model.joblib
-RUN MODEL_URL="${MODEL_URL}" python -m churn.artifact && chown -R user:user /app
+RUN MODEL_URL="${MODEL_URL}" python -m churn.artifact
 
+FROM base AS model-local
+COPY --from=localmodel model.joblib ./models/model.joblib
+RUN python -m churn.artifact
+
+FROM model-${MODEL_SOURCE} AS final
+RUN chown -R user:user /app
 USER user
 ENV ROLE=all \
     API_URL=http://127.0.0.1:8000 \

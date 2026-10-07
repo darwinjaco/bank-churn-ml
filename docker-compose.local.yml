@@ -1,0 +1,15 @@
+# Prueba local sin GitHub Release: usa models/model.joblib (verificado por SHA-256 en el build).
+# docker compose -f docker-compose.yml -f docker-compose.local.yml up --build
+services:
+  api:
+    build:
+      args:
+        MODEL_SOURCE: local
+      additional_contexts:
+        localmodel: ./models
+  dashboard:
+    build:
+      args:
+        MODEL_SOURCE: local
+      additional_contexts:
+        localmodel: ./models

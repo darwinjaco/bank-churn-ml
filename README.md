@@ -272,6 +272,7 @@ Verificación automática (build, arranque, `/predict`, 422 con `Gender`, `/expl
 
 ```powershell
 pwsh -File scripts/verify-docker.ps1        # añade -Down para detener al final
+pwsh -File scripts/verify-docker.ps1 -LocalModel   # sin Release: usa models/model.joblib (mismo SHA-256)
 ```
 
 **Sin Docker** (con `models/model.joblib` local o descargado con `uv run python -m churn.artifact`):
