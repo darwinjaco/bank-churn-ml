@@ -764,8 +764,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 
 | Tarea | Estado | Commit requerido |
 |---|---|---|
-| T0 | Completada (commit local) | `docs: spec 002 v1.6 and week 6 plan (SDD gate)` |
-| T1 | Pendiente | `build: add shap` |
+| T0 | Completada (`2659ef1`) | `docs: spec 002 v1.6 and week 6 plan (SDD gate)` |
+| T1 | Completada (commit local) | `build: add shap` |
 | T2 | Pendiente | `feat: SHAP explanations with grouped features` |
 | T3 | Pendiente | `feat: error, segment and E-01 fairness audit` |
 | T4 | Pendiente | `chore: explainability and audit results` |
