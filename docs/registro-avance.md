@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semanas 1–5 completadas y verificadas; siguiente: semana 6 |
+| Fase actual | Semana 6: explicabilidad, auditoría y ficha del modelo |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -32,7 +32,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 | Semana 3 | 19–25 oct | Pipeline, división estratificada, Dummy/LogReg y MLflow | Modelos de referencia registrados en MLflow | Baselines implementadas y registradas; revisión pendiente |
 | Semana 4 | 26 oct–1 nov | RF, XGBoost, validación cruzada y ajuste acotado | Tabla de media ± desviación estándar por modelo | Compuerta documental en curso; bloqueo B-02 antes de entrenar |
 | Semana 5 | 2–8 nov | Calibración (E-04) y umbral monetario analítico (opción A); deciles y sensibilidad excluidos por decisión del responsable | Umbral justificado por beneficio esperado bajo supuestos explícitos | Completada |
-| Semana 6 | 9–15 nov | SHAP, errores, segmentos y ficha del modelo | Limitaciones documentadas | Pendiente |
+| Semana 6 | 9–15 nov | SHAP, errores, segmentos, E-01, ficha del modelo y evaluación final (con confirmación) | Limitaciones documentadas | En curso |
 | Semana 7 | 16–22 nov | FastAPI, Streamlit, tests de API y Docker Compose | `docker compose up` funciona desde cero | Pendiente |
 | Semana 8 | 23–29 nov | Cambio de distribución simulado, despliegue y README final | URL pública y reproducibilidad verificadas | Pendiente |
 
@@ -752,6 +752,31 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - Artefacto `models/model.joblib` recargado sobre validación: 621 contactados con p > 1/6, igual que `decision.json`; columnas sin `Gender`; metadata idéntica a su copia en `reports/`.
 - Controles estáticos: ningún módulo carga la partición de prueba; `Gender` solo aparece como columna de auditoría; spec 003 marcada como implementada.
 - Observación: `.python-version` fija solo 3.11 (no el parche); no afecta a los resultados.
+
+### S10 — Semana 6: explicabilidad, auditoría y ficha del modelo
+
+| Campo | Valor |
+|---|---|
+| Fecha de apertura | 7 de octubre de 2026 |
+| Fechas planificadas | 9–15 de noviembre de 2026 |
+| Estado | En curso: T0 |
+| Objetivo | Explicar el modelo congelado, auditar errores, segmentos y género (E-01) en validación, redactar la ficha y, con confirmación, hacer la única evaluación en prueba |
+
+| Tarea | Estado | Commit requerido |
+|---|---|---|
+| T0 | Completada (commit local) | `docs: spec 002 v1.6 and week 6 plan (SDD gate)` |
+| T1 | Pendiente | `build: add shap` |
+| T2 | Pendiente | `feat: SHAP explanations with grouped features` |
+| T3 | Pendiente | `feat: error, segment and E-01 fairness audit` |
+| T4 | Pendiente | `chore: explainability and audit results` |
+| T5 | Pendiente | `docs: week 6 audit and model card` |
+| T6 | Pendiente; requiere confirmación del responsable | `feat: final test evaluation` |
+
+#### T0 — Compuerta
+
+- Semana 5 y verificación publicadas (`a99517f`). Spec 002 v1.6 §11 fija, antes de calcular: SHAP con aditividad y agrupación R4; errores en t*; segmentos; E-01 con bootstrap (2.000 réplicas, semilla 42) y señal de alerta (IC sin 0 y |Δ| ≥ 0,05); ficha del modelo; evaluación final única con confirmación explícita.
+- `AGENTS.md` regla 7: excepción única `load_test_once` para §11.6.
+- Prueba técnica previa de compatibilidad (sin versionar): `shap` 0.51 con `numba` 0.68 funciona con el lock actual; 200 filas en 2,9 s.
 
 ## 6. Plantilla para nuevas secciones
 

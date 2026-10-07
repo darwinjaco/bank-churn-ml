@@ -38,4 +38,4 @@ No modificar `src/`, `tests/` ni dependencias sin una especificación y un plan 
 
 ## 7. Partición de prueba
 
-No crear funciones que carguen la partición de prueba hasta la evaluación final de la especificación 002. Durante la semana 2 solo se carga entrenamiento y validación para exploración; no existe `load_test()`.
+No crear funciones que carguen la partición de prueba hasta la evaluación final de la especificación 002. Durante la semana 2 solo se carga entrenamiento y validación para exploración; no existe `load_test()`. La única excepción es `load_test_once` de la spec 002 v1.6 §11.6: se implementa y ejecuta una sola vez, después de versionar la ficha del modelo y con confirmación explícita del responsable.

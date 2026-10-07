@@ -5,7 +5,7 @@
 | Estado | En implementación: semanas 3–5 completadas; pendientes E-01 (semana 6) y evaluación final en prueba |
 | Responsable | Darwin Jacome Cuenca |
 | Dependencia | [Especificación 001](001-overview-and-data-contract.md) |
-| Versión | v1.5 — semana 5: detalle de calibración (E-04), artefacto y hash canónico del manifiesto; §6 y experimentos sin cambios |
+| Versión | v1.6 — semana 6: explicabilidad (SHAP), errores, segmentos, E-01 y ficha del modelo; evaluación final en prueba con confirmación explícita |
 | Última revisión documental | 6 de octubre de 2026 |
 
 ## 1. Objetivo
@@ -207,3 +207,44 @@ El [plan completo de semana 4](../docs/plan-semana-4.md) fija T0–T7 y las obse
 - T5: `selection.py`, función pura `select_model(cv_summary, val_scores=None)` que aplica literalmente §6 pasos 1–5. Tests de todas las ramas, incluido fallo frente a Dummy, fallback a LogReg y comparación de LogReg solo con Dummy.
 - T6: CLI `churn-select` → `reports/model_selection.json`, con AP de búsqueda optimista, métricas FASE B, diferencias pareadas, decisiones paso a paso, E-03, E-02 y AP de validación de los candidatos necesarios, siguiendo el orden de §6. Registrar stages y etiquetas de §5.4.
 - T7: `reports/model_selection.md` generado desde JSON, tablas a tres decimales, aplicación de la regla, experimentos y AP de validación como selección de desarrollo; lenguaje descriptivo sin causalidad y sin decisiones económicas de semana 5. README, criterios cumplidos de §8 y S08 actualizados con CI y run IDs. Detenerse para revisión, sin avanzar a semana 5.
+
+## 11. Explicabilidad, errores, segmentos y E-01 (semana 6, v1.6)
+
+Fijado antes de calcular. Datos: las 2.000 filas de **validación** y el artefacto congelado de la semana 5 (Random Forest sin `EstimatedSalary` + calibrador sigmoide, t* = 1/6). Todo es análisis de **desarrollo**: no se modifica el modelo, el calibrador ni el umbral.
+
+### 11.1. SHAP
+
+- `shap.TreeExplainer` sobre el Random Forest base, con las variables ya transformadas por el pipeline. Explica la probabilidad **sin calibrar**; la sigmoide es monótona, así que el orden de los clientes no cambia.
+- Comprobación de aditividad: valor base + suma de SHAP = probabilidad sin calibrar (tolerancia 1e-6).
+- **Global:** media de |SHAP| por variable. Agrupaciones por suma de SHAP dentro de cada fila: `Geography` (sus tres columnas one-hot), *saldo* (`Balance` + `has_balance`) y, por R4, el grupo conjunto *saldo y geografía*.
+- **Local:** tres clientes de validación (mayor probabilidad, el más cercano a t* por encima y menor probabilidad), con sus cinco contribuciones de mayor magnitud.
+- Importancia predictiva ≠ causalidad: SHAP describe el modelo, no el efecto de intervenir una variable.
+
+### 11.2. Errores en t*
+
+- Perfil medio de las variables del modelo para VP, FP, FN y VN.
+- Banda cercana al umbral: clientes con |p calibrada − t*| < 0,05; n y tasa observada de abandono.
+- Segmento (de §11.3) con mayor proporción de abandonos no contactados (FN / abandonos).
+
+### 11.3. Segmentos
+
+Segmentos: `Geography`, tramos de edad de `config.py`, `NumOfProducts` en {1, 2, 3–4}, `IsActiveMember`, `has_balance` y `Gender` (auditoría). Por segmento: n, tasa observada, probabilidad calibrada media (brecha de calibración = media predicha − tasa observada), tasa de contacto, sensibilidad, precisión y beneficio (total y por cliente) según la spec 004.
+
+### 11.4. E-01: auditoría por `Gender`
+
+- `Gender` no es variable del modelo; se usa solo para auditar.
+- Diferencias Female − Male en tasa de contacto (paridad demográfica), sensibilidad (igualdad de oportunidades), precisión y brecha de calibración.
+- IC 95 % por bootstrap estratificado por género: 2.000 réplicas, semilla 42.
+- **Señal de alerta preregistrada:** el IC excluye 0 y |diferencia| ≥ 0,05.
+- Las tasas base difieren por género (EDA), así que no se espera paridad en la tasa de contacto; la sensibilidad y la calibración son los criterios más relevantes.
+- Esta semana solo se reporta. Cualquier mitigación requiere una enmienda.
+
+### 11.5. Ficha del modelo
+
+`reports/model_card.md`, generada desde los JSON: uso previsto y no previsto, datos, variables y exclusiones, entrenamiento y selección, métricas de desarrollo, calibración, regla de decisión, segmentos y E-01, limitaciones (origen sintético, grupo 3–4, Alemania sin saldo cero, supuestos económicos) y resultado de la evaluación final.
+
+### 11.6. Evaluación final en prueba (§8)
+
+- Se ejecuta **una sola vez**, después de versionar §11.1–11.5, y **solo con confirmación explícita del responsable**.
+- Artefacto, calibrador y umbral congelados. Métricas: AP, ROC-AUC, Brier y log loss; beneficio de las políticas de la spec 004 en t*; precisión, sensibilidad, F1 y matriz de confusión.
+- Primera y única función que carga la prueba (`load_test_once`), con registro en MLflow `final=true`. Tras ella no se reajusta nada; los resultados se añaden a la ficha.
