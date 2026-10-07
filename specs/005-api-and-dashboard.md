@@ -72,7 +72,7 @@ Mismos rangos que el contrato de datos (spec 001): `CreditScore` 300–900, `Age
 - [x] `/predict` devuelve la misma probabilidad que `models/model.joblib` para el mismo cliente.
 - [x] Hash del artefacto verificado en build y al arrancar (réplica de los pasos de la imagen; build real pendiente).
 - [x] Sin clave de LLM, `/explain` responde con la plantilla.
-- [ ] CI en verde con cobertura ≥ 85 % (local: 194 tests, 98 %; CI tras el push).
+- [x] CI en verde con cobertura ≥ 85 % (CI remoto en `fd78f59`; local: 243 tests, 98,25 %).
 
 ## 10. Enmienda v1.1 (7 de octubre de 2026, semana 8)
 

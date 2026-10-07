@@ -6,7 +6,7 @@
 
 **Bank churn → retention decisions.** End-to-end ML system that turns a *calibrated* churn probability into a contact / no-contact decision with an explicit expected-profit rule: contact if p > c / (s·V) = 1/6. On a test set used exactly once, the frozen Random Forest reaches **AP 0.705** and **ROC-AUC 0.862** and, under illustrative assumptions, earns **€61,600 vs €22,100** for contacting everyone (60.5 % of the oracle). Built spec-first (6 specs) with preregistered hypotheses and thresholds, leakage-safe pipelines, MLflow, SHAP and a fairness audit, FastAPI + Streamlit, Docker and CI. A simulated drift study shows that a prevalence shift miscalibrates the model by −9.6 pp **without any input-drift alarm**.
 
-**[Demo en vivo](https://huggingface.co/spaces/darwinjaco/bank-churn-ml)** · [API](#api) · [Ficha del modelo](reports/model_card.md) · [Especificaciones](specs/) · [Registro de avance](docs/registro-avance.md)
+**[Demo en vivo](https://huggingface.co/spaces/darwinjaco/bank-churn-ml)** (pendiente de publicar) · [API](#api) · [Ficha del modelo](reports/model_card.md) · [Especificaciones](specs/) · [Registro de avance](docs/registro-avance.md)
 
 <!-- GIF de demo (20-30 s): docs/demo.gif o asset de un Release si supera 500 KB. -->
 
@@ -100,7 +100,7 @@ Referencia = entrenamiento; actual = validación remuestreada (nunca la prueba).
 
 ## Trabajo futuro
 
-Presupuesto por deciles y análisis de sensibilidad de los supuestos (opciones B y C de la [spec 004](specs/004-decision-layer.md)); mitigación de E-01; uplift con datos de tratamiento; monitoreo con etiquetas reales; migrar `penalty="l2"` de LogisticRegression (obsoleto en scikit-learn 1.10).
+Presupuesto por deciles y análisis de sensibilidad de los supuestos (opciones B y C de la [spec 004](specs/004-decision-layer.md)); mitigación de E-01; uplift con datos de tratamiento; monitoreo con etiquetas reales; migrar `penalty="l2"` de LogisticRegression (obsoleto desde scikit-learn 1.9; se elimina en la 1.10).
 
 ## Inicio rápido
 
