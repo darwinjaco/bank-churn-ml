@@ -8,6 +8,7 @@ authors = [{ name = "Darwin Jacome Cuenca" }]
 requires-python = ">=3.11,<3.13"
 dependencies = [
     "fastapi>=0.142.2",
+    "httpx>=0.28.1",
     "mlflow>=3.16.1",
     "numpy>=2.4.6",
     "openai>=3.26.0",
@@ -39,7 +40,6 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
-    "httpx>=0.28.1",
     "pre-commit>=4.6.2",
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
