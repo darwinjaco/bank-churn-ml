@@ -228,7 +228,7 @@ uv run churn-decide                       # E-04, decisión, artefacto en models
 uv run python -m churn.decision_report
 ```
 
-Estado de cierre: semanas 1–4 publicadas; semana 5 implementada, pendiente de publicación. Semanas 6–8 sin iniciar. La división se adelantó a semana 2 para reservar la prueba antes del EDA.
+Estado de cierre: semanas 1–5 publicadas con CI en verde y reproducidas desde un clon limpio. Semanas 6–8 sin iniciar. La división se adelantó a semana 2 para reservar la prueba antes del EDA.
 
 ## Publicación y seguimiento
 

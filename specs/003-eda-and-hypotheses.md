@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Estado | Aprobada v1.1 |
+| Estado | Implementada v1.1 (semana 2) |
 | Responsable | Darwin Jacome Cuenca |
 | Semana | 2 (12–18 de octubre de 2026) |
 | Dependencias | [001](001-overview-and-data-contract.md) (contrato), [002](002-modeling-and-evaluation.md) §2 (división) |

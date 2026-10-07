@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 6 de octubre de 2026 |
-| Fase actual | Semana 5 implementada; siguiente: semana 6 (SHAP, errores, segmentos, E-01 y ficha del modelo) |
+| Fase actual | Semanas 1–5 completadas y verificadas; siguiente: semana 6 |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -31,7 +31,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 | Semana 2 | 12–18 oct | EDA, hipótesis y auditoría de productos 3–4 y balance cero | Hipótesis contrastadas con pruebas estadísticas, tamaños de efecto e incertidumbre | Completada y revisada el 6 de octubre; correcciones interpretativas incorporadas |
 | Semana 3 | 19–25 oct | Pipeline, división estratificada, Dummy/LogReg y MLflow | Modelos de referencia registrados en MLflow | Baselines implementadas y registradas; revisión pendiente |
 | Semana 4 | 26 oct–1 nov | RF, XGBoost, validación cruzada y ajuste acotado | Tabla de media ± desviación estándar por modelo | Compuerta documental en curso; bloqueo B-02 antes de entrenar |
-| Semana 5 | 2–8 nov | Calibración (E-04) y umbral monetario analítico (opción A); deciles y sensibilidad excluidos por decisión del responsable | Umbral justificado por beneficio esperado bajo supuestos explícitos | Implementada; pendiente de publicación |
+| Semana 5 | 2–8 nov | Calibración (E-04) y umbral monetario analítico (opción A); deciles y sensibilidad excluidos por decisión del responsable | Umbral justificado por beneficio esperado bajo supuestos explícitos | Completada |
 | Semana 6 | 9–15 nov | SHAP, errores, segmentos y ficha del modelo | Limitaciones documentadas | Pendiente |
 | Semana 7 | 16–22 nov | FastAPI, Streamlit, tests de API y Docker Compose | `docker compose up` funciona desde cero | Pendiente |
 | Semana 8 | 23–29 nov | Cambio de distribución simulado, despliegue y README final | URL pública y reproducibilidad verificadas | Pendiente |
@@ -691,7 +691,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 |---|---|
 | Fecha de apertura | 6 de octubre de 2026 |
 | Fechas planificadas | 2–8 de noviembre de 2026 |
-| Estado | Implementada (T0–T6); pendiente de publicación |
+| Estado | Completada y publicada (`7013dfc..fbae9cc`, CI #27 en verde) |
 | Objetivo | Calibrar el Random Forest final (E-04), aplicar el umbral analítico de la spec 004 y congelar el artefacto, sin consultar prueba |
 
 | Tarea | Estado | Commit requerido |
@@ -702,7 +702,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T3 | Completada (`fa7472e`) | `feat: expected-profit decision layer (spec 004)` |
 | T4 | Completada (`f2796d5`) | `feat: calibrate, decide and freeze artifact` |
 | T5 | Completada (`364fe26`) | `chore: calibration and decision results` |
-| T6 | Completada; pendiente de publicación y CI | `docs: week 5 calibration and decision` |
+| T6 | Completada; publicada (`fbae9cc`, CI #27 en verde) | `docs: week 5 calibration and decision` |
 
 #### T0 — Compuerta
 
@@ -743,6 +743,15 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 
 - `decision_report.py` genera `reports/decision.md` desde `decision.json` (test que compara cifras y salida de la CLI). README con la sección de la semana 5; spec 002 §8 (selección/calibración y artefacto marcados; E-01 pendiente) y spec 004 §9 completos.
 - Pendiente para la semana 6: E-01 (auditoría por `Gender`), SHAP agrupando `has_balance` y `Geography` (R4), análisis de errores y segmentos, y ficha del modelo con el sesgo del grupo 3–4 y los límites de la spec 004. La evaluación final en prueba sigue reservada.
+
+#### Verificación previa a la semana 6
+
+- Sincronización: `main` local = `origin/main` = `fbae9cc`; árbol limpio. CI #27 en verde (1 min 23 s).
+- **Clon limpio desde GitHub** (entorno Linux independiente, `uv sync --locked --all-groups`, mismo CSV): `churn-split` regenera el manifiesto sin cambios; `churn-validate` reproduce `data_quality.json`; 148 tests aprobados **sin omitidos** (incluidos los de datos reales), cobertura 98,31 %.
+- **Reproducción completa del pipeline** en ese clon (`churn-hypotheses` → `churn-baselines` → `churn-tune` → `churn-select` → `churn-decide`, ≈ 8 min): `hypotheses`, `baselines`, `tuning`, `model_selection` y `decision` idénticos a los versionados (tolerancia 1e-9), salvo procedencia (run IDs, commit, hash del manifiesto). En `model_metadata` solo cambia la versión de parche de Python (3.11.16 frente a 3.11.15).
+- Artefacto `models/model.joblib` recargado sobre validación: 621 contactados con p > 1/6, igual que `decision.json`; columnas sin `Gender`; metadata idéntica a su copia en `reports/`.
+- Controles estáticos: ningún módulo carga la partición de prueba; `Gender` solo aparece como columna de auditoría; spec 003 marcada como implementada.
+- Observación: `.python-version` fija solo 3.11 (no el parche); no afecta a los resultados.
 
 ## 6. Plantilla para nuevas secciones
 
