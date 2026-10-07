@@ -765,8 +765,8 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | Tarea | Estado | Commit requerido |
 |---|---|---|
 | T0 | Completada (`2659ef1`) | `docs: spec 002 v1.6 and week 6 plan (SDD gate)` |
-| T1 | Completada (commit local) | `build: add shap` |
-| T2 | Pendiente | `feat: SHAP explanations with grouped features` |
+| T1 | Completada (`928bea6`) | `build: add shap` |
+| T2 | Completada (commit local) | `feat: SHAP explanations with grouped features` |
 | T3 | Pendiente | `feat: error, segment and E-01 fairness audit` |
 | T4 | Pendiente | `chore: explainability and audit results` |
 | T5 | Pendiente | `docs: week 6 audit and model card` |
@@ -777,6 +777,12 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 - Semana 5 y verificación publicadas (`a99517f`). Spec 002 v1.6 §11 fija, antes de calcular: SHAP con aditividad y agrupación R4; errores en t*; segmentos; E-01 con bootstrap (2.000 réplicas, semilla 42) y señal de alerta (IC sin 0 y |Δ| ≥ 0,05); ficha del modelo; evaluación final única con confirmación explícita.
 - `AGENTS.md` regla 7: excepción única `load_test_once` para §11.6.
 - Prueba técnica previa de compatibilidad (sin versionar): `shap` 0.51 con `numba` 0.68 funciona con el lock actual; 200 filas en 2,9 s.
+
+#### T1–T2 — SHAP
+
+- `shap>=0.51` añadido (sin paquetes NVIDIA en el lock).
+- `explain.py`: `compute_shap` (TreeExplainer sobre el RF base, clase 1, probabilidad sin calibrar) que **falla si la aditividad no se cumple** (tolerancia 1e-6); `global_importance` (media |SHAP| por variable y por grupo, sumando SHAP por fila dentro del grupo: Geography, saldo y saldo + geografía según R4); `local_explanations` (mayor p, más cercano a t* por encima, menor p; cinco contribuciones de mayor magnitud).
+- Tests con un modelo pequeño: aditividad, orden, agrupaciones, ausencia de `Gender`, selección correcta de los tres clientes y caso sin clientes sobre el umbral.
 
 ## 6. Plantilla para nuevas secciones
 
