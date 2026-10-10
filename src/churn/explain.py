@@ -76,9 +76,7 @@ def global_importance(values: np.ndarray, names: list[str]) -> dict:
     return {"per_feature": per_feature, "groups": groups}
 
 
-def local_explanations(
-    shap_result: dict, calibrated: np.ndarray, customer_ids, threshold: float
-) -> list[dict]:
+def local_explanations(shap_result: dict, calibrated: np.ndarray, threshold: float) -> list[dict]:
     """Tres clientes: mayor p, el más cercano a t* por encima y menor p (§11.1)."""
     calibrated = np.asarray(calibrated, dtype=float)
     above = np.flatnonzero(calibrated > threshold)
@@ -87,7 +85,6 @@ def local_explanations(
         "cerca_del_umbral": int(above[np.argmin(calibrated[above])]) if above.size else None,
         "menor_probabilidad": int(np.argmin(calibrated)),
     }
-    ids = np.asarray(customer_ids)
     names, values, matrix = shap_result["names"], shap_result["values"], shap_result["matrix"]
     out = []
     for case, row in cases.items():
@@ -97,7 +94,6 @@ def local_explanations(
         out.append(
             {
                 "case": case,
-                "customer_id": int(ids[row]),
                 "p_calibrated": float(calibrated[row]),
                 "p_raw": float(shap_result["raw"][row]),
                 "base_value": shap_result["base"],

@@ -193,3 +193,22 @@ def test_monitoring_endpoint(model):
     empty = api.Service(model, METADATA, "b" * 64)
     with TestClient(api.create_app(lambda: empty)) as test_client:
         assert test_client.get("/monitoring").status_code == 404
+
+
+def test_validation_errors_do_not_echo_sensitive_input(client):
+    forbidden = {"CustomerId": "identificador-privado", "Gender": "dato-privado"}
+    response = client.post("/predict", json={**CUSTOMER, **forbidden})
+    assert response.status_code == 422
+    for item in response.json()["detail"]:
+        assert set(item) == {"loc", "type", "msg"}
+        assert item["loc"][-1] == "campo_extra"
+    assert all(value not in response.text for value in forbidden.values())
+    assert all(name not in response.text for name in forbidden)
+    assert response.headers["cache-control"] == "no-store"
+    assert response.headers["x-content-type-options"] == "nosniff"
+
+
+def test_api_rejects_oversized_body_before_parsing(client):
+    response = client.post("/predict", content=b"x" * (512 * 1024 + 1))
+    assert response.status_code == 413
+    assert client.get("/health").status_code == 200

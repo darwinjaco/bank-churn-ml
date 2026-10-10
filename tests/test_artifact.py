@@ -58,3 +58,16 @@ def test_published_hash_matches_local_artifact_when_present():
     if not artifact.DEFAULT_MODEL_PATH.exists():
         pytest.skip("Artefacto local ausente (esperado en CI).")
     assert artifact.sha256_file(artifact.DEFAULT_MODEL_PATH) == artifact.MODEL_SHA256
+
+
+def test_local_load_rejects_before_deserialization_and_never_downloads(tmp_path, monkeypatch):
+    calls = []
+    monkeypatch.setattr(artifact.joblib, "load", lambda path: calls.append(path))
+    missing = tmp_path / "missing.joblib"
+    with pytest.raises(FileNotFoundError):
+        artifact.load_local_model(missing)
+    changed = tmp_path / "changed.joblib"
+    changed.write_bytes(b"not trusted")
+    with pytest.raises(artifact.ArtifactIntegrityError):
+        artifact.load_local_model(changed)
+    assert not calls and not missing.exists()

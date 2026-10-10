@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Estado | Implementada v1.0 y verificada en local (7 de octubre de 2026); pendientes del responsable: push y CI, Release, Space (B-03), GIF y etiqueta `v1.0.0` |
+| Estado | Implementación original publicada en `fd78f59`; Release `model-v1.0` y Docker verificados; despliegue gratuito Render en preparación, GIF y etiqueta `v1.0.0` pendientes |
 | Responsable | Darwin Jacome Cuenca |
 | Semana | 8 (23–29 de noviembre de 2026) |
 | Dependencias | [002](002-modeling-and-evaluation.md) (artefacto congelado), [004](004-decision-layer.md) (regla de decisión), [005](005-api-and-dashboard.md) (API, dashboard e imagen) |
@@ -166,7 +166,7 @@ Si hay tiempo, `GET /monitoring` devuelve `reports/monitoring.json` (404 si no e
 
 Estado al 7 de octubre de 2026. Se distingue verificación local, CI remoto y despliegue público; el detalle está en el registro S12.
 
-- [ ] Spec 005 cerrada: Docker con el Release publicado y CI en verde. *Pendiente del responsable (Release, `verify-docker.ps1` sin `-LocalModel`, push).*
+- [ ] Spec 005 cerrada: Docker con el Release publicado y CI en verde. *Release y `verify-docker.ps1` sin `-LocalModel` verificados (S14). Pendientes: clon limpio y CI remoto de las correcciones nuevas.*
 - [ ] El Space público responde y reproduce el cliente de referencia (0,947, contactar). *Pendiente: cuenta de Hugging Face (B-03) y workflow. En local, la API real y el dashboard (`AppTest`) dan 94,7 % y contactar.*
 - [x] El Space no contiene datos reales, binarios, `models/` ni secretos: `tests/test_build_space.py` (lista exacta, rechazos, cabecera YAML, cada `COPY` presente); armado real con 41 archivos de texto (792 KB).
 - [ ] LLM con límite por hora y respaldo de plantilla: implementado y probado (`tests/test_narrative.py`: límite, intentos fallidos, ventana deslizante, 0 y valores inválidos). *Falta configurar los secretos en el Space y ver `source="llm"` en la demo.*
@@ -196,3 +196,11 @@ Autenticación, escalado, reentrenamiento automático, monitoreo en producción 
 
 - **B-03 — Cuenta de Hugging Face pendiente.** El responsable aún no tiene cuenta (7 de octubre de 2026). Se usa `darwinjaco` como usuario provisional en el README y en esta spec. Si el usuario final es otro, se corrige en `README.md`, `deploy/space/README.md` y la variable `HF_SPACE`; el código no depende del nombre.
 - Prerrequisitos del responsable (P1–P6 del plan): push y CI en verde, Release `model-v1.0` publicado con el repositorio público, `verify-docker.ps1` sin `-LocalModel`, cuenta y token de Hugging Face, secreto `HF_TOKEN` y variable `HF_SPACE` en GitHub, Space vacío creado y, si se usa, la clave del LLM.
+
+## 11. Enmienda de seguridad — Spec 007
+
+La [spec 007](007-security-hardening.md) sustituye §3 en la persistencia del
+presupuesto LLM: mismo límite configurable, compartido por procesos mediante
+SQLite en la misma instancia. También exige XSRF activo, autenticación Git sin
+token en argumentos y referencias inmutables. Los disparadores de §2.4 siguen
+vigentes. Render permanece aparcado, pendiente de su propia decisión de diseño.

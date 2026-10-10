@@ -5,6 +5,7 @@ from churn import model_card
 
 def test_reports_contain_json_values_and_cli(tmp_path, monkeypatch):
     audit = model_card._load("audit.json")
+    assert all("customer_id" not in case for case in audit["shap"]["local"])
     text = model_card.render_audit(audit)
     assert f"{audit['e01_gender']['precision']['difference']:+.3f}" in text
     assert audit["shap"]["per_feature"][0]["feature"] in text

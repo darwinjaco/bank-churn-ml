@@ -6,7 +6,7 @@
 
 **Bank churn → retention decisions.** End-to-end ML system that turns a *calibrated* churn probability into a contact / no-contact decision with an explicit expected-profit rule: contact if p > c / (s·V) = 1/6. On a test set used exactly once, the frozen Random Forest reaches **AP 0.705** and **ROC-AUC 0.862** and, under illustrative assumptions, earns **€61,600 vs €22,100** for contacting everyone (60.5 % of the oracle). Built spec-first (6 specs) with preregistered hypotheses and thresholds, leakage-safe pipelines, MLflow, SHAP and a fairness audit, FastAPI + Streamlit, Docker and CI. A simulated drift study shows that a prevalence shift miscalibrates the model by −9.6 pp **without any input-drift alarm**.
 
-**[Demo en vivo](https://huggingface.co/spaces/darwinjaco/bank-churn-ml)** · [API](#api) · [Ficha del modelo](reports/model_card.md) · [Especificaciones](specs/) · [Registro de avance](docs/registro-avance.md)
+**[Demo en vivo](https://huggingface.co/spaces/darwinjaco/bank-churn-ml)** (pendiente de publicar) · [API](#api) · [Ficha del modelo](reports/model_card.md) · [Especificaciones](specs/) · [Registro de avance](docs/registro-avance.md)
 
 <!-- GIF de demo (20-30 s): docs/demo.gif o asset de un Release si supera 500 KB. -->
 
@@ -100,7 +100,7 @@ Referencia = entrenamiento; actual = validación remuestreada (nunca la prueba).
 
 ## Trabajo futuro
 
-Presupuesto por deciles y análisis de sensibilidad de los supuestos (opciones B y C de la [spec 004](specs/004-decision-layer.md)); mitigación de E-01; uplift con datos de tratamiento; monitoreo con etiquetas reales; migrar `penalty="l2"` de LogisticRegression (obsoleto en scikit-learn 1.10).
+Presupuesto por deciles y análisis de sensibilidad de los supuestos (opciones B y C de la [spec 004](specs/004-decision-layer.md)); mitigación de E-01; uplift con datos de tratamiento; monitoreo con etiquetas reales; migrar `penalty="l2"` de LogisticRegression (obsoleto desde scikit-learn 1.9; se elimina en la 1.10).
 
 ## Inicio rápido
 
@@ -132,6 +132,42 @@ uv run streamlit run dashboard/app.py    # en otra terminal
 Para probar el lote, sube [`examples/clientes_ejemplo.csv`](examples/clientes_ejemplo.csv): 20 clientes **sintéticos** generados con semilla por `scripts/make_example_csv.py`.
 
 **LLM opcional** para `/explain`: copia `.env.example` a `.env` (no se versiona) con `LLM_BASE_URL`, `LLM_API_KEY` y `LLM_MODEL` de un proveedor compatible con OpenAI (NVIDIA NIM, OpenRouter). `LLM_MAX_CALLS_PER_HOUR` (30 por defecto) limita el gasto. Solo se envían las variables del contrato y las razones del modelo, nunca identificadores; ante cualquier fallo o límite responde una plantilla.
+
+### Controles de seguridad de la demo
+
+La [spec 007](specs/007-security-hardening.md) define el perfil aprobado:
+**60 intentos de inferencia/minuto**, **2 simultáneos**, JSON de hasta **512 KiB**
+y CSV de hasta **1 MiB / 1.000 clientes**. Los límites de inferencia son globales
+para el único worker de API; los rechazos devuelven 429 con `Retry-After`, o 413
+si se supera el tamaño. `/health` sigue disponible.
+
+```mermaid
+flowchart LR
+    CSV["CSV acotado<br/>solo columnas del contrato"] --> UI["Streamlit<br/>CORS y XSRF activos"]
+    UI --> G["API: tamaño, frecuencia<br/>y concurrencia"]
+    G --> M["Modelo congelado<br/>SHA-256 verificado"]
+    M --> R["Probabilidad y decisión<br/>errores sin datos de entrada"]
+    R --> UI
+    UI --> OUT["Descarga minimizada<br/>sin IDs ni fórmulas activas"]
+    G -. "explicación opcional" .-> Q["Cuota SQLite<br/>30 intentos/hora"]
+    Q --> LLM["LLM<br/>salida mostrada como texto literal"]
+```
+
+- El CSV descargado conserva únicamente las entradas normalizadas del contrato
+  y las predicciones. Descarta `Gender`, identificadores, apellidos, salario y
+  columnas extra; protege adicionalmente las celdas textuales de la exportación.
+- La cuota LLM se guarda en `.runtime/llm-quota.sqlite3`; `LLM_RATE_LIMIT_DB`
+  permite elegir otra ruta. Comparte el presupuesto entre procesos que usan ese
+  archivo y persiste sus reinicios. Compose monta el volumen `llm-state`.
+  Réplicas en hosts distintos necesitan un control de plataforma compartido.
+- Compose publica los puertos solo en `127.0.0.1`. Las imágenes conservan código
+  y modelo no modificables por el usuario del servicio; solo el estado es escribible.
+- Para un iframe **HTTPS**, configurar
+  `STREAMLIT_SERVER_XSRF_COOKIE_SAME_SITE=none`, el dominio público de Streamlit
+  y sus orígenes CORS permitidos. XSRF continúa activo; en acceso local se conserva
+  SameSite `lax`. La verificación del iframe público sigue pendiente.
+- Los casos SHAP publicados usan etiquetas sin identificador. Los reportes
+  históricos conservan los IDs del dataset público: no se ha reescrito Git.
 
 ### Reproducir el pipeline
 
@@ -167,7 +203,7 @@ La entrada se valida con el contrato de datos: rangos, categorías conocidas y n
 ## Estructura
 
 ```text
-specs/        Especificaciones 001-006 (diseño antes de implementar)
+specs/        Especificaciones 001-007 (incluye seguridad)
 src/churn/    Contrato, división, EDA, pipelines, ajuste, calibración, decisión, SHAP,
               auditoría, artefacto, API, interfaz y monitoreo
 dashboard/    Streamlit (solo consume la API)

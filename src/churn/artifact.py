@@ -77,6 +77,13 @@ def load_model(path: Path | None = None, expected: str = MODEL_SHA256):
     return joblib.load(ensure_model(path, expected=expected))
 
 
+def load_local_model(path: Path, expected: str = MODEL_SHA256):
+    """CLI de análisis: archivo local obligatorio, sin descargas implícitas."""
+    if not Path(path).is_file():
+        raise FileNotFoundError("Falta el artefacto local congelado.")
+    return load_model(path, expected)
+
+
 def main() -> int:
     path = ensure_model()
     print(f"Modelo verificado: {path} ({MODEL_SHA256[:12]}…)")

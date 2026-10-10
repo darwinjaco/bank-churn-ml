@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: cef0300fd0fc4d2a87a85fa2093c6b283ea36f4b  # v5.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -11,13 +11,13 @@ repos:
       - id: detect-private-key
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.10
+    rev: f12be1ebaa5351c1fc76472de98db2c3446c8253  # v0.16.10
     hooks:
       - id: ruff-check
         args: [--fix]
       - id: ruff-format
 
   - repo: https://github.com/kynan/nbstripout
-    rev: 0.8.1
+    rev: 4439d61ff1913ee7d1c0168948d79f0ae0da9799  # 0.8.1
     hooks:
       - id: nbstripout   # notebooks committed without outputs

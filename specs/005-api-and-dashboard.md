@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Estado | Implementada v1.1 (enmienda de la semana 8, §10); Docker verificado con modelo local; falta repetir con el Release |
+| Estado | Implementada v1.2 (seguridad, §11 y spec 007), verificada en local y Docker con el Release publicado; clon limpio y CI remoto de las nuevas correcciones pendientes |
 | Responsable | Darwin Jacome Cuenca |
 | Semana | 7 (16–22 de noviembre de 2026) |
 | Dependencias | [002](002-modeling-and-evaluation.md) (artefacto congelado), [004](004-decision-layer.md) (regla de decisión) |
@@ -68,11 +68,11 @@ Mismos rangos que el contrato de datos (spec 001): `CreditScore` 300–900, `Age
 ## 9. Criterios de aceptación
 
 - [ ] `docker compose up` levanta API y dashboard desde un clon limpio (con el Release publicado).
-  - Verificado en Docker Desktop con el modelo local (`verify-docker.ps1 -LocalModel`, mismo SHA-256); falta repetirlo con el Release.
+  - Verificado en Docker Desktop con el Release publicado: `pwsh -File scripts/verify-docker.ps1` termina en «VERIFICACIÓN COMPLETA» (registro S14). Falta registrar el procedimiento desde un clon limpio.
 - [x] `/predict` devuelve la misma probabilidad que `models/model.joblib` para el mismo cliente.
-- [x] Hash del artefacto verificado en build y al arrancar (réplica de los pasos de la imagen; build real pendiente).
+- [x] Hash del artefacto verificado en build y al arrancar (build real y descarga del Release verificados, S14).
 - [x] Sin clave de LLM, `/explain` responde con la plantilla.
-- [ ] CI en verde con cobertura ≥ 85 % (local: 194 tests, 98 %; CI tras el push).
+- [x] CI en verde con cobertura ≥ 85 % (CI remoto en `fd78f59`; local: 243 tests, 98,25 %).
 
 ## 10. Enmienda v1.1 (7 de octubre de 2026, semana 8)
 
@@ -83,3 +83,13 @@ Motivo: revisión completa del código antes del cierre (registro S12). No cambi
 - **`GET /monitoring`** y pestaña **Monitoreo** del dashboard (spec 006 §4.9).
 - **Dashboard:** un cliente HTTP por proceso (`st.cache_resource`); los errores 422 de la API se muestran por fila en lugar de una traza; el lote rechaza celdas vacías y decimales en columnas enteras antes de enviar (antes `Age = 52.7` se truncaba a 52 sin aviso).
 - **`scripts/verify-docker.ps1`:** cada comprobación es una aserción (SHA-256 servido, probabilidad 0,947 y contactar para el cliente de referencia, 422 con `Gender`, `/explain` y `/monitoring`) y se añade la imagen del Space (Dockerfile derivado, `ROLE=all`, puerto 7860, API interna).
+
+## 11. Enmienda v1.2 — Seguridad (spec 007)
+
+El responsable aprobó la [spec 007](007-security-hardening.md) y su perfil de
+límites. Esta enmienda sustituye la exportación de todas las columnas del CSV
+por las ocho entradas del contrato y los resultados, redacta los errores 422
+y añade controles de tamaño, frecuencia y concurrencia. El LLM se muestra como
+texto literal. Modelo, calibración, umbral y respuestas válidas de inferencia
+conservan sus valores. Compuerta versionada en `6343526`; controles implementados
+y comprobados en local según S14. Publicación y CI remoto del código pendientes.

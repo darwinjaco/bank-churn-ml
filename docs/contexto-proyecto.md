@@ -1,6 +1,6 @@
 # Contexto del proyecto — bank-churn-ml (documento de cierre)
 
-Documento de traspaso para quien retome el proyecto (persona o agente). Estado al **7 de octubre de 2026**: semanas 1–8 implementadas; quedan acciones externas del responsable (§6). Base de código: `30c0809` más los cambios de la semana 8.
+Documento de traspaso para quien retome el proyecto (persona o agente). Estado al **7 de octubre de 2026**: semanas 1–8 implementadas; quedan acciones externas del responsable (§6). Base de código: `fd78f59` (semana 8 publicada, CI en verde).
 
 ## 1. Qué es
 
@@ -14,7 +14,7 @@ Proyecto de portafolio de Darwin Jacome Cuenca: **predicción de abandono bancar
 ## 2. Forma de trabajo (obligatoria)
 
 - **SDD:** ninguna línea de `src/` o `tests/` sin spec y plan versionados. Cada semana empieza con una tarea T0 de documentación.
-- **Una tarea = un commit**, con el mensaje fijado en el plan; Ruff, formato, hooks y pytest (≥ 85 %) en verde.
+- **Una tarea = un commit**, con el mensaje fijado en el plan; Ruff, formato, hooks y pytest (≥ 85 %) en verde. Excepción documentada: la semana 8 se publicó en dos commits (`d0e8e6c` y `fd78f59`).
 - **Preregistro:** hipótesis, reglas, umbrales y expectativas antes de ver resultados; los cambios son enmiendas versionadas.
 - **Reglas fijas (`AGENTS.md`):** `Gender` nunca es variable del modelo (solo auditoría); la partición de prueba ya se usó **una vez** y no se vuelve a evaluar (tampoco para monitoreo); el modelo `model-v1.0` está congelado.
 - **Registro:** `docs/registro-avance.md` (S01–S12, estado y Definition of Done en §6). Todas las cifras de reportes se generan desde JSON con código.
@@ -55,7 +55,7 @@ CLIs: `churn-validate`, `churn-split`, `churn-hypotheses`, `churn-baselines`, `c
 
 ## 6. Pendientes (responsable, en orden)
 
-1. Commits de la semana 8 (plan en `docs/plan-semana-8.md`), `git push origin main` y CI en verde.
+1. Completado: semana 8 publicada en `fd78f59` con CI en verde.
 2. Release `model-v1.0` con `models/model.joblib`.
 3. `pwsh -File scripts/verify-docker.ps1` sin `-LocalModel` (incluye la imagen del Space).
 4. Cuenta y token de Hugging Face (B-03); crear el Space (Docker, *Blank*, público); `HF_TOKEN` (secreto) y `HF_SPACE` (variable) en GitHub.
@@ -65,8 +65,8 @@ CLIs: `churn-validate`, `churn-split`, `churn-hypotheses`, `churn-baselines`, `c
 ## 7. Notas técnicas
 
 - Windows: `uv` gestiona `.venv`; `.gitattributes` fuerza LF. No ejecutar `uv` desde otro sistema operativo sobre el `.venv` de Windows (la verificación de Claude usa un entorno aparte).
-- Comprobaciones: `uv sync --locked --all-groups`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run pre-commit run --all-files`, `uv run pytest --cov=churn --cov-fail-under=85`. Último resultado: 243 tests, 98,25 % (240 + 3 omitidos sin datos en un clon limpio).
+- Comprobaciones: `uv sync --locked --all-groups`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run pre-commit run --all-files`, `uv run pytest --cov=churn --cov-report=term-missing --cov-fail-under=85`. Último resultado: 243 tests, 98,25 % (240 + 3 omitidos sin datos en un clon limpio).
 - MLflow: `uv run mlflow ui --backend-store-uri sqlite:///mlruns/mlflow.db` (local, fuera de Git).
 - LLM opcional: `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` y `LLM_MAX_CALLS_PER_HOUR` (vacío = 30) en `.env` o secretos del Space.
-- Trabajo futuro: opciones B y C de la spec 004, mitigación de E-01, uplift, monitoreo con etiquetas reales, migrar `penalty="l2"` (obsoleto en scikit-learn 1.10).
+- Trabajo futuro: opciones B y C de la spec 004, mitigación de E-01, uplift, monitoreo con etiquetas reales, migrar `penalty="l2"` (obsoleto desde scikit-learn 1.9; se elimina en la 1.10).
 - Commits con autor `Darwin Jacome <daabjaco@espol.edu.ec>` y línea `Co-Authored-By` de Claude cuando corresponde.

@@ -65,7 +65,6 @@
     "local": [
       {
         "case": "mayor_probabilidad",
-        "customer_id": 15570002,
         "p_calibrated": 0.9746566453286595,
         "p_raw": 0.9675567510322169,
         "base_value": 0.20419200000000007,
@@ -99,7 +98,6 @@
       },
       {
         "case": "cerca_del_umbral",
-        "customer_id": 15655175,
         "p_calibrated": 0.1667751778769818,
         "p_raw": 0.2217961375596763,
         "base_value": 0.20419200000000007,
@@ -133,7 +131,6 @@
       },
       {
         "case": "menor_probabilidad",
-        "customer_id": 15774393,
         "p_calibrated": 0.04230289740353559,
         "p_raw": 0.0074921769101973556,
         "base_value": 0.20419200000000007,

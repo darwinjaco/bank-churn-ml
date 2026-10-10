@@ -5,6 +5,7 @@ import json
 import joblib
 import pytest
 
+from churn import artifact as secure_artifact
 from churn import final_eval
 from churn.calibration import CalibratedModel, IdentityCalibrator
 from churn.config import FEATURE_SETS, TARGET
@@ -48,6 +49,12 @@ def test_main_runs_once_and_updates_metadata(setup, valid_df, tmp_path, monkeypa
         "rf", "tree", exclude=("EstimatedSalary",), params={"n_estimators": 10, "max_depth": 3}
     ).fit(valid_df[columns], valid_df[TARGET])
     joblib.dump(CalibratedModel(pipeline, IdentityCalibrator(), columns), tmp_path / "m.joblib")
+    expected_hash = secure_artifact.sha256_file(tmp_path / "m.joblib")
+    monkeypatch.setattr(
+        final_eval,
+        "load_local_model",
+        lambda path: secure_artifact.load_local_model(path, expected_hash),
+    )
     metadata = {
         "model_family": "rf",
         "git_commit": "d" * 40,
@@ -80,4 +87,16 @@ def test_main_runs_once_and_updates_metadata(setup, valid_df, tmp_path, monkeypa
         final_eval.main()
     (tmp_path / "final.json").unlink()
     with pytest.raises(final_eval.FinalEvaluationDoneError, match="metadata"):
+        final_eval.main()
+
+
+def test_final_rejects_modified_artifact_before_reading_partition(tmp_path, monkeypatch):
+    meta = tmp_path / "metadata.json"
+    meta.write_text(json.dumps({"threshold": 1 / 6, "final_test_evaluation": "pendiente"}))
+    model = tmp_path / "model.joblib"
+    model.write_bytes(b"artefacto alterado")
+    monkeypatch.setattr(final_eval, "METADATA_FILE", meta)
+    monkeypatch.setattr(final_eval, "MODEL_FILE", model)
+    monkeypatch.setattr(final_eval, "load_test_once", lambda: pytest.fail("No debe leer prueba"))
+    with pytest.raises(secure_artifact.ArtifactIntegrityError):
         final_eval.main()

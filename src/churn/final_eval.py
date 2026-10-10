@@ -6,11 +6,11 @@ import hashlib
 import json
 from datetime import UTC, datetime
 
-import joblib
 import numpy as np
 import pandas as pd
 from sklearn.metrics import average_precision_score, brier_score_loss, log_loss, roc_auc_score
 
+from churn.artifact import load_local_model
 from churn.config import ID_COLUMNS, MODEL_FEATURES, PROJECT_ROOT, RAW_FILE, TARGET
 from churn.data import DTYPES
 from churn.decision import evaluate_policies, threshold
@@ -74,7 +74,7 @@ def main() -> int:
         raise FinalEvaluationDoneError("La metadata indica que la prueba ya se evaluó.")
     if abs(metadata["threshold"] - threshold()) > 1e-12:
         raise ValueError("El umbral de la metadata no coincide con la spec 004.")
-    model = joblib.load(MODEL_FILE)
+    model = load_local_model(MODEL_FILE)
     test = load_test_once()
     result = evaluate(model, test)
     origin = provenance()

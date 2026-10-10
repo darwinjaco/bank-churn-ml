@@ -8,8 +8,8 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Inicio previsto | 5 de octubre de 2026 |
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
-| Última actualización | 7 de octubre de 2026 |
-| Fase actual | Semana 8 implementada y verificada en local; pendientes del responsable: push y CI, Release `model-v1.0`, Docker con el Release, Space (B-03), GIF y etiqueta `v1.0.0` |
+| Última actualización | 9 de octubre de 2026 |
+| Fase actual | Seguridad verificada en local (S14); Release `model-v1.0` y Docker confirmados; pendientes: publicación y CI de las correcciones, Render gratuito (acceso y enmienda), clon limpio, GIF y etiqueta `v1.0.0` |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -33,8 +33,8 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 | Semana 4 | 26 oct–1 nov | RF, XGBoost, validación cruzada y ajuste acotado | Tabla de media ± desviación estándar por modelo | Completada y publicada (`a868641..7013dfc`, CI #26); B-02 resuelto |
 | Semana 5 | 2–8 nov | Calibración (E-04) y umbral monetario analítico (opción A); deciles y sensibilidad excluidos por decisión del responsable | Umbral justificado por beneficio esperado bajo supuestos explícitos | Completada |
 | Semana 6 | 9–15 nov | SHAP, errores, segmentos, E-01, ficha del modelo y evaluación final (con confirmación) | Limitaciones documentadas | Completada |
-| Semana 7 | 16–22 nov | FastAPI, Streamlit, tests de API y Docker Compose | `docker compose up` funciona desde cero | Implementada; Docker verificado con modelo local; pendiente Release, Docker con Release y CI |
-| Semana 8 | 23–29 nov | Cambio de distribución simulado, despliegue y README final | URL pública y reproducibilidad verificadas | Implementada y verificada en local (S12); despliegue pendiente (B-03) |
+| Semana 7 | 16–22 nov | FastAPI, Streamlit, tests de API y Docker Compose | `docker compose up` funciona desde cero | Base publicada con CI verde; Docker con el Release verificado (S14); seguridad nueva comprobada en local, publicación pendiente |
+| Semana 8 | 23–29 nov | Cambio de distribución simulado, despliegue y README final | URL pública y reproducibilidad verificadas | Implementada, verificada en local (S12) y publicada en `fd78f59` (CI en verde); despliegue pendiente (B-03) |
 
 **Prioridad de alcance:** proteger la capa de decisión de la semana 5. Si hay retrasos, reducir primero el monitoreo de cambios de distribución de la semana 8 y registrar el ajuste.
 
@@ -46,8 +46,9 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 | 002 | Modelado y evaluación | Completada v1.6: selección, calibración, auditoría y evaluación final en prueba (una vez) | Semanas 3–6 |
 | 003 | [EDA e hipótesis preregistradas](../specs/003-eda-and-hypotheses.md) | Implementada v1.1 y revisada; H1–H6 congeladas en v1.0 | Semana 2 |
 | 004 | Capa de decisión y beneficio esperado | Implementada v1.0 (opción A) | Semana 5 |
-| 005 | API y dashboard | Implementada v1.1 (enmienda de la revisión de la semana 8); Docker con Release y CI pendientes | Semana 7 |
-| 006 | [Despliegue, monitoreo simulado y cierre](../specs/006-deployment-monitoring-release.md) | Implementada v1.0 en local; despliegue público pendiente (B-03) | Semana 8 |
+| 005 | API y dashboard | Implementada v1.2 en local; Docker con Release verificado; CI remoto de la base verde, correcciones nuevas pendientes de publicación | Semana 7 |
+| 006 | [Despliegue, monitoreo simulado y cierre](../specs/006-deployment-monitoring-release.md) | Implementada v1.0 y publicada (`fd78f59`, CI en verde); despliegue público pendiente (B-03) | Semana 8 |
+| 007 | [Correcciones de seguridad](../specs/007-security-hardening.md) | Implementada y verificada en local: 282 tests, 98,11 %; publicación y CI nuevo pendientes | Después de semana 8 |
 
 ## 4. Punto de partida — 6 de octubre de 2026
 
@@ -831,7 +832,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 |---|---|
 | Fecha de apertura | 7 de octubre de 2026 |
 | Fechas planificadas | 16–22 de noviembre de 2026 |
-| Estado | T0–T7 implementadas; Docker verificado en Windows con el modelo local; pendientes: Release `model-v1.0` y CI |
+| Estado | T0–T7 implementadas; Docker verificado en Windows con el modelo local; pendiente: Release `model-v1.0` (CI en verde desde `30c0809`) |
 | Objetivo | Servir el modelo congelado con FastAPI y Streamlit, reproducible con `docker compose up`, sin CSV ni reentrenamiento |
 
 | Tarea | Estado | Commit requerido |
@@ -843,7 +844,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 | T4 | Completada (`ae3e9e0`) | `feat: optional LLM explanation with template fallback` |
 | T5 | Completada (`11867df`) | `feat: Streamlit dashboard` |
 | T6 | Completada (`36babc9`); verificada en Docker Desktop (`3a741c6`, `1b300a2`) | `build: docker image and compose` |
-| T7 | Completada (commit local) | `docs: week 7 api, dashboard and docker` |
+| T7 | Completada (`5b391f9`) | `docs: week 7 api, dashboard and docker` |
 
 #### T0 — Compuerta
 
@@ -897,19 +898,19 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 |---|---|
 | Fecha de apertura | 7 de octubre de 2026 |
 | Fechas planificadas | 23–29 de noviembre de 2026 |
-| Estado | T0, T1, T3–T6 implementadas y verificadas en local; T2 y la publicación de T7 pendientes del responsable |
+| Estado | T0 publicada en `d0e8e6c`; T1 y T3–T7 publicadas en `fd78f59` (CI en verde); pendientes del responsable: T2, GIF y etiqueta `v1.0.0` |
 | Objetivo | Demo pública en Hugging Face Spaces, monitoreo simulado preregistrado y cierre del portafolio |
-| Base | `30c0809`; T0 publicado en `d0e8e6c`, con CI remoto en verde; estado final preparado para publicación consolidada |
+| Base | `30c0809`; T0 publicado en `d0e8e6c` y estado final en `fd78f59`, ambos con CI remoto en verde |
 
 | Tarea | Estado | Commit requerido |
 |---|---|---|
 | T0 | Publicada (`d0e8e6c`, CI remoto en verde) | `docs: spec 006 deployment and monitoring, week 8 plan (SDD gate)` |
-| T1 | Completada (pendiente de commit) | `build: hugging face space sync` |
+| T1 | Implementada y publicada en `fd78f59`; despliegue público pendiente | `build: hugging face space sync` |
 | T2 | Pendiente del responsable (B-03) | `docs: public deployment verified` |
-| T3 | Implementada y probada; secretos del Space pendientes | `feat: rate limit for optional LLM` |
-| T4 | Completada (pendiente de commit) | `feat: simulated drift monitoring` |
-| T5 | Completada salvo el GIF (responsable) | `docs: final portfolio readme` |
-| T6 | Completada en local; `docker build` pendiente del responsable | `chore: final cleanup and reproducibility check` |
+| T3 | Implementada y publicada en `fd78f59`; secretos del Space pendientes | `feat: rate limit for optional LLM` |
+| T4 | Completada y publicada en `fd78f59` | `feat: simulated drift monitoring` |
+| T5 | Publicada en `fd78f59`, salvo el GIF (responsable) | `docs: final portfolio readme` |
+| T6 | Publicada en `fd78f59`; `docker build` con el Release pendiente del responsable | `chore: final cleanup and reproducibility check` |
 | T7 | Documentación completada; etiqueta `v1.0.0` pendiente | `docs: week 8 close and project completion` |
 
 **Nota de proceso.** Por decisión del responsable, Claude edita la carpeta de trabajo y el responsable hace los commits al final. La compuerta SDD se respeta en el orden del historial (T0 primero), pero no en el tiempo: el código se escribió antes del commit de la spec. Solo se verificó el estado final; los commits intermedios no se probaron uno por uno.
@@ -949,7 +950,7 @@ Compuerta satisfecha; continuar con T1 según el plan versionado.
 
 - **E1 cumplida.** **E2 no cumplida:** S3 queda en 0,196 (nota a priori ≈ 0,20); S1 y S2 sí alarman con calibración dentro de ±3 pp. **E3 cumplida:** la prevalencia del 35 % descalibra el modelo −9,6 pp sin ninguna alarma de PSI. **E4 cumplida** (+3,8 a +11,1 pp).
 - S2 figura como "degradación" solo por el Brier (1,18 × S0) con la calibración dentro de rango: es el efecto de mezcla anticipado en la nota 3 de §4.7, no un deterioro del modelo. Se reporta sin reinterpretar el criterio.
-- `monitoring.json` registra `git_commit` = `30c0809`, el padre de los cambios sin commit; los resultados son deterministas (semilla 2028) y se pueden regenerar con `uv run churn-monitor`.
+- `monitoring.json` registra `git_commit` = `30c0809`, el HEAD al generarlo (el código se publicó después en `fd78f59`); los resultados son deterministas (semilla 2028) y se pueden regenerar con `uv run churn-monitor`.
 - Opcional de §4.9 implementado: `GET /monitoring` y pestaña **Monitoreo** del dashboard.
 - Tests (11): PSI = 0 con distribuciones idénticas, PSI calculado a mano (0,16946), ε en bins vacíos, deciles con masa puntual en cero e intervalos cerrados por la derecha, escenarios deterministas que alcanzan la proporción objetivo, E1/E3 reproducidas con datos sintéticos, sin partición de prueba y CLI con reportes.
 
@@ -1016,14 +1017,296 @@ Sin defectos en los módulos de análisis (semanas 2–6): ya produjeron los res
   sincronización con `origin/main`. T1 y T3–T7 se agrupan conforme a la enmienda
   del plan; el despliegue público, el GIF y la etiqueta conservan sus pendientes.
 
+#### Revisión de los seis pasos de cierre
+
+- `git status -sb`: `main` sincronizada con `origin/main` en `fd78f59`, árbol
+  limpio al comenzar la revisión. `gh run view 37571530333 --json headSha,conclusion,url`
+  confirma CI remoto satisfactorio para ese commit:
+  https://github.com/darwinjaco/bank-churn-ml/actions/runs/37571530333.
+- `gh release list --limit 10` y
+  `gh api repos/darwinjaco/bank-churn-ml/releases`: no existen releases.
+  `Get-FileHash -LiteralPath "models/model.joblib" -Algorithm SHA256` confirma
+  que el artefacto local coincide con el SHA-256 fijado (`579b7fe3…095a`).
+  El Release `model-v1.0` sigue pendiente.
+- `docker version` y `docker compose ps`: Docker Desktop operativo y servicios
+  locales levantados. Se ejecutó exactamente `pwsh -File scripts/verify-docker.ps1`
+  sin `-LocalModel`: falla en el paso 2 porque no existe el asset del Release;
+  no alcanza `VERIFICACIÓN COMPLETA` ni ejecuta los builds de esta verificación.
+- Peticiones reales con `Invoke-RestMethod` a `/health` y `/predict` de la API
+  local: hash esperado y cliente de referencia con **0,947001474187885**,
+  `contact=true`. Esta evidencia es local, no una validación del Space público.
+- `gh variable list --json name` y `gh secret list --json name`: listas vacías;
+  faltan `HF_SPACE` y `HF_TOKEN`. Consulta pública del Space provisional:
+  API de Hugging Face devuelve 401 y `/_stcore/health` devuelve 404. No se puede
+  confirmar la cuenta ni un Space público activo con ese nombre.
+- `gh run list --workflow deploy-space.yml --limit 5 --json databaseId,status,conclusion,url`:
+  ninguna ejecución de *Deploy Space*. T2 continúa pendiente.
+- Búsqueda local de `*.gif`, `*.mp4` y `*.webm`: sin archivos. El README contiene
+  solo el comentario reservado para el GIF; no hay asset de demo en releases.
+- `git tag --list`: sin etiquetas locales; consulta de referencias de etiquetas
+  en GitHub devuelve 404 y la lista de releases está vacía. `v1.0.0` sigue pendiente.
+- Desviación de trazabilidad confirmada: **dos commits en lugar de los siete
+  previstos**, T0 = `d0e8e6c` y T1/T3–T7 = `fd78f59`. La consolidación está
+  documentada en el plan; es una excepción a «una tarea = un commit». Se conserva
+  también la desviación temporal de SDD indicada en la nota de proceso.
+- Siguiente paso: publicar `model-v1.0` con el artefacto verificado, repetir la
+  verificación Docker y configurar la cuenta/Space de Hugging Face para T2.
+
 #### Pendientes del responsable (en orden)
 
-1. Commits según el plan de semana 8 y `git push origin main`; revisar el CI.
+1. **Completado:** publicación de semana 8 en `fd78f59` y CI remoto en verde.
 2. Release `model-v1.0` con `models/model.joblib` (repositorio público: confirmado por la API de GitHub).
 3. `pwsh -File scripts/verify-docker.ps1` sin `-LocalModel`: ahora incluye la imagen del Space.
 4. Cuenta y token de Hugging Face (B-03); crear el Space vacío (Docker, *Blank*, público); secreto `HF_TOKEN` y variable `HF_SPACE` en GitHub; si el usuario no es `darwinjaco`, corregir README y `deploy/space/README.md`.
 5. Ejecutar *Deploy Space* (T2) y verificar §2.5; secretos del LLM en el Space (T3).
 6. GIF de demo (T5) y etiqueta/Release `v1.0.0` (T7).
+
+### S13 — Revisión previa a producción: correcciones de documentación
+
+| Campo | Valor |
+|---|---|
+| Fecha | 2026-10-07 |
+| Fase | Cierre (posterior a la semana 8) |
+| Estado | Correcciones documentales comprobadas en local; D-B confirmada y D-A resuelta: Render aparcado en `render-prep`; continúa el endurecimiento en S14 |
+| Objetivo | Revisar [`verificacion-preproduccion.md`](verificacion-preproduccion.md) y alinear la documentación con el estado publicado (`fd78f59`, CI remoto en verde) |
+
+**Trabajo realizado**
+- Plan de revisión corregido: el `git stash -u` ahora se limita a los 7 archivos de la preparación de Render (antes se habría llevado el propio plan y este registro); comprobaciones alineadas con `AGENTS.md` §4; regla de reproducibilidad contra JSON versionados sin reentrenar ni ejecutar `churn-final`; módulos y archivos que faltaban en la tabla por semana; corrección 7 de S12/T6; notas sobre `penalty`, `git_commit` de `monitoring.json`, tamaño de la imagen y `ROLE=all` de `deploy/Dockerfile.release`.
+- Estados desactualizados tras publicar `fd78f59`: §2 (semanas 7–8), §3 (specs 005–006), S11 (estado y T7 = `5b391f9`), S12 (estado, T3, T5, T6 y nota de `git_commit` de T4), spec 005 (criterio de CI marcado), spec 006 (estado y criterio 1) y `contexto-proyecto.md` (base, pendiente 1, excepción de la semana 8 a «una tarea = un commit» y comando de pytest).
+- `penalty="l2"`: «obsoleto en scikit-learn 1.10» → «obsoleto desde scikit-learn 1.9; se elimina en la 1.10» (versión bloqueada 1.9.1) en README y `contexto-proyecto.md`.
+- README: el enlace a la demo indica «pendiente de publicar» (el Space no existe).
+
+**Archivos modificados o creados**
+- `docs/verificacion-preproduccion.md`, `docs/registro-avance.md`, `docs/contexto-proyecto.md`, `README.md`, `specs/005-api-and-dashboard.md`, `specs/006-deployment-monitoring-release.md`.
+
+**Comprobaciones y evidencia**
+- `gh run list --branch main --limit 3`: CI satisfactorio en `fd78f59`, `d0e8e6c` y `30c0809`. `docker images`: `bank-churn-ml:space` y `bank-churn-ml:local` de 3,34 GB. `uv.lock`: scikit-learn 1.9.1.
+- `uv sync --locked`; `uv run ruff check .`: **1 error** E501 en `tests/test_build_space.py:116`, archivo de la preparación de Render sin commit (no modificado aquí). `uv run ruff format --check .`: en verde.
+- `uv run pre-commit run --files` sobre los seis archivos editados: en verde.
+- `uv run pytest --cov=churn --cov-report=term-missing --cov-fail-under=85`: **246 aprobados, 98,22 %** (243 + 3 tests de la preparación de Render), 147 avisos de terceros ya documentados. Después, `uv sync --locked --all-groups` para restaurar el grupo `eda`.
+- Comprobación solo local; sin commit ni CI remoto de estos cambios.
+
+**Decisiones y pendientes**
+- **D-A resuelta en S14:** responsable aprobó aparcar únicamente las siete rutas de Render en `render-prep`. La enmienda de Render sigue pendiente antes de recuperar esa preparación. El E501 documentado correspondía a esos cambios; no afecta a la base tras aparcarlos.
+- **D-B resuelta:** la sesión de OpenCode que realizó la revisión de los seis pasos confirmó la autoría de esa sección y de las líneas de estado de S12, pendientes y CI/CD; su contenido coincide con git y GitHub según la evidencia registrada.
+- Correcciones previas publicadas por el responsable en `a2598ee`, CI remoto en verde. Los ajustes finales y la decisión D-A se versionaron con la compuerta `6343526`; seguir con S14.
+
+#### Ajustes finales del documento de verificación
+
+- A petición del responsable, corregidos los cuatro puntos pendientes en
+  `docs/verificacion-preproduccion.md`: `ROLE=all` corresponde a dos procesos
+  en un contenedor; la deprecación de `penalty` comienza en scikit-learn 1.8;
+  D-B queda resuelta; las cifras de memoria de Render se identifican como
+  orientativas, sin medición registrada. `API_URL` se configura en el dashboard
+  para apuntar a la API cuando se usan dos servicios.
+- Evidencia: `docker/start.sh` arranca Uvicorn en segundo plano y Streamlit en
+  primer plano; `sklearn/linear_model/_logistic.py` documenta la deprecación en
+  1.8 y la eliminación en 1.10. La autoría fue confirmada en la conversación.
+- Comandos ejecutados: `git status -sb`, revisión del diff del documento,
+  `uv run pre-commit run --files docs/verificacion-preproduccion.md docs/registro-avance.md`,
+  `git diff --check` y `git diff --stat`. Hooks pertinentes y comprobación del
+  diff satisfactorios. Evidencia local de estos ajustes documentales; todavía
+  sin commit ni CI remoto de esta modificación.
+- Alcance completado: revisión documental del plan; la revisión integral de
+  las semanas 1–8 sigue pendiente. D-A fue resuelta después, en S14.
+
+### S14 — Correcciones de la auditoría de seguridad
+
+| Campo | Valor |
+|---|---|
+| Fase | Endurecimiento posterior a la semana 8 |
+| Estado | Implementada y verificada en local; compuerta `6343526` versionada; código y CI remoto de las correcciones pendientes de publicación |
+| Objetivo | Corregir SEC-01 a SEC-13 con pruebas de regresión, conservando el artefacto y los resultados congelados |
+
+**Comprobaciones y documentación consultada**
+
+- Ejecutados `git status -sb`, `git log --oneline -10`, `git diff --stat`,
+  `git remote -v` y `gh run list --limit 5 --json databaseId,headSha,status,conclusion,workflowName,url`.
+  Base actual: `a2598ee`, rama `docs/pre-production-review`; CI remoto en verde:
+  https://github.com/darwinjaco/bank-churn-ml/actions/runs/37577603990.
+- Leídas `AGENTS.md` y las specs 005 y 006. Continúan presentes los cambios
+  locales de preparación para Render y los ajustes documentales previos.
+- Consultadas las fuentes oficiales de
+  [persistencia de scikit-learn](https://scikit-learn.org/stable/model_persistence.html),
+  [texto literal de Streamlit](https://docs.streamlit.io/develop/api-reference/text/st.text),
+  [configuración de Streamlit](https://docs.streamlit.io/develop/api-reference/configuration/config.toml)
+  y [seguridad de GitHub Actions](https://docs.github.com/en/actions/reference/security/secure-use).
+  Streamlit documenta XSRF activo y cookies `SameSite=None; Secure` para iframes
+  HTTPS, y renderizado literal con `st.text`. El SHA-256 debe comprobarse antes
+  de cualquier deserialización de `joblib`.
+- Consulta inicial de OWASP con una ruta inexistente: HTTP 404. La consulta
+  inicial de middleware de Starlette falló por transporte; no se presenta como
+  documentación verificada.
+
+**Decisiones y bloqueo**
+
+- Se requiere decidir D-A (aparcar solo las siete rutas de Render o incorporar
+  su enmienda), autorizar el commit previo de la especificación y del plan, y
+  aprobar límites de consumo que las specs actuales no definen.
+- Propuesta para una demo de una instancia: 60 peticiones de inferencia por
+  minuto, 2 inferencias simultáneas, cuerpos JSON de 512 KiB y CSV de 1 MiB,
+  manteniendo el máximo de 1.000 clientes. El presupuesto LLM se conserva en
+  30 intentos/hora, con almacenamiento local compartido entre procesos;
+  instancias distintas requieren un control compartido de la plataforma.
+- Según `AGENTS.md` §6, la implementación queda bloqueada hasta resolver estas
+  decisiones y versionar especificación y plan. Solo se ha actualizado este
+  registro; las correcciones de código todavía no se han aplicado.
+- Siguiente paso: confirmar las decisiones, redactar la spec de seguridad y su
+  plan, ejecutar las comprobaciones previas y versionar la compuerta SDD.
+
+**Resolución de la preparación**
+
+- Responsable: «Aparcar Render y versionar» y «Aprobar perfil propuesto».
+  Ejecutado el stash limitado a las siete rutas, con nombre `render-prep`.
+  Las ediciones documentales permanecen en la carpeta de trabajo.
+- Redactadas spec 007 y `docs/plan-seguridad.md`, con enmiendas explícitas de
+  las specs 005 y 006. Se implementará después del commit previo requerido.
+- Consultada correctamente [OWASP CSV Injection](https://owasp.org/www-community/attacks/CSV_Injection).
+  La defensa principal será descartar texto no contractual y normalizar tipos,
+  además de proteger la exportación; no se considera suficiente entrecomillar.
+- Comprobaciones previas de T0 ejecutadas con los comandos exactos de
+  `AGENTS.md` §4: sincronización, Ruff, formato y todos los hooks en verde;
+  **243 tests aprobados, cobertura 98,25 %**. Los nuevos archivos documentales
+  fueron incluidos mediante `git add` antes de `pre-commit run --all-files`.
+  CI remoto de la base `a2598ee` confirmado en verde antes del commit previo.
+
+**Implementación y comprobaciones focalizadas**
+
+- Compuerta local `6343526`, creada con los hooks activos. No se han publicado
+  estos cambios en GitHub: el CI remoto citado sigue siendo el de `a2598ee`.
+- Implementados CSV acotado y exportación minimizada/protegida, texto LLM
+  literal, errores sin valores rechazados, carga SHA-256 previa en las dos CLI,
+  límites ASGI de cuerpo/frecuencia/concurrencia y presupuesto LLM SQLite.
+  Los tests usan bases temporales; no modifican tracking ni presupuesto reales.
+- Eliminados únicamente los tres `customer_id` del JSON de auditoría y sus
+  referencias en Markdown; no se recalculan ni modifican métricas.
+- Configuración: XSRF y CORS activos; SameSite configurable para iframe HTTPS;
+  puertos Compose solo en loopback; `.env*` y estado excluidos; permiso CI mínimo;
+  helper Git restringido al Space esperado, sin token en URL ni argumentos.
+- Referencias inmutables verificadas con `gh api`, `git ls-remote --tags` y
+  `docker buildx imagetools inspect`: Actions, hooks y digests de Python/uv.
+  Se conservan `uv.lock` y las versiones Python del paquete; el tag de imagen
+  Python 3.11 consultado resuelve a 3.11.17, sin cambiar el artefacto entrenado.
+- `uv run ruff format .` y `uv run ruff check . --fix`: corregidos importación,
+  formato, default B008 y literales Unicode ambiguos, sin desactivar reglas.
+  Ruff posterior en verde. Primera suite focalizada: **117 aprobados**.
+- Segunda suite focalizada: **71 aprobados**, incluida cuota compartida entre
+  procesos, atomicidad entre conexiones y regresión del dashboard con `AppTest`
+  (94,7 %, contactar y texto no interpretado); ningún servicio externo llamado.
+- `docker compose config --quiet`: válido. Primer build de seguridad bloqueado
+  por Docker Desktop detenido; ejecutado `docker desktop start` para poder
+  repetirlo. Build y comprobaciones finales todavía pendientes en este punto.
+
+**Regresión Docker**
+
+- Tras iniciar Docker Desktop, ejecutado `docker build --progress plain
+  --build-arg MODEL_SOURCE=local --build-context localmodel=./models
+  -t bank-churn-ml:security-check .`: build correcto con las imágenes fijadas
+  por digest y verificación del SHA-256 del artefacto en la etapa de modelo.
+- Contenedores temporales propios con `ROLE=all` y puerto de prueba publicado
+  en `127.0.0.1:17860`. Comprobados dashboard, API interna, modelo congelado
+  **0,947001474187885 y contactar**, 422 sin valor rechazado, 413, plantilla,
+  `/monitoring`, UID 1000, código/modelo no escribibles y cuota SQLite operativa.
+  Se eliminaron únicamente esos contenedores de verificación al terminar.
+- Primera comprobación del cuerpo grande con `urllib` vio una conexión cerrada
+  durante el envío: Uvicorn ya había respondido 413 antes de recibir el cuerpo.
+  Se verificó después el rechazo anticipado enviando solo cabeceras con
+  `http.client`; respuesta 413 correcta. Los cuerpos fragmentados o con longitud
+  declarada falsa se prueban directamente con ASGI sintético.
+- Esta prueba usa el modelo local: no acredita descarga del Release ni iframe
+  HTTPS público. Esos prerrequisitos externos siguen pendientes.
+- Resumen de controles y límites en `docs/seguridad-demo.md`; README actualizado
+  con perfil operativo y diagrama de los controles. Preparación Render preservada
+  en el stash; no se aplicó su diseño ni se ejecutó despliegue público.
+
+**Cierre local y resultados finales**
+
+- Primera suite completa: **281 aprobados y 1 fallo**, cobertura 98,11 %.
+  Interferencia de `AppTest` con `multiprocessing` en Windows: Streamlit dejaba
+  `sys.modules["__main__"]` apuntando al dashboard. El test de interfaz restaura
+  ahora el módulo original en `finally`; no se cambió producción por ese fallo.
+- Reproducción conjunta de interfaz y procesos tras corregir el aislamiento:
+  **12 aprobados**. Repetidas después todas las comprobaciones obligatorias:
+  `uv sync --locked`, `uv run ruff check .`, `uv run ruff format --check .`,
+  `uv run pre-commit run --all-files` y
+  `uv run pytest --cov=churn --cov-report=term-missing --cov-fail-under=85`:
+  **282 aprobados, sin omitidos, cobertura 98,11 %**, lint, formato y hooks
+  en verde. Los archivos nuevos estaban incluidos en el índice para los hooks.
+- `uv sync --locked --all-groups` ejecutado al terminar para restaurar el grupo
+  `eda` preexistente en el entorno local; sincronización correcta, sin cambios
+  en las dependencias declaradas ni en el lockfile.
+- Se conservan los 147 avisos de terceros históricos. No se han cambiado
+  `pyproject.toml`, `uv.lock`, metadata, evaluación final ni artefacto; no se ha
+  reentrenado ni ejecutado la evaluación final real. El cliente de referencia
+  reproduce exactamente su probabilidad anterior en la regresión Docker.
+- Estado Git: compuerta SDD local versionada; implementación comprobada y
+  preparada para commit, sin push. El CI remoto confirmado es el de `a2598ee`;
+  las comprobaciones nuevas son locales, no CI remoto de estas correcciones.
+- Revisión final con `git diff --cached --check`, `git status -sb`,
+  `git diff --cached --stat`, comprobación de los archivos congelados y
+  `git diff --cached --numstat -- reports/audit.json`: sin cambios en dependencias,
+  evaluación final o metadata; JSON de auditoría con solo tres líneas eliminadas.
+  `git check-ignore --no-index` confirma las exclusiones de `.env`, sus variantes
+  y el estado; `git stash list` confirma `render-prep`. Hooks repetidos tras cerrar
+  la documentación: satisfactorios.
+- Siguiente paso: versionar y publicar el código para verificar su CI remoto;
+  después completar Release y despliegue/iframe HTTPS. Render sigue guardado
+  en `render-prep` y necesita su enmienda antes de recuperarlo.
+
+**Confirmación del Release y preparación del commit solicitado**
+
+- Responsable solicita crear el commit de las correcciones y comprobar el paso
+  del Release, que ya había realizado. `gh release list --limit 10` y
+  `gh api repos/darwinjaco/bank-churn-ml/releases/tags/model-v1.0` confirman:
+  [Release publicado](https://github.com/darwinjaco/bank-churn-ml/releases/tag/model-v1.0),
+  no borrador, asset `model.joblib` de 16.544.282 bytes y digest igual al
+  SHA-256 fijado (`579b7fe3…095a`). La afirmación anterior «Release pendiente»
+  queda superada por esta evidencia.
+- Ejecutado exactamente `pwsh -File scripts/verify-docker.ps1`, sin
+  `-LocalModel`: **VERIFICACIÓN COMPLETA**. Release accesible (HTTP 206),
+  descarga y hash en ambos builds, API y dashboard operativos, cliente 0,947
+  y contactar, Gender → 422, plantilla, monitoreo e imagen derivada con API
+  interna. Compose queda ejecutándose en loopback. Imagen de 3,32 GB.
+- SDK generado en un directorio temporal limpio: 42 archivos, sin CSV ni
+  artefacto local; el modelo proviene del Release. Esto acredita ese contexto
+  limpio de imagen, no reemplaza la verificación formal desde clon Git limpio.
+- Revisión antes del commit: `git status -sb`, diffs normal y de índice,
+  `git log --oneline -10`, remoto, diff de configuración/seguridad y archivos
+  congelados. CI remoto base `a2598ee` en verde confirmado con `gh run list`.
+- Comprobaciones repetidas antes del commit solicitado con los cinco comandos
+  exactos de `AGENTS.md` §4: **282 aprobados, cobertura 98,11 %**; sincronización,
+  Ruff, formato y todos los hooks satisfactorios. La publicación del nuevo
+  commit y su CI remoto se comprobarán después del push autorizado.
+
+### S15 — Viabilidad del despliegue gratuito en Render
+
+| Campo | Valor |
+|---|---|
+| Estado | Plan gratuito confirmado; publicación bloqueada por acceso a Render y enmienda de despliegue |
+| Objetivo | Continuar únicamente con recursos gratuitos, según instrucción del responsable |
+
+- Consultadas [tarifas](https://render.com/pricing), [plan gratuito](https://render.com/docs/free),
+  [Docker](https://render.com/docs/docker) y [Blueprint](https://render.com/docs/blueprint-spec).
+  Free: 512 MB y 0,1 CPU por servicio, 750 horas/mes compartidas por workspace,
+  suspensión tras 15 min sin tráfico; disco efímero y sin volumen persistente.
+  El Blueprint debe declarar `plan: free`: omitirlo selecciona un plan de pago.
+- Usuario: «si es gratis vamos». Es viable estudiar una sola instancia con API
+  interna y dashboard público para no duplicar el consumo de horas gratuitas.
+- Prueba Docker propia con imagen del Release, `--memory=512m`,
+  `--memory-swap=512m`, `--cpus=0.1` y `LLM_MAX_CALLS_PER_HOUR=0`:
+  dashboard health, referencia **0,947001474187885 y contactar**, plantilla y
+  lote sintético de 1.000 clientes correctos; `OOMKilled=false`.
+  Memoria de trabajo reportada: **409,8 MiB / 512 MiB**; cgroup incluida caché
+  llegó a 512 MiB. No se presenta como prueba de toda la interfaz bajo carga
+  ni como garantía de capacidad en la plataforma real.
+- `docker stats --no-stream` y `docker image inspect` usados para establecer
+  la base de la prueba. Se eliminó únicamente el contenedor temporal propio.
+- No hay `RENDER_API_KEY` ni `RENDER_API_TOKEN` en el entorno y no se encontró
+  CLI `render`. Se comprobó únicamente presencia, sin imprimir credenciales.
+- Siguiente paso: versionar la enmienda y plan de Render antes de recuperar
+  preparación o modificar código. Para publicar se requiere la cuenta del
+  responsable; la cuota SQLite se pierde en reinicios del Free, por lo que la
+  demo gratuita debe comenzar con plantilla sin llamadas al proveedor.
 
 ## 6. Estado del proyecto y Definition of Done
 
@@ -1060,7 +1343,7 @@ Estado al 7 de octubre de 2026, contra la *Definition of Done* del plan maestro 
 | Tests | ✅ | 243 tests (98,25 %); 240 + 3 omitidos en un clon limpio sin datos (98,16 %) |
 | Linting | ✅ | Ruff, formato y hooks de pre-commit en verde (S12) |
 | Docker | ⏳ | Verificado en Windows con el modelo local (S11); falta repetirlo con el Release y la imagen del Space |
-| CI/CD | ⏳ | Semana 7 publicada; CI de `30c0809` en verde. Workflow *Deploy Space* listo; publicación y CI de semana 8 en curso |
+| CI/CD | ⏳ | Semanas 7–8 publicadas; CI de `fd78f59` en verde. Workflow *Deploy Space* sin ejecuciones; faltan `HF_TOKEN` y `HF_SPACE` |
 | Deployment | ⏳ | Space pendiente de la cuenta de Hugging Face (B-03) |
 | README profesional | ⏳ | Redactado; faltan el GIF y la URL pública activa |
 | Reproducibilidad verificada | ✅ / ⏳ | Pipeline completo reproducido desde un clon limpio (S08–S10); tests y hooks desde un clon limpio (S12); `docker build` desde un clon limpio pendiente |

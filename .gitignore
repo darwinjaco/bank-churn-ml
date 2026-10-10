@@ -23,5 +23,7 @@ mlruns/
 mlartifacts/
 
 # Env
-.env
+.env*
+!.env.example
+.runtime/
 .DS_Store

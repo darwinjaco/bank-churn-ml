@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import csv
+import io
+import math
 import os
 
 import httpx
@@ -18,6 +21,7 @@ CONTRACT_COLUMNS = [
     "Geography",
 ]
 MAX_BATCH = 1_000
+MAX_CSV_BYTES = 1024 * 1024
 INTEGER_COLUMNS = ("CreditScore", "Age", "Tenure", "NumOfProducts", "HasCrCard", "IsActiveMember")
 MAX_ERRORS_SHOWN = 5
 
@@ -85,6 +89,29 @@ class ApiClient:
         return None if response.status_code == 404 else self._check(response)
 
 
+def read_batch_csv(upload) -> pd.DataFrame:
+    """CSV acotado antes de pandas; no materializa columnas fuera del contrato."""
+    upload.seek(0)  # Streamlit puede reutilizar el mismo archivo durante una re-ejecución.
+    raw = upload.read(MAX_CSV_BYTES + 1)
+    if len(raw) > MAX_CSV_BYTES:
+        raise ValueError("El CSV supera el máximo de 1 MiB.")
+    try:
+        header = next(csv.reader(io.StringIO(raw.decode("utf-8-sig"))))
+    except (UnicodeError, csv.Error, StopIteration) as error:
+        raise ValueError("El CSV está vacío o no tiene formato UTF-8 válido.") from error
+    if len(header) != len(set(header)):
+        raise ValueError("El CSV contiene columnas duplicadas.")
+    try:
+        frame = pd.read_csv(
+            io.BytesIO(raw), usecols=lambda column: column in CONTRACT_COLUMNS, nrows=MAX_BATCH + 1
+        )
+    except (ValueError, pd.errors.ParserError) as error:
+        raise ValueError("El CSV no tiene un formato válido.") from error
+    if not 1 <= len(frame) <= MAX_BATCH:
+        raise ValueError(f"El archivo debe tener entre 1 y {MAX_BATCH} filas.")
+    return frame
+
+
 def prepare_batch(frame: pd.DataFrame) -> list[dict]:
     """Toma solo las columnas del contrato (descarta Gender, IDs, salario) y valida tamaño."""
     missing = [c for c in CONTRACT_COLUMNS if c not in frame.columns]
@@ -100,6 +127,8 @@ def prepare_batch(frame: pd.DataFrame) -> list[dict]:
         values = pd.to_numeric(data[column], errors="coerce")
         if values.isna().any():
             raise ValueError(f"{column} debe ser numérica")
+        if not values.map(math.isfinite).all():
+            raise ValueError(f"{column} debe contener números finitos")
         if column in INTEGER_COLUMNS and not (values % 1 == 0).all():
             raise ValueError(f"{column} debe contener enteros")
         data[column] = values.astype(int) if column in INTEGER_COLUMNS else values.astype(float)
@@ -108,13 +137,26 @@ def prepare_batch(frame: pd.DataFrame) -> list[dict]:
 
 
 def results_table(frame: pd.DataFrame, response: dict) -> pd.DataFrame:
-    """Une el CSV original con las predicciones, ordenado por probabilidad descendente."""
+    """Solo entradas normalizadas del contrato y predicciones; sin IDs ni columnas extra."""
     predictions = pd.DataFrame(response["predictions"])
-    out = frame.reset_index(drop=True).copy()
+    out = pd.DataFrame(prepare_batch(frame))
     out["probabilidad_abandono"] = predictions["churn_probability"].round(4)
     out["contactar"] = predictions["contact"].map({True: "sí", False: "no"})
     out["beneficio_esperado_eur"] = predictions["expected_benefit_eur"].round(2)
     return out.sort_values("probabilidad_abandono", ascending=False).reset_index(drop=True)
+
+
+def results_csv(table: pd.DataFrame) -> str:
+    """Protección adicional de texto para hojas de cálculo; los números se conservan."""
+
+    def safe(value):
+        if isinstance(value, str):
+            start = value.lstrip()
+            if start.startswith(("=", "+", "-", "@", "\uff1d", "\uff0b", "\uff0d", "\uff20")):
+                return "'" + value
+        return value
+
+    return table.map(safe).to_csv(index=False, quoting=csv.QUOTE_ALL)
 
 
 def reason_rows(prediction: dict) -> list[dict]:
