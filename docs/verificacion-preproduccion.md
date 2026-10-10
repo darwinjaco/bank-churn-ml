@@ -44,16 +44,16 @@ NaN o infinito → 422 (antes 500) · errores 422 legibles en el dashboard · de
 
 ## 4. Pendientes conocidos y aparcados
 
-- **Producción (aplazada):** Hugging Face exige plan PRO para Docker. La opción evaluada es Render gratis con dos servicios (API ~370 MB y dashboard ~150 MB, 512 MB cada uno). Requiere la enmienda v1.1 de la spec 006 y una prueba con `--memory=512m`. `deploy/Dockerfile.release` arranca con `ROLE=all` y `PORT=7860` (un solo proceso con API y dashboard); con dos servicios hay que fijar `ROLE=api` / `ROLE=dashboard` y `API_URL` en cada uno.
+- **Producción (aplazada):** Hugging Face exige plan PRO para Docker. La opción evaluada es Render gratis con dos servicios de 512 MB cada uno. Los valores API ~370 MB y dashboard ~150 MB son orientativos: no hay una medición registrada en este documento que permita darlos por verificados. Requiere la enmienda v1.1 de la spec 006 y una prueba con `--memory=512m`. `deploy/Dockerfile.release` arranca con `ROLE=all` y `PORT=7860` (un contenedor con dos procesos: FastAPI y Streamlit, según `docker/start.sh`); con dos servicios hay que fijar `ROLE=api` / `ROLE=dashboard` y configurar `API_URL` en el dashboard para que apunte a la API.
 - **Cambios sin commit de esa preparación**, no verificados: `deploy/Dockerfile.release`, `scripts/build_space.py`, `deploy-space.yml` (solo manual), `wait_for_model()` en `ui.py` y `app.py`, y 3 tests nuevos. Citan "spec 006 v1.1 §2.6" y "Render (§2.1)", que no existen (la spec 006 sigue en v1.0, solo Hugging Face), y `deploy-space.yml` quita el disparador por etiquetas `v*`, en contra de la spec 006 §2.4 y §6: incumplen `AGENTS.md` §6 mientras no exista la enmienda. Antes de la revisión, apárcalos solo a ellos (sin este documento ni el registro) o descártalos:
 
   ```powershell
   git stash push -u -m "render-prep" -- deploy/Dockerfile.release scripts/build_space.py .github/workflows/deploy-space.yml src/churn/ui.py dashboard/app.py tests/test_build_space.py tests/test_ui.py
   ```
 
-- **Edición concurrente:** otra sesión modificó `docs/registro-avance.md`: la sección "Revisión de los seis pasos de cierre" y las líneas de estado de S12, de los pendientes del responsable y de CI/CD en §6. Confirma su autoría antes de hacer commit.
+- **Edición concurrente (autoría confirmada, D-B resuelta):** la sesión de OpenCode que realizó la revisión anterior modificó `docs/registro-avance.md`: la sección "Revisión de los seis pasos de cierre" y las líneas de estado de S12, de los pendientes del responsable y de CI/CD en §6. Esa sesión confirmó su autoría; el contenido coincide con git y GitHub según la revisión registrada.
 - **Conocidos, sin corregir:**
-  - `penalty="l2"` está obsoleto desde scikit-learn 1.9 (versión bloqueada: 1.9.1) y se elimina en la 1.10; migrar a `l1_ratio=0` requiere enmienda.
+  - El parámetro `penalty`, incluido `penalty="l2"`, está obsoleto desde scikit-learn 1.8 (versión bloqueada: 1.9.1) y se elimina en la 1.10; confirmado por la documentación y el aviso de `sklearn/linear_model/_logistic.py`. Migrar a `l1_ratio=0` requiere enmienda.
   - `monitoring.json` registra `git_commit` = `30c0809`, el HEAD en el momento de generarlo; el código que lo produjo se publicó después en `fd78f59` (hijo de `d0e8e6c`).
   - Imagen de 3,34 GB (comprobado con `docker images`). Causa sin medir: `mlflow` y `statsmodels` solo se usan para entrenar y analizar (`tracking`, `train`, `stats`, `hypotheses`, `monitoring`) y podrían salir del runtime; `xgboost` sí hace falta, porque `pipeline.py` lo importa al nivel del módulo y se necesita para deserializar el modelo. Mover dependencias exige enmienda (`AGENTS.md` §6).
   - El GIF de demo y la etiqueta `v1.0.0` siguen pendientes.

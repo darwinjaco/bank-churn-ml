@@ -196,3 +196,11 @@ Autenticación, escalado, reentrenamiento automático, monitoreo en producción 
 
 - **B-03 — Cuenta de Hugging Face pendiente.** El responsable aún no tiene cuenta (7 de octubre de 2026). Se usa `darwinjaco` como usuario provisional en el README y en esta spec. Si el usuario final es otro, se corrige en `README.md`, `deploy/space/README.md` y la variable `HF_SPACE`; el código no depende del nombre.
 - Prerrequisitos del responsable (P1–P6 del plan): push y CI en verde, Release `model-v1.0` publicado con el repositorio público, `verify-docker.ps1` sin `-LocalModel`, cuenta y token de Hugging Face, secreto `HF_TOKEN` y variable `HF_SPACE` en GitHub, Space vacío creado y, si se usa, la clave del LLM.
+
+## 11. Enmienda de seguridad — Spec 007
+
+La [spec 007](007-security-hardening.md) sustituye §3 en la persistencia del
+presupuesto LLM: mismo límite configurable, compartido por procesos mediante
+SQLite en la misma instancia. También exige XSRF activo, autenticación Git sin
+token en argumentos y referencias inmutables. Los disparadores de §2.4 siguen
+vigentes. Render permanece aparcado, pendiente de su propia decisión de diseño.

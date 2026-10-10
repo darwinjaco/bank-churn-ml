@@ -1087,8 +1087,87 @@ Sin defectos en los módulos de análisis (semanas 2–6): ya produjeron los res
 
 **Decisiones y pendientes**
 - **D-A (responsable):** aparcar los cambios de Render con el stash limitado del plan §4 o continuar con Render, lo que exige antes la enmienda v1.1 de la spec 006 con commit (`AGENTS.md` §6). Mientras tanto, `ruff check .` no queda en verde por el E501 de esos cambios.
-- **D-B (responsable):** confirmar la autoría de la sección «Revisión de los seis pasos de cierre» y de las líneas de estado de S12, pendientes y CI/CD añadidas por otra sesión; su contenido coincide con git y GitHub.
-- Siguiente paso: resolver D-A y D-B, repetir las comprobaciones con `pre-commit run --all-files` y hacer commit (`docs: pre-production review corrections`) con CI remoto en verde.
+- **D-B resuelta:** la sesión de OpenCode que realizó la revisión de los seis pasos confirmó la autoría de esa sección y de las líneas de estado de S12, pendientes y CI/CD; su contenido coincide con git y GitHub según la evidencia registrada.
+- Siguiente paso: resolver D-A, repetir las comprobaciones con `pre-commit run --all-files` y hacer commit (`docs: pre-production review corrections`) con CI remoto en verde.
+
+#### Ajustes finales del documento de verificación
+
+- A petición del responsable, corregidos los cuatro puntos pendientes en
+  `docs/verificacion-preproduccion.md`: `ROLE=all` corresponde a dos procesos
+  en un contenedor; la deprecación de `penalty` comienza en scikit-learn 1.8;
+  D-B queda resuelta; las cifras de memoria de Render se identifican como
+  orientativas, sin medición registrada. `API_URL` se configura en el dashboard
+  para apuntar a la API cuando se usan dos servicios.
+- Evidencia: `docker/start.sh` arranca Uvicorn en segundo plano y Streamlit en
+  primer plano; `sklearn/linear_model/_logistic.py` documenta la deprecación en
+  1.8 y la eliminación en 1.10. La autoría fue confirmada en la conversación.
+- Comandos ejecutados: `git status -sb`, revisión del diff del documento,
+  `uv run pre-commit run --files docs/verificacion-preproduccion.md docs/registro-avance.md`,
+  `git diff --check` y `git diff --stat`. Hooks pertinentes y comprobación del
+  diff satisfactorios. Evidencia local de estos ajustes documentales; todavía
+  sin commit ni CI remoto de esta modificación.
+- Alcance completado: revisión documental del plan; la revisión integral de
+  las semanas 1–8 y la decisión D-A siguen pendientes.
+
+### S14 — Correcciones de la auditoría de seguridad
+
+| Campo | Valor |
+|---|---|
+| Fase | Endurecimiento posterior a la semana 8 |
+| Estado | Preparación; compuerta SDD pendiente de decisiones y commit previo |
+| Objetivo | Corregir SEC-01 a SEC-13 con pruebas de regresión, conservando el artefacto y los resultados congelados |
+
+**Comprobaciones y documentación consultada**
+
+- Ejecutados `git status -sb`, `git log --oneline -10`, `git diff --stat`,
+  `git remote -v` y `gh run list --limit 5 --json databaseId,headSha,status,conclusion,workflowName,url`.
+  Base actual: `a2598ee`, rama `docs/pre-production-review`; CI remoto en verde:
+  https://github.com/darwinjaco/bank-churn-ml/actions/runs/37577603990.
+- Leídas `AGENTS.md` y las specs 005 y 006. Continúan presentes los cambios
+  locales de preparación para Render y los ajustes documentales previos.
+- Consultadas las fuentes oficiales de
+  [persistencia de scikit-learn](https://scikit-learn.org/stable/model_persistence.html),
+  [texto literal de Streamlit](https://docs.streamlit.io/develop/api-reference/text/st.text),
+  [configuración de Streamlit](https://docs.streamlit.io/develop/api-reference/configuration/config.toml)
+  y [seguridad de GitHub Actions](https://docs.github.com/en/actions/reference/security/secure-use).
+  Streamlit documenta XSRF activo y cookies `SameSite=None; Secure` para iframes
+  HTTPS, y renderizado literal con `st.text`. El SHA-256 debe comprobarse antes
+  de cualquier deserialización de `joblib`.
+- Consulta inicial de OWASP con una ruta inexistente: HTTP 404. La consulta
+  inicial de middleware de Starlette falló por transporte; no se presenta como
+  documentación verificada.
+
+**Decisiones y bloqueo**
+
+- Se requiere decidir D-A (aparcar solo las siete rutas de Render o incorporar
+  su enmienda), autorizar el commit previo de la especificación y del plan, y
+  aprobar límites de consumo que las specs actuales no definen.
+- Propuesta para una demo de una instancia: 60 peticiones de inferencia por
+  minuto, 2 inferencias simultáneas, cuerpos JSON de 512 KiB y CSV de 1 MiB,
+  manteniendo el máximo de 1.000 clientes. El presupuesto LLM se conserva en
+  30 intentos/hora, con almacenamiento local compartido entre procesos;
+  instancias distintas requieren un control compartido de la plataforma.
+- Según `AGENTS.md` §6, la implementación queda bloqueada hasta resolver estas
+  decisiones y versionar especificación y plan. Solo se ha actualizado este
+  registro; las correcciones de código todavía no se han aplicado.
+- Siguiente paso: confirmar las decisiones, redactar la spec de seguridad y su
+  plan, ejecutar las comprobaciones previas y versionar la compuerta SDD.
+
+**Resolución de la preparación**
+
+- Responsable: «Aparcar Render y versionar» y «Aprobar perfil propuesto».
+  Ejecutado el stash limitado a las siete rutas, con nombre `render-prep`.
+  Las ediciones documentales permanecen en la carpeta de trabajo.
+- Redactadas spec 007 y `docs/plan-seguridad.md`, con enmiendas explícitas de
+  las specs 005 y 006. Se implementará después del commit previo requerido.
+- Consultada correctamente [OWASP CSV Injection](https://owasp.org/www-community/attacks/CSV_Injection).
+  La defensa principal será descartar texto no contractual y normalizar tipos,
+  además de proteger la exportación; no se considera suficiente entrecomillar.
+- Comprobaciones previas de T0 ejecutadas con los comandos exactos de
+  `AGENTS.md` §4: sincronización, Ruff, formato y todos los hooks en verde;
+  **243 tests aprobados, cobertura 98,25 %**. Los nuevos archivos documentales
+  fueron incluidos mediante `git add` antes de `pre-commit run --all-files`.
+  CI remoto de la base `a2598ee` confirmado en verde antes del commit previo.
 
 ## 6. Estado del proyecto y Definition of Done
 

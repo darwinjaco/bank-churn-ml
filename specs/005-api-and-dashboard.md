@@ -83,3 +83,12 @@ Motivo: revisión completa del código antes del cierre (registro S12). No cambi
 - **`GET /monitoring`** y pestaña **Monitoreo** del dashboard (spec 006 §4.9).
 - **Dashboard:** un cliente HTTP por proceso (`st.cache_resource`); los errores 422 de la API se muestran por fila en lugar de una traza; el lote rechaza celdas vacías y decimales en columnas enteras antes de enviar (antes `Age = 52.7` se truncaba a 52 sin aviso).
 - **`scripts/verify-docker.ps1`:** cada comprobación es una aserción (SHA-256 servido, probabilidad 0,947 y contactar para el cliente de referencia, 422 con `Gender`, `/explain` y `/monitoring`) y se añade la imagen del Space (Dockerfile derivado, `ROLE=all`, puerto 7860, API interna).
+
+## 11. Enmienda v1.2 — Seguridad (spec 007)
+
+El responsable aprobó la [spec 007](007-security-hardening.md) y su perfil de
+límites. Esta enmienda sustituye la exportación de todas las columnas del CSV
+por las ocho entradas del contrato y los resultados, redacta los errores 422
+y añade controles de tamaño, frecuencia y concurrencia. El LLM se muestra como
+texto literal. Modelo, calibración, umbral y respuestas válidas de inferencia
+conservan sus valores. Implementación pendiente del commit de compuerta.
