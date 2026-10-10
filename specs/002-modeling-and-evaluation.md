@@ -248,3 +248,11 @@ Segmentos: `Geography`, tramos de edad de `config.py`, `NumOfProducts` en {1, 2,
 - Se ejecuta **una sola vez**, después de versionar §11.1–11.5, y **solo con confirmación explícita del responsable**.
 - Artefacto, calibrador y umbral congelados. Métricas: AP, ROC-AUC, Brier y log loss; beneficio de las políticas de la spec 004 en t*; precisión, sensibilidad, F1 y matriz de confusión.
 - Primera y única función que carga la prueba (`load_test_once`), con registro en MLflow `final=true`. Tras ella no se reajusta nada; los resultados se añaden a la ficha.
+
+## 12. Enmienda de publicación segura — Spec 007
+
+La spec 007 elimina identificadores de los tres casos locales de §11.1; sus
+etiquetas de caso, probabilidades y contribuciones permanecen intactas. La carga
+del artefacto de auditoría y evaluación final comprueba el SHA-256 antes de
+deserializar. No se repite ningún análisis real ni la evaluación final; las
+regresiones de esas rutas se comprueban con datos sintéticos.

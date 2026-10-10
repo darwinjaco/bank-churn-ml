@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import json
-import math
 from collections.abc import Callable
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
@@ -13,13 +12,13 @@ from typing import Literal
 import numpy as np
 import pandas as pd
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from churn import __version__, explain, narrative
 from churn.config import PROJECT_ROOT
+from churn.security import RequestGuards
 
 METADATA_FILE = PROJECT_ROOT / "reports" / "model_metadata.json"
 FINAL_FILE = PROJECT_ROOT / "reports" / "final_test.json"
@@ -120,17 +119,6 @@ def load_service() -> Service:
     return service
 
 
-def json_safe(value):
-    """NaN e infinitos como texto: el error 422 debe poder serializarse en JSON."""
-    if isinstance(value, float) and not math.isfinite(value):
-        return str(value)
-    if isinstance(value, dict):
-        return {key: json_safe(item) for key, item in value.items()}
-    if isinstance(value, list | tuple):
-        return [json_safe(item) for item in value]
-    return value
-
-
 def create_app(service_factory: Callable[[], Service] = load_service) -> FastAPI:
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -143,10 +131,23 @@ def create_app(service_factory: Callable[[], Service] = load_service) -> FastAPI
         description="Probabilidad calibrada de abandono y decisión de contacto (specs 004 y 005).",
         lifespan=lifespan,
     )
+    app.add_middleware(RequestGuards)
 
     @app.exception_handler(RequestValidationError)
     async def validation_error(request: Request, error: RequestValidationError) -> JSONResponse:
-        detail = json_safe(jsonable_encoder(error.errors()))
+        detail = []
+        for item in error.errors():
+            extra = item["type"] == "extra_forbidden"
+            loc = list(item["loc"])
+            if extra:
+                loc[-1] = "campo_extra"
+            detail.append(
+                {
+                    "loc": loc,
+                    "type": item["type"],
+                    "msg": "Campo adicional no permitido" if extra else item["msg"],
+                }
+            )
         return JSONResponse(status_code=422, content={"detail": detail})
 
     def service(request: Request) -> Service:

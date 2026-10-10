@@ -43,11 +43,9 @@ class FakeClient:
 
 
 @pytest.fixture(autouse=True)
-def fresh_limiter(monkeypatch):
-    narrative.LIMITER.reset()
+def fresh_limiter(monkeypatch, tmp_path):
+    monkeypatch.setenv("LLM_RATE_LIMIT_DB", str(tmp_path / "quota.sqlite3"))
     monkeypatch.delenv("LLM_MAX_CALLS_PER_HOUR", raising=False)
-    yield
-    narrative.LIMITER.reset()
 
 
 @pytest.fixture
@@ -153,3 +151,28 @@ def test_max_calls_per_hour_parsing(monkeypatch, raw, expected):
     else:
         monkeypatch.setenv("LLM_MAX_CALLS_PER_HOUR", raw)
     assert narrative.max_calls_per_hour() == expected
+
+
+def test_persistent_quota_survives_recreating_limiter(configured, monkeypatch):
+    monkeypatch.setenv("LLM_MAX_CALLS_PER_HOUR", "1")
+    fake = FakeClient("Texto")
+    assert narrative.explain(CUSTOMER, PREDICTION, lambda url, key: fake)["source"] == "llm"
+    assert narrative.explain(CUSTOMER, PREDICTION, lambda url, key: fake)["reason"] == (
+        narrative.RATE_LIMIT_REASON
+    )
+
+
+def test_quota_storage_failure_never_calls_provider(configured, monkeypatch, tmp_path):
+    blocked = tmp_path / "not-a-directory"
+    blocked.write_text("x")
+    monkeypatch.setenv("LLM_RATE_LIMIT_DB", str(blocked / "quota.sqlite3"))
+    fake = FakeClient("No debe llamar")
+    result = narrative.explain(CUSTOMER, PREDICTION, lambda url, key: fake)
+    assert result["reason"] == "presupuesto LLM no disponible" and fake.sent is None
+
+
+def test_disabled_llm_does_not_create_state(configured, monkeypatch, tmp_path):
+    path = tmp_path / "quota.sqlite3"
+    monkeypatch.setenv("LLM_MAX_CALLS_PER_HOUR", "0")
+    result = narrative.explain(CUSTOMER, PREDICTION)
+    assert result["source"] == "template" and not path.exists()

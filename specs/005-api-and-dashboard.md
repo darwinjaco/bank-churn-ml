@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Estado | Implementada v1.1 (enmienda de la semana 8, §10); Docker verificado con modelo local; falta repetir con el Release |
+| Estado | Implementada v1.2 (seguridad, §11 y spec 007), verificada en local y Docker con el Release publicado; clon limpio y CI remoto de las nuevas correcciones pendientes |
 | Responsable | Darwin Jacome Cuenca |
 | Semana | 7 (16–22 de noviembre de 2026) |
 | Dependencias | [002](002-modeling-and-evaluation.md) (artefacto congelado), [004](004-decision-layer.md) (regla de decisión) |
@@ -68,9 +68,9 @@ Mismos rangos que el contrato de datos (spec 001): `CreditScore` 300–900, `Age
 ## 9. Criterios de aceptación
 
 - [ ] `docker compose up` levanta API y dashboard desde un clon limpio (con el Release publicado).
-  - Verificado en Docker Desktop con el modelo local (`verify-docker.ps1 -LocalModel`, mismo SHA-256); falta repetirlo con el Release.
+  - Verificado en Docker Desktop con el Release publicado: `pwsh -File scripts/verify-docker.ps1` termina en «VERIFICACIÓN COMPLETA» (registro S14). Falta registrar el procedimiento desde un clon limpio.
 - [x] `/predict` devuelve la misma probabilidad que `models/model.joblib` para el mismo cliente.
-- [x] Hash del artefacto verificado en build y al arrancar (réplica de los pasos de la imagen; build real pendiente).
+- [x] Hash del artefacto verificado en build y al arrancar (build real y descarga del Release verificados, S14).
 - [x] Sin clave de LLM, `/explain` responde con la plantilla.
 - [x] CI en verde con cobertura ≥ 85 % (CI remoto en `fd78f59`; local: 243 tests, 98,25 %).
 
@@ -91,4 +91,5 @@ límites. Esta enmienda sustituye la exportación de todas las columnas del CSV
 por las ocho entradas del contrato y los resultados, redacta los errores 422
 y añade controles de tamaño, frecuencia y concurrencia. El LLM se muestra como
 texto literal. Modelo, calibración, umbral y respuestas válidas de inferencia
-conservan sus valores. Implementación pendiente del commit de compuerta.
+conservan sus valores. Compuerta versionada en `6343526`; controles implementados
+y comprobados en local según S14. Publicación y CI remoto del código pendientes.

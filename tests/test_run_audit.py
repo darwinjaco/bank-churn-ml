@@ -5,6 +5,7 @@ import json
 import joblib
 import pytest
 
+from churn import artifact as secure_artifact
 from churn import run_audit
 from churn.calibration import CalibratedModel, SigmoidCalibrator, oof_predictions
 from churn.config import FEATURE_SETS, TARGET
@@ -42,6 +43,12 @@ def test_run_audit_structure(artifact, valid_df):
 
 def test_main_writes_audit_and_checks_decision(artifact, valid_df, monkeypatch, tmp_path):
     joblib.dump(artifact, tmp_path / "model.joblib")
+    expected_hash = secure_artifact.sha256_file(tmp_path / "model.joblib")
+    monkeypatch.setattr(
+        run_audit,
+        "load_local_model",
+        lambda path: secure_artifact.load_local_model(path, expected_hash),
+    )
     (tmp_path / "metadata.json").write_text(
         json.dumps({"model_family": "rf", "git_commit": "d" * 40}), encoding="utf-8"
     )
@@ -69,4 +76,8 @@ def test_main_writes_audit_and_checks_decision(artifact, valid_df, monkeypatch, 
     decision["decision"]["policies"]["model"]["contacted"] = contacted + 1
     (tmp_path / "decision.json").write_text(json.dumps(decision), encoding="utf-8")
     with pytest.raises(RuntimeError):
+        run_audit.main()
+    (tmp_path / "model.joblib").write_bytes(b"alterado")
+    monkeypatch.setattr(run_audit, "load_validation", lambda: pytest.fail("No debe leer datos"))
+    with pytest.raises(secure_artifact.ArtifactIntegrityError):
         run_audit.main()

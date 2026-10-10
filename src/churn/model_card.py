@@ -75,7 +75,7 @@ def render_audit(audit: dict) -> str:
             f"{c['feature']} = {c['value']:g} ({c['shap']:+.3f})" for c in case["top_contributions"]
         )
         local.append(
-            f"- **{case['case'].replace('_', ' ')}** (cliente {case['customer_id']}, p calibrada "
+            f"- **{case['case'].replace('_', ' ')}** (caso sin identificador, p calibrada "
             f"{case['p_calibrated']:.3f}): {contributions}."
         )
     profiles = errors["profiles"]

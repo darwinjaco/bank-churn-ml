@@ -6,7 +6,7 @@ ROLE="${ROLE:-all}"
 PORT="${PORT:-7860}"
 
 run_api() {
-    exec uvicorn churn.api:app --host "${API_HOST:-0.0.0.0}" --port "${API_PORT:-8000}"
+    exec uvicorn churn.api:app --host "${API_HOST:-0.0.0.0}" --port "${API_PORT:-8000}" --workers 1
 }
 
 run_dashboard() {
@@ -14,6 +14,10 @@ run_dashboard() {
         --server.port "${PORT}" \
         --server.address 0.0.0.0 \
         --server.headless true \
+        --server.enableXsrfProtection true \
+        --server.enableCORS true \
+        --server.maxUploadSize 1 \
+        --client.showErrorDetails none \
         --browser.gatherUsageStats false \
         "$@"
 }
@@ -33,10 +37,10 @@ case "${ROLE}" in
     api) run_api ;;
     dashboard) run_dashboard ;;
     all)
-        uvicorn churn.api:app --host 127.0.0.1 --port 8000 &
+        uvicorn churn.api:app --host 127.0.0.1 --port 8000 --workers 1 &
         wait_for_api
-        # Dentro del iframe de Spaces, la protección XSRF bloquea la subida de archivos.
-        run_dashboard --server.enableXsrfProtection false
+        # En iframe HTTPS, configurar xsrfCookieSameSite=none y los orígenes permitidos.
+        run_dashboard
         ;;
     *)
         echo "ROLE desconocido: ${ROLE} (usar api, dashboard o all)" >&2

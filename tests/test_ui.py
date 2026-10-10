@@ -1,5 +1,9 @@
 """Funciones puras del dashboard y cliente HTTP con transporte simulado."""
 
+import csv
+import io
+import json
+
 import httpx
 import pandas as pd
 import pytest
@@ -132,7 +136,6 @@ def test_prepare_batch_accepts_float_encoded_integers():
 
 
 def test_monitoring_tables_from_versioned_report():
-    import json
 
     from churn.config import PROJECT_ROOT
 
@@ -149,3 +152,56 @@ def test_monitoring_tables_from_versioned_report():
     pa.Table.from_pandas(psi)
     rows = ui.expectation_rows(report)
     assert [row["Expectativa"][:2] for row in rows] == ["E1", "E2", "E3", "E4"]
+
+
+def test_download_drops_identifiers_and_untrusted_columns():
+    frame = pd.DataFrame([{**ROW, "CustomerId": "privado", "Gender": "privado", "nota": "=1+1"}])
+    response = {
+        "predictions": [{"churn_probability": 0.1, "contact": False, "expected_benefit_eur": -20.0}]
+    }
+    table = ui.results_table(frame, response)
+    assert set(table.columns) == set(ui.CONTRACT_COLUMNS) | {
+        "probabilidad_abandono",
+        "contactar",
+        "beneficio_esperado_eur",
+    }
+    exported = ui.results_csv(table)
+    assert "privado" not in exported and "=1+1" not in exported
+    assert pd.read_csv(io.StringIO(exported))["beneficio_esperado_eur"].iloc[0] == -20
+
+
+@pytest.mark.parametrize("text", ["=1+1", "+1+1", "-1+1", "@SUM(1)", "\t =1", "\uff20SUM(1)"])
+def test_csv_formula_text_is_neutralized_without_creating_new_cells(text):
+    table = pd.DataFrame({"texto": [text + '",otra'], "numero": [-20.0]})
+    rows = list(csv.reader(io.StringIO(ui.results_csv(table))))
+    assert len(rows[1]) == 2
+    assert rows[1][0].startswith("'")
+    assert float(rows[1][1]) == -20
+
+
+def test_csv_reader_is_bounded_and_discards_extra_columns():
+    frame = pd.DataFrame([{**ROW, "Surname": "privado", "nota": "=1+1"}])
+    data = frame.to_csv(index=False).encode()
+    upload = io.BytesIO(data)
+    parsed = ui.read_batch_csv(upload)
+    assert ui.read_batch_csv(upload).equals(parsed)
+    assert set(parsed.columns) == set(ui.CONTRACT_COLUMNS)
+    assert ui.prepare_batch(parsed) == [ROW]
+    oversized = io.BytesIO(b"x" * (ui.MAX_CSV_BYTES + 1))
+    with pytest.raises(ValueError, match="1 MiB"):
+        ui.read_batch_csv(oversized)
+    assert oversized.tell() == ui.MAX_CSV_BYTES + 1
+    many = pd.DataFrame([ROW] * (ui.MAX_BATCH + 1)).to_csv(index=False).encode()
+    with pytest.raises(ValueError, match="1 y 1000"):
+        ui.read_batch_csv(io.BytesIO(many))
+
+
+@pytest.mark.parametrize("data", [b"", b"\xff", b"Age,Age\n52,52\n", b"Age\n"])
+def test_csv_reader_rejects_invalid_or_duplicate_headers(data):
+    with pytest.raises(ValueError):
+        ui.read_batch_csv(io.BytesIO(data))
+
+
+def test_prepare_batch_rejects_infinity_before_json_serialization():
+    with pytest.raises(ValueError, match="finitos"):
+        ui.prepare_batch(pd.DataFrame([{**ROW, "Balance": float("inf")}]))

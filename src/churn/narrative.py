@@ -7,10 +7,15 @@ from __future__ import annotations
 
 import json
 import os
+import sqlite3
 import threading
 import time
 from collections import deque
 from collections.abc import Callable
+from pathlib import Path
+
+from churn.config import PROJECT_ROOT
+from churn.security import SQLiteHourlyLimiter
 
 LLM_TIMEOUT_S = 10.0
 DEFAULT_MAX_CALLS_PER_HOUR = 30
@@ -107,7 +112,9 @@ class HourlyLimiter:
             self._calls.clear()
 
 
-LIMITER = HourlyLimiter()
+def persistent_limiter() -> SQLiteHourlyLimiter:
+    path = Path(os.getenv("LLM_RATE_LIMIT_DB") or PROJECT_ROOT / ".runtime" / "llm-quota.sqlite3")
+    return SQLiteHourlyLimiter(path)
 
 
 def _openai_client(base_url: str, api_key: str):
@@ -120,7 +127,7 @@ def explain(
     customer: dict,
     prediction: dict,
     client_factory: Callable = _openai_client,
-    limiter: HourlyLimiter = LIMITER,
+    limiter: HourlyLimiter | SQLiteHourlyLimiter | None = None,
 ) -> dict:
     """Texto del LLM si está configurado, dentro del límite y responde; si no, la plantilla."""
     facts = build_facts(customer, prediction)
@@ -128,7 +135,12 @@ def explain(
     config = llm_config()
     if config is None:
         return {"text": fallback, "source": "template", "reason": "LLM no configurado"}
-    if not limiter.try_acquire(max_calls_per_hour()):  # Cuenta intentos, también los fallidos.
+    limiter = limiter or persistent_limiter()
+    try:
+        allowed = limiter.try_acquire(max_calls_per_hour())
+    except (OSError, sqlite3.Error):
+        return {"text": fallback, "source": "template", "reason": "presupuesto LLM no disponible"}
+    if not allowed:  # Cuenta intentos, también los fallidos.
         return {"text": fallback, "source": "template", "reason": RATE_LIMIT_REASON}
     try:
         client = client_factory(config["base_url"], config["api_key"])

@@ -71,10 +71,13 @@ def test_cli_writes_report(csv_path, tmp_path):
     assert out.exists()
 
 
-def test_cli_returns_1_on_schema_failure(tmp_path, valid_df):
+def test_cli_returns_1_on_schema_failure(tmp_path, valid_df, capsys):
     path = tmp_path / "bad.csv"
     valid_df.assign(Balance=-1.0).to_csv(path, index=False)
     assert main(["--path", str(path)]) == 1
+    captured = capsys.readouterr().err
+    assert "Valores omitidos" in captured
+    assert "failure_case" not in captured and "CustomerId" not in captured
 
 
 @pytest.mark.realdata

@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Versión | v1.0 |
-| Estado | Aprobada por el responsable; implementación pendiente del commit de compuerta |
+| Estado | Implementada y verificada en local; publicación del código y CI remoto pendientes |
 | Base | `a2598ee`, CI remoto en verde |
 | Dependencias | Specs 002, 005 y 006; auditoría SEC-01 a SEC-13 |
 

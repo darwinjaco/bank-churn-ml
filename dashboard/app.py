@@ -14,7 +14,9 @@ from churn.ui import (
     monitoring_metrics,
     prepare_batch,
     psi_table,
+    read_batch_csv,
     reason_rows,
+    results_csv,
     results_table,
 )
 
@@ -72,17 +74,18 @@ with single:
             m3.metric("Beneficio esperado", f"{prediction['expected_benefit_eur']:.0f} €")
             st.dataframe(pd.DataFrame(reason_rows(prediction)), hide_index=True)
             origin = "LLM" if result["source"] == "llm" else "plantilla"
-            st.info(f"{result['text']}\n\n_Texto generado por: {origin}._")
+            st.text(result["text"])
+            st.caption(f"Texto generado por: {origin}.")
 
 with batch_tab:
     st.write(
         "CSV con las columnas del contrato (otras columnas se ignoran; máximo 1.000 filas). "
         "Ejemplo sintético en el repositorio: `examples/clientes_ejemplo.csv`."
     )
-    upload = st.file_uploader("Archivo CSV", type="csv")
+    upload = st.file_uploader("Archivo CSV", type="csv", max_upload_size=1)
     if upload is not None:
         try:
-            frame = pd.read_csv(upload)
+            frame = read_batch_csv(upload)
             response = api.batch(prepare_batch(frame))
         except (ValueError, pd.errors.ParserError, *API_ERRORS) as error:
             st.error(str(error) or type(error).__name__)
@@ -95,7 +98,7 @@ with batch_tab:
             table = results_table(frame, response)
             st.dataframe(table, hide_index=True)
             st.download_button(
-                "Descargar resultados", table.to_csv(index=False), "decisiones.csv", "text/csv"
+                "Descargar resultados", results_csv(table), "decisiones.csv", "text/csv"
             )
 
 with about:

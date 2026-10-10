@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import json
 
-import joblib
 import pandas as pd
 
 from churn import audit, explain
+from churn.artifact import load_local_model
 from churn.config import PROJECT_ROOT, RAW_FILE, TARGET
 from churn.decision import decide, threshold
 from churn.experiments import load_validation
@@ -46,9 +46,7 @@ def run_audit(model, validation: pd.DataFrame) -> dict:
             "additivity_max_gap": shap_result["additivity_max_gap"],
             "explains": "probabilidad sin calibrar del Random Forest base",
             **explain.global_importance(shap_result["values"], shap_result["names"]),
-            "local": explain.local_explanations(
-                shap_result, probability, validation["CustomerId"], t
-            ),
+            "local": explain.local_explanations(shap_result, probability, t),
         },
         "errors": {
             "profiles": audit.error_profiles(validation, y, contact),
@@ -63,7 +61,7 @@ def run_audit(model, validation: pd.DataFrame) -> dict:
 def main() -> int:
     from churn.plots import shap_importance_figure
 
-    model = joblib.load(MODEL_FILE)
+    model = load_local_model(MODEL_FILE)
     metadata = json.loads(METADATA_FILE.read_text(encoding="utf-8"))
     validation = attach_gender(load_validation())
     result = run_audit(model, validation)

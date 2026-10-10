@@ -143,7 +143,7 @@ def main(argv: list[str] | None = None) -> int:
         validate_schema(df)
     except SchemaErrors as exc:
         print("SCHEMA VALIDATION FAILED", file=sys.stderr)
-        print(exc.failure_cases.to_string(), file=sys.stderr)
+        print(f"Fallos detectados: {len(exc.failure_cases)}. Valores omitidos.", file=sys.stderr)
         return 1
 
     report = quality_report(df)

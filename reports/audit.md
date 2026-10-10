@@ -28,9 +28,9 @@ Explica la probabilidad sin calibrar del Random Forest base; aditividad comproba
 
 Explicaciones locales (cinco mayores contribuciones; valores de las variables tal como las recibe el modelo):
 
-- **mayor probabilidad** (cliente 15570002, p calibrada 0.975): NumOfProducts = 4 (+0.347); Age = 55 (+0.237); IsActiveMember = 0 (+0.063); Geography=Germany = 1 (+0.038); Balance = 118773 (+0.036).
-- **cerca del umbral** (cliente 15655175, p calibrada 0.167): NumOfProducts = 2 (-0.095); Geography=Germany = 1 (+0.051); Balance = 114319 (+0.034); Age = 40 (-0.033); IsActiveMember = 0 (+0.032).
-- **menor probabilidad** (cliente 15774393, p calibrada 0.042): Age = 30 (-0.060); NumOfProducts = 2 (-0.057); IsActiveMember = 1 (-0.027); has_balance = 0 (-0.022); Geography=Germany = 0 (-0.009).
+- **mayor probabilidad** (caso sin identificador, p calibrada 0.975): NumOfProducts = 4 (+0.347); Age = 55 (+0.237); IsActiveMember = 0 (+0.063); Geography=Germany = 1 (+0.038); Balance = 118773 (+0.036).
+- **cerca del umbral** (caso sin identificador, p calibrada 0.167): NumOfProducts = 2 (-0.095); Geography=Germany = 1 (+0.051); Balance = 114319 (+0.034); Age = 40 (-0.033); IsActiveMember = 0 (+0.032).
+- **menor probabilidad** (caso sin identificador, p calibrada 0.042): Age = 30 (-0.060); NumOfProducts = 2 (-0.057); IsActiveMember = 1 (-0.027); has_balance = 0 (-0.022); Geography=Germany = 0 (-0.009).
 
 Figura: [shap_importance.png](figures/shap_importance.png).
 

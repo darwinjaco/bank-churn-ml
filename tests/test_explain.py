@@ -54,13 +54,14 @@ def test_shap_is_additive_and_importance_is_sorted(small_model, valid_df):
 def test_local_explanations_pick_expected_customers(small_model, valid_df):
     result = explain.compute_shap(small_model, valid_df)
     calibrated = small_model.predict_proba(valid_df)
-    cases = explain.local_explanations(result, calibrated, valid_df["CustomerId"], 1 / 6)
+    cases = explain.local_explanations(result, calibrated, 1 / 6)
     by_case = {case["case"]: case for case in cases}
     assert by_case["mayor_probabilidad"]["p_calibrated"] == pytest.approx(calibrated.max())
     assert by_case["menor_probabilidad"]["p_calibrated"] == pytest.approx(calibrated.min())
     near = by_case["cerca_del_umbral"]["p_calibrated"]
     assert near > 1 / 6 and near == pytest.approx(calibrated[calibrated > 1 / 6].min())
     for case in cases:
+        assert "customer_id" not in case
         assert len(case["top_contributions"]) == explain.N_LOCAL_TOP
         magnitudes = [abs(c["shap"]) for c in case["top_contributions"]]
         assert magnitudes == sorted(magnitudes, reverse=True)
@@ -69,5 +70,5 @@ def test_local_explanations_pick_expected_customers(small_model, valid_df):
 def test_local_explanations_without_customers_above_threshold(small_model, valid_df):
     result = explain.compute_shap(small_model, valid_df)
     calibrated = np.zeros(len(valid_df))
-    cases = explain.local_explanations(result, calibrated, valid_df["CustomerId"], 0.5)
+    cases = explain.local_explanations(result, calibrated, 0.5)
     assert {case["case"] for case in cases} == {"mayor_probabilidad", "menor_probabilidad"}

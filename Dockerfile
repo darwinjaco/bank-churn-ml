@@ -3,9 +3,9 @@
 # MODEL_SOURCE=local lo copia del contexto adicional "localmodel" (docker-compose.local.yml).
 ARG MODEL_SOURCE=release
 
-FROM python:3.11-slim AS base
+FROM python:3.11-slim@sha256:e88e9763f943ec1834f992a4b51e0f24500486803e8bc534e5767af9ea65f6ce AS base
 
-COPY --from=ghcr.io/astral-sh/uv:0.12.13 /uv /uvx /bin/
+COPY --from=ghcr.io/astral-sh/uv:0.12.13@sha256:b485bd65cc2cf1c9a93b3554012c9c3778cf7b1b5fd3d3096ce9e1226c97e1e6 /uv /uvx /bin/
 
 ENV PYTHONUNBUFFERED=1 \
     UV_COMPILE_BYTECODE=1 \
@@ -40,7 +40,7 @@ COPY --from=localmodel model.joblib ./models/model.joblib
 RUN python -m churn.artifact
 
 FROM model-${MODEL_SOURCE} AS final
-RUN chown -R user:user /app
+RUN install -d -o user -g user -m 700 /app/.runtime
 USER user
 ENV ROLE=all \
     API_URL=http://127.0.0.1:8000 \

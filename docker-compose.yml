@@ -10,7 +10,9 @@ services:
       LLM_MODEL: ${LLM_MODEL:-}
       LLM_MAX_CALLS_PER_HOUR: ${LLM_MAX_CALLS_PER_HOUR:-30}
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - llm-state:/app/.runtime
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 10s
@@ -25,7 +27,10 @@ services:
       API_URL: http://api:8000
       PORT: "8501"
     ports:
-      - "8501:8501"
+      - "127.0.0.1:8501:8501"
     depends_on:
       api:
         condition: service_healthy
+
+volumes:
+  llm-state:

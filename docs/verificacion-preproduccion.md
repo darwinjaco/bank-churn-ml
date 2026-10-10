@@ -45,7 +45,7 @@ NaN o infinito → 422 (antes 500) · errores 422 legibles en el dashboard · de
 ## 4. Pendientes conocidos y aparcados
 
 - **Producción (aplazada):** Hugging Face exige plan PRO para Docker. La opción evaluada es Render gratis con dos servicios de 512 MB cada uno. Los valores API ~370 MB y dashboard ~150 MB son orientativos: no hay una medición registrada en este documento que permita darlos por verificados. Requiere la enmienda v1.1 de la spec 006 y una prueba con `--memory=512m`. `deploy/Dockerfile.release` arranca con `ROLE=all` y `PORT=7860` (un contenedor con dos procesos: FastAPI y Streamlit, según `docker/start.sh`); con dos servicios hay que fijar `ROLE=api` / `ROLE=dashboard` y configurar `API_URL` en el dashboard para que apunte a la API.
-- **Cambios sin commit de esa preparación**, no verificados: `deploy/Dockerfile.release`, `scripts/build_space.py`, `deploy-space.yml` (solo manual), `wait_for_model()` en `ui.py` y `app.py`, y 3 tests nuevos. Citan "spec 006 v1.1 §2.6" y "Render (§2.1)", que no existen (la spec 006 sigue en v1.0, solo Hugging Face), y `deploy-space.yml` quita el disparador por etiquetas `v*`, en contra de la spec 006 §2.4 y §6: incumplen `AGENTS.md` §6 mientras no exista la enmienda. Antes de la revisión, apárcalos solo a ellos (sin este documento ni el registro) o descártalos:
+- **Preparación de Render aparcada (D-A resuelta):** las siete rutas siguientes y sus tres tests están guardados en el stash `render-prep`, por decisión del responsable. Su diseño de Render sigue sin aprobar ni versionar: las referencias a "spec 006 v1.1 §2.6" y "Render (§2.1)" no corresponden a la spec vigente, y su retirada del disparador por etiquetas necesita enmienda. El stash se realizó con rutas, sin incluir este documento ni el registro:
 
   ```powershell
   git stash push -u -m "render-prep" -- deploy/Dockerfile.release scripts/build_space.py .github/workflows/deploy-space.yml src/churn/ui.py dashboard/app.py tests/test_build_space.py tests/test_ui.py
@@ -57,3 +57,12 @@ NaN o infinito → 422 (antes 500) · errores 422 legibles en el dashboard · de
   - `monitoring.json` registra `git_commit` = `30c0809`, el HEAD en el momento de generarlo; el código que lo produjo se publicó después en `fd78f59` (hijo de `d0e8e6c`).
   - Imagen de 3,34 GB (comprobado con `docker images`). Causa sin medir: `mlflow` y `statsmodels` solo se usan para entrenar y analizar (`tracking`, `train`, `stats`, `hypotheses`, `monitoring`) y podrían salir del runtime; `xgboost` sí hace falta, porque `pipeline.py` lo importa al nivel del módulo y se necesita para deserializar el modelo. Mover dependencias exige enmienda (`AGENTS.md` §6).
   - El GIF de demo y la etiqueta `v1.0.0` siguen pendientes.
+
+## 5. Correcciones de seguridad posteriores a esta revisión
+
+La [spec 007](../specs/007-security-hardening.md) y el
+[plan de seguridad](plan-seguridad.md) fueron aprobados y versionados en `6343526`
+antes de modificar código. S14 registra la corrección de SEC-01 a SEC-13 y sus
+pruebas. No se modifican el modelo, sus dependencias Python ni los resultados
+congelados. La revisión de seguridad y la corrección no equivalen al despliegue
+público ni a una auditoría de CVE de las dependencias.
