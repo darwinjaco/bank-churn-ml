@@ -1330,7 +1330,7 @@ Sin defectos en los módulos de análisis (semanas 2–6): ya produjeron los res
 
 | Campo | Valor |
 |---|---|
-| Estado | Diseño previo documentado; pendiente de commit de compuerta y de URL pública |
+| Estado | Compuerta `40127be` versionada; implementación y escaneos comprobados en local; publicación/CI nuevo y URL pública pendientes |
 | Base | `3419a65`, rama `docs/pre-production-review`, CI remoto en verde |
 | Objetivo | Aplicar la propuesta aprobada por el responsable sin alterar modelo ni dependencias congeladas |
 
@@ -1378,6 +1378,69 @@ Sin defectos en los módulos de análisis (semanas 2–6): ya produjeron los res
 - Esta evidencia Linux permite versionar la compuerta con CI remoto previo
   verde en `3419a65`. El fallo de timeout Windows queda documentado y debe
   corregirse y comprobarse después del commit previo, sin omitir el test.
+- Compuerta creada como `40127be`, con hooks activos. Implementación posterior:
+  workflow separado `security.yml`, binario Gitleaks verificado por hash,
+  pip-audit aislado, informe mínimo de secretos y comprobador público manual.
+  AppTest usa ahora un plazo explícito de 30 s; conserva todas sus aserciones.
+- Descargado Gitleaks v8.30.1 de su Release oficial al directorio temporal
+  aprobado; SHA-256 Windows comprobado (`d29144de…`), sin instalación global.
+  Se exportó `uv.lock` a requisitos temporales y se ejecutó pip-audit v2.10.1
+  mediante `uv tool run`, sin tocar el entorno de entrenamiento ni sus archivos.
+- Escaneos locales reales: Gitleaks `git --log-opts=--all --redact=100` y
+  minimización del informe: **0 hallazgos**; pip-audit con requisitos bloqueados,
+  sin resolución/pip/actualizaciones: **ninguna vulnerabilidad conocida encontrada**.
+  Alcance de dependencias: plataforma Windows/Python 3.11 de esta ejecución.
+- Pruebas focalizadas: **30 aprobados**. Ejecución del comprobador sin `--url`:
+  `not_verified`, código 2, sin peticiones. No se ejecutó contra una URL de ejemplo.
+- Fuentes y uso en `docs/verificacion-seguridad-publica.md`. Comprobaciones
+  finales y CI remoto de la implementación todavía pendientes en este punto.
+- Comprobada equivalencia de los jobs en Linux en un contenedor temporal:
+  exportación del lock, pip-audit con hashes y sin pip, descarga/verificación
+  SHA-256/tar de Gitleaks, escaneo de historial y minimización. **0 vulnerabilidades
+  conocidas y 0 hallazgos de secretos**. Esto sigue siendo evidencia local,
+  no una ejecución del workflow nuevo en GitHub Actions.
+- Se usa `--require-hashes --disable-pip --strict`; se elimina `--no-deps`
+  redundante, según advertencia de la herramienta, conservando la ausencia de
+  resolución y la inmovilidad del lockfile. Repetición con los flags finales
+  satisfactoria tanto en Windows como Linux.
+- Prueba positiva con una cadena sintética generada en memoria: el primer
+  patrón alfabético de ejemplo no fue detectado; un patrón seudoaleatorio fijo
+  sí produjo un hallazgo y código 1 esperado. No se imprimieron sus valores.
+  La prueba no es un secreto real del proyecto ni se publicó como hallazgo.
+- Escaneo adicional del diff preparado mediante Gitleaks `stdin`: 0 hallazgos.
+  El helper se comprueba además con informes ausentes/malformados y datos
+  sintéticos sin redacción para asegurar que no filtra valores ni oculta fallos.
+- Comprobador HTTP usa `http.client` para conservar `Connection: Upgrade`:
+  `urllib` sustituye esa cabecera por `close`. Test de transporte confirma
+  validación de certificado, preservación del handshake y cierre sin leer cuerpo.
+  También se prueba que CSP permisiva no quede oculta por X-Frame-Options.
+- Comprobaciones finales en Windows: `uv sync --locked`, Ruff, formato, todos
+  los hooks y suite completa con el comando de cobertura de AGENTS §4:
+  **301 aprobados, cobertura 98,11 %**, 147 avisos históricos. El fallo del
+  plazo de AppTest quedó corregido sin omitir tests ni cambiar la aplicación.
+- La implementación permanece preparada en el índice, sin commit/push nuevos;
+  solo el commit previo fue autorizado. CI remoto confirmado: base `3419a65`.
+  Siguiente paso: publicar el workflow para comprobar su CI; verificar la demo
+  real cuando el responsable proporcione su URL. Render y su stash se conservan.
+- Revisión final de índice (`git diff --cached --check`, estado y estadística)
+  y archivos congelados: sin cambios en `src/`, dependencias, metadata ni
+  evaluación final. Hooks en verde con todos los archivos nuevos incluidos.
+  `uv sync --locked --all-groups` restaura el grupo EDA anterior y
+  `git stash list` confirma que `render-prep` sigue preservado.
+
+**Publicación solicitada de los escaneos**
+
+- Responsable solicita «sube el commit». Revisados índice, diffs, estado,
+  historial reciente y remoto; se conservan aparte los borradores de Render.
+- Publicada primero la compuerta con
+  `git push origin docs/pre-production-review`. CI remoto de `40127be` en verde
+  antes de crear el commit de implementación:
+  https://github.com/darwinjaco/bank-churn-ml/actions/runs/38208131397.
+- Repetidas las cinco comprobaciones exactas de AGENTS §4 antes del commit:
+  **301 aprobados, cobertura 98,11 %**, Ruff, formato y todos los hooks en verde.
+- Siguiente paso: crear y publicar el commit de implementación en la misma rama,
+  actualizar el PR #1 y comprobar ambos workflows (CI y Security scans).
+  No se fusiona `main`; la validación pública sigue pendiente de URL.
 
 ## 6. Estado del proyecto y Definition of Done
 

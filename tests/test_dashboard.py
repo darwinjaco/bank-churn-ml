@@ -45,7 +45,9 @@ def test_dashboard_displays_llm_as_literal_text(monkeypatch):
     original_main = sys.modules["__main__"]
     st.cache_resource.clear()
     try:
-        app = AppTest.from_file(str(Path(__file__).parents[1] / "dashboard" / "app.py"))
+        app = AppTest.from_file(
+            str(Path(__file__).parents[1] / "dashboard" / "app.py"), default_timeout=30
+        )
         app.run()
         assert not app.exception and len(app.tabs) == 4
         app.button[0].click().run()

@@ -169,6 +169,14 @@ flowchart LR
 - Los casos SHAP publicados usan etiquetas sin identificador. Los reportes
   históricos conservan los IDs del dataset público: no se ha reescrito Git.
 
+### Escaneos y comprobación pública
+
+Los escaneos de CVE y secretos se definen en
+[Security scans](.github/workflows/security.yml), con herramientas aisladas y
+sin actualizar dependencias. La [comprobación pública](docs/verificacion-seguridad-publica.md)
+de HTTPS, cookies y orígenes se ejecuta cuando exista una URL real; no está
+certificada por los tests sintéticos.
+
 ### Reproducir el pipeline
 
 El CSV no se distribuye: descárgalo de Kaggle a `data/raw/Churn_Modelling.csv`.

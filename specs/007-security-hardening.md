@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Versión | v1.1 — escaneos CI y verificación pública (§9) |
-| Estado | v1.0 publicada en `3419a65`, CI verde; enmienda v1.1 aprobada, pendiente de implementación |
+| Estado | v1.0 publicada en `3419a65`, CI verde; v1.1 implementada y comprobada en local, CI nuevo y verificación pública pendientes |
 | Base | `a2598ee`, CI remoto en verde |
 | Dependencias | Specs 002, 005 y 006; auditoría SEC-01 a SEC-13 |
 
@@ -129,7 +129,8 @@ MLflow ni la evaluación final real. Los tests de esas rutas usan datos sintéti
 
 ## 9. Enmienda v1.1 — Escaneos y verificación pública
 
-Estado: aprobada por el responsable; pendiente de versionar la compuerta.
+Estado: compuerta `40127be` versionada; implementación comprobada en local.
+El workflow nuevo no está publicado y no hay URL pública para comprobar Render.
 Responsable autorizó añadir escaneos CI y comprobar HTTPS, cookies y orígenes.
 
 ### 9.1. Escaneos CI
@@ -143,7 +144,8 @@ Responsable autorizó añadir escaneos CI y comprobar HTTPS, cookies y orígenes
 - Exportar temporalmente los requisitos completos de `uv.lock` con
   `uv export --locked --all-groups --no-emit-project`, conservando hashes.
   Auditar sin resolver ni instalar las dependencias del proyecto, con
-  `--no-deps --disable-pip --strict`; sin `--fix` ni actualizaciones automáticas.
+  `--require-hashes --disable-pip --strict` (`--require-hashes` evita resolución;
+  `--no-deps` es redundante según la herramienta); sin `--fix` ni actualizaciones.
   La cobertura de versiones corresponde al Python/plataforma del runner.
 - Escanear todo el historial disponible con checkout completo y Gitleaks
   `git --log-opts=--all --redact=100`. No escanear `.venv`, datos o tracking
