@@ -2,8 +2,8 @@
 
 | Campo | Valor |
 |---|---|
-| Versión | v1.0 |
-| Estado | Implementada y verificada en local; publicación del código y CI remoto pendientes |
+| Versión | v1.1 — escaneos CI y verificación pública (§9) |
+| Estado | v1.0 publicada en `3419a65`, CI verde; enmienda v1.1 aprobada, pendiente de implementación |
 | Base | `a2598ee`, CI remoto en verde |
 | Dependencias | Specs 002, 005 y 006; auditoría SEC-01 a SEC-13 |
 
@@ -126,3 +126,75 @@ MLflow ni la evaluación final real. Los tests de esas rutas usan datos sintéti
 - [Streamlit: configuración](https://docs.streamlit.io/develop/api-reference/configuration/config.toml).
 - [Python 3.11: SQLite](https://docs.python.org/3.11/library/sqlite3.html).
 - [GitHub Actions: seguridad](https://docs.github.com/en/actions/reference/security/secure-use).
+
+## 9. Enmienda v1.1 — Escaneos y verificación pública
+
+Estado: aprobada por el responsable; pendiente de versionar la compuerta.
+Responsable autorizó añadir escaneos CI y comprobar HTTPS, cookies y orígenes.
+
+### 9.1. Escaneos CI
+
+- Workflow de seguridad separado, sin alterar el job de calidad existente,
+  ejecutado en pull requests, push a `main` y manualmente.
+- Herramientas externas al entorno de entrenamiento: `pip-audit==2.10.1` en
+  entorno aislado de uv y Gitleaks v8.30.1 con distribución oficial verificada
+  por SHA-256. Actions por SHA; `permissions: contents: read` y checkout sin
+  credenciales persistidas. No usar secretos del repositorio en los jobs.
+- Exportar temporalmente los requisitos completos de `uv.lock` con
+  `uv export --locked --all-groups --no-emit-project`, conservando hashes.
+  Auditar sin resolver ni instalar las dependencias del proyecto, con
+  `--no-deps --disable-pip --strict`; sin `--fix` ni actualizaciones automáticas.
+  La cobertura de versiones corresponde al Python/plataforma del runner.
+- Escanear todo el historial disponible con checkout completo y Gitleaks
+  `git --log-opts=--all --redact=100`. No escanear `.venv`, datos o tracking
+  locales mediante este job; no son contenido versionado del checkout.
+- Hallazgos o errores de ejecución fallan el job: no convertir un escaneo
+  incompleto en verde ni usar `continue-on-error`. Cualquier excepción a un
+  hallazgo requiere evidencia, motivo y decisión versionada del responsable.
+- Artifacts con retención de 7 días. El informe de secretos contiene únicamente
+  regla, ruta, línea y commit: no texto fuente, valores, autor ni mensaje del
+  commit. No publicar informes crudos aunque el escáner use redacción.
+- No editar `pyproject.toml`, `uv.lock`, modelo ni resultados para remediar
+  hallazgos sin la enmienda específica correspondiente.
+
+### 9.2. Verificación pública
+
+- Preparar una comprobación manual para una URL HTTPS explícita del responsable;
+  sin URL pública, registrar «no verificado» y no atribuir resultado a Render.
+- Comprobar certificado TLS con verificación estándar y redirección HTTP a
+  HTTPS. No desactivar TLS ni enviar claves, credenciales o datos de clientes.
+- Revisar cabeceras efectivas en el dashboard público: `nosniff`, política de
+  referencia, HSTS y controles de framing/CSP cuando estén presentes. Informar
+  ausencia o conflicto; no afirmar que las cabeceras de la API interna protegen
+  automáticamente las respuestas de Streamlit o del proxy.
+- Observar atributos de cookies sin imprimir valores. Para XSRF: SameSite
+  válido; `SameSite=None` exige `Secure`; no exigir `HttpOnly` al token que debe
+  leer el frontend. Una cookie no observada es evidencia incompleta.
+- Confirmar rechazo del handshake WebSocket con origen no autorizado, sin enviar
+  mensajes de aplicación, archivos ni peticiones de inferencia. El rechazo de
+  origen es distinto de comprobar el token XSRF de una subida.
+- Los controles de iframe/subida requieren un navegador y despliegue real; las
+  pruebas con respuestas sintéticas no se presentan como validación pública.
+- No cambiar autenticación, cookies, TLS o proxy por resultados hipotéticos.
+  Primero registrar la evidencia de la URL real y aprobar la solución necesaria.
+
+### 9.3. Aceptación
+
+- Escaneos reales ejecutados con versión fija; errores y hallazgos registrados
+  separadamente de resultados satisfactorios y sin revelar secretos.
+- Tests sintéticos de minimización del informe, códigos de salida y evaluación
+  de cabeceras/cookies, si se añaden helpers de implementación.
+- Regresión del dashboard con plazo explícito de 30 s en `AppTest`; conservar
+  todas las aserciones y la restauración de `__main__`. Los 3 s por defecto de
+  la herramienta no son un SLA de la aplicación y agotan el plazo en Windows
+  bajo cobertura. Aplicar este ajuste solo después de versionar la compuerta.
+- Comprobaciones locales de AGENTS §4 en verde; CI nuevo solo se acredita tras
+  publicar y consultar su ejecución. Revisión pública pendiente si no hay URL.
+
+### 9.4. Fuentes consultadas para esta enmienda
+
+- [pip-audit: usos, formatos y exit codes](https://github.com/pypa/pip-audit).
+- [Gitleaks: redacción e historial](https://github.com/gitleaks/gitleaks).
+- [uv: exportación de lockfiles](https://docs.astral.sh/uv/concepts/projects/export/).
+- [Render: TLS y redirección](https://render.com/docs/tls).
+- [Streamlit: configuración de cookies y orígenes](https://docs.streamlit.io/develop/api-reference/configuration/config.toml).

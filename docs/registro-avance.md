@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 9 de octubre de 2026 |
-| Fase actual | Seguridad verificada en local (S14); Release `model-v1.0` y Docker confirmados; pendientes: publicación y CI de las correcciones, Render gratuito (acceso y enmienda), clon limpio, GIF y etiqueta `v1.0.0` |
+| Fase actual | Seguridad publicada en `3419a65` (PR #1), CI remoto verde; Release y Docker confirmados; pendientes: Render gratuito (cuenta y enmienda), clon limpio, GIF y etiqueta `v1.0.0` |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -1115,7 +1115,7 @@ Sin defectos en los módulos de análisis (semanas 2–6): ya produjeron los res
 | Campo | Valor |
 |---|---|
 | Fase | Endurecimiento posterior a la semana 8 |
-| Estado | Implementada y verificada en local; compuerta `6343526` versionada; código y CI remoto de las correcciones pendientes de publicación |
+| Estado | Publicada en `3419a65`, CI remoto en verde; compuerta `6343526`; Release y Docker verificados |
 | Objetivo | Corregir SEC-01 a SEC-13 con pruebas de regresión, conservando el artefacto y los resultados congelados |
 
 **Comprobaciones y documentación consultada**
@@ -1277,6 +1277,15 @@ Sin defectos en los módulos de análisis (semanas 2–6): ya produjeron los res
   exactos de `AGENTS.md` §4: **282 aprobados, cobertura 98,11 %**; sincronización,
   Ruff, formato y todos los hooks satisfactorios. La publicación del nuevo
   commit y su CI remoto se comprobarán después del push autorizado.
+- Creado `3419a65` (`fix: harden demo security and verify release deployment`),
+  hooks activos en verde. Restaurado el grupo `eda` con
+  `uv sync --locked --all-groups`. `git status -sb` confirmó árbol limpio.
+- Responsable autorizó subir la rama actual. `git push origin docs/pre-production-review`
+  publicó `6343526` y `3419a65`, actualizando el
+  [PR #1](https://github.com/darwinjaco/bank-churn-ml/pull/1), sin fusionar `main`.
+  `gh run list --branch docs/pre-production-review --limit 3 --json databaseId,headSha,status,conclusion,workflowName,url`
+  confirma **CI remoto en verde para `3419a65`**:
+  https://github.com/darwinjaco/bank-churn-ml/actions/runs/38023547252.
 
 ### S15 — Viabilidad del despliegue gratuito en Render
 
@@ -1307,6 +1316,68 @@ Sin defectos en los módulos de análisis (semanas 2–6): ya produjeron los res
   preparación o modificar código. Para publicar se requiere la cuenta del
   responsable; la cuota SQLite se pierde en reinicios del Free, por lo que la
   demo gratuita debe comenzar con plantilla sin llamadas al proveedor.
+- Responsable confirma que está creando la cuenta. Preparados el borrador de
+  enmienda v1.1 en spec 006 y `docs/plan-render-gratuito.md`, con Blueprint de
+  un solo servicio, `plan: free`, publicación manual y sin claves LLM. Estas
+  últimas modificaciones documentales son locales y todavía no están versionadas;
+  la cuenta, el archivo funcional `render.yaml` y el servicio público siguen pendientes.
+- Borradores y actualización de evidencia comprobados con
+  `uv run pre-commit run --files` sobre el plan, registro y specs 005–007,
+  además de `git diff --check`: satisfactorios. La rama está sincronizada con
+  GitHub en `3419a65`; estos ajustes documentales posteriores permanecen locales.
+
+### S16 — Escaneos CI y verificación de HTTPS, cookies y orígenes
+
+| Campo | Valor |
+|---|---|
+| Estado | Diseño previo documentado; pendiente de commit de compuerta y de URL pública |
+| Base | `3419a65`, rama `docs/pre-production-review`, CI remoto en verde |
+| Objetivo | Aplicar la propuesta aprobada por el responsable sin alterar modelo ni dependencias congeladas |
+
+- Responsable: «Adelante», después del preview de escaneos y verificación
+  pública. Revisados estado, diffs, commits, stash y CI remoto mediante git y
+  `gh run list`. Se conservan los borradores locales previos de Render.
+- Leída spec 007 y el workflow actual. Consultadas las fuentes oficiales de
+  pip-audit, Gitleaks, uv, Render TLS y Streamlit; la documentación advierte que
+  pip-audit no interpreta directamente `uv.lock`. Se usará exportación del lock,
+  no una nueva resolución ni modificación del entorno de entrenamiento.
+- `gh api` confirma versiones oficiales pip-audit v2.10.1 y Gitleaks v8.30.1;
+  SHA oficial de `actions/upload-artifact@v4`:
+  `ea165f8d65b6e75b540449e92b4886f43607fa02`.
+- Redactadas propuesta de enmienda spec 007 §9 y `docs/plan-escaneos-seguridad.md`.
+  Los escaneos no usan credenciales del proyecto ni publican valores detectados.
+- No existe `render.yaml`, no se encontró URL pública de Render en la
+  documentación y no hay credencial Render en el entorno. HTTPS, cookies y
+  rechazo de origen públicos permanecen **no verificados**.
+- Compuerta: antes de editar código o tests se necesita versionar la enmienda
+  y el plan, conforme a AGENTS §6. El nuevo diseño propone conservar códigos
+  de fallo nativos: hallazgos o errores del escáner fallan CI, sin autoactualizar.
+  Se requiere confirmar autorización del commit previo y esta política.
+- Siguiente paso: confirmar la compuerta, ejecutar sus comprobaciones, versionar
+  el diseño y después implementar. Obtener URL pública cuando Render esté listo.
+- Responsable confirma «Autorizar commit y política» y «Todavía no hay URL».
+  Se aprueba la compuerta previa y mantener fallos de hallazgos/ejecución visibles.
+  La comprobación pública se prepara, pero no se ejecuta contra una URL inventada.
+- Comprobaciones previas: sincronización, Ruff, formato y hooks en verde.
+  La primera suite completa de Windows agotó el timeout global de 300 s tras
+  registrar un fallo de AppTest. El test aislado pasó (1 aprobado, 1,55 s).
+  Segunda suite completa: 281 aprobados y 1 fallo, cobertura 98,11 %; timeout
+  explícito de AppTest a los 3 s. Se limitaron temporalmente hilos BLAS/OMP y se
+  restauró el entorno; el problema del plazo persistió, por lo que no se ignora.
+- Se documenta el ajuste acotado de AppTest en la enmienda antes de editar tests.
+  La compuerta todavía no se ha creado. Se comprobará la base en Linux con
+  las mismas comprobaciones, conservando como fallo la evidencia Windows.
+- Primer intento Linux con montaje de solo lectura: lint y formato correctos;
+  hooks fallaron porque los fixers necesitan abrir los archivos en escritura,
+  incluso para comprobarlos. No se modificó el workspace.
+- Segunda comprobación Linux en un clon temporal privado de `3419a65` más
+  el diff documental, sin CSV/modelo/venv locales: los cinco comandos de
+  AGENTS §4 satisfactorios, **279 aprobados, 3 omitidos esperados, cobertura
+  98,02 %**. El clon y su entorno estuvieron dentro del contenedor temporal;
+  el repositorio original se mantuvo montado solo para lectura.
+- Esta evidencia Linux permite versionar la compuerta con CI remoto previo
+  verde en `3419a65`. El fallo de timeout Windows queda documentado y debe
+  corregirse y comprobarse después del commit previo, sin omitir el test.
 
 ## 6. Estado del proyecto y Definition of Done
 
