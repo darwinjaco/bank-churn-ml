@@ -6,7 +6,7 @@
 
 **Bank churn → retention decisions.** End-to-end ML system that turns a *calibrated* churn probability into a contact / no-contact decision with an explicit expected-profit rule: contact if p > c / (s·V) = 1/6. On a test set used exactly once, the frozen Random Forest reaches **AP 0.705** and **ROC-AUC 0.862** and, under illustrative assumptions, earns **€61,600 vs €22,100** for contacting everyone (60.5 % of the oracle). Built spec-first (6 specs) with preregistered hypotheses and thresholds, leakage-safe pipelines, MLflow, SHAP and a fairness audit, FastAPI + Streamlit, Docker and CI. A simulated drift study shows that a prevalence shift miscalibrates the model by −9.6 pp **without any input-drift alarm**.
 
-**[Demo en vivo](https://huggingface.co/spaces/darwinjaco/bank-churn-ml)** (pendiente de publicar) · [API](#api) · [Ficha del modelo](reports/model_card.md) · [Especificaciones](specs/) · [Registro de avance](docs/registro-avance.md)
+**[Demo en vivo](https://bank-churn-ml-ufa7.onrender.com/)** (funcionalidad verificada; cierre de cabeceras de seguridad pendiente) · [API](#api) · [Ficha del modelo](reports/model_card.md) · [Especificaciones](specs/) · [Registro de avance](docs/registro-avance.md)
 
 <!-- GIF de demo (20-30 s): docs/demo.gif o asset de un Release si supera 500 KB. -->
 
@@ -44,12 +44,14 @@ flowchart LR
     API --> SH["SHAP<br/>3 razones por cliente"]
     API -. "opcional, ≤ 30 llamadas/h" .-> LLM["LLM compatible con OpenAI"]
     REL["GitHub Release model-v1.0<br/>model.joblib + SHA-256"] -- "build: descarga y verifica" --> API
-    GH["GitHub: CI (Ruff + pytest ≥ 85 %)"] -- "etiqueta v* → deploy-space" --> HF["Hugging Face Space<br/>Docker, ROLE=all"]
+    GH["GitHub: CI (Ruff + pytest ≥ 85 %)"] -- "despliegue manual tras CI verde" --> RD["Render Free<br/>Docker, ROLE=all"]
+    RD --> ST
+    GH -. "workflow alternativo: etiqueta v*" .-> HF["Hugging Face Space<br/>despliegue pendiente"]
 ```
 
 - El dashboard **no carga el modelo**: todo pasa por la API ([spec 005](specs/005-api-and-dashboard.md)).
 - El modelo no se versiona en Git: se publica como asset del Release y el build **falla si el SHA-256 no coincide**.
-- En el Space solo el dashboard es público; la API escucha en `127.0.0.1` ([spec 006](specs/006-deployment-monitoring-release.md)).
+- En Render solo el dashboard es público; la API escucha en `127.0.0.1` ([spec 006 §12](specs/006-deployment-monitoring-release.md#12-enmienda-v11--render-gratuito)).
 
 ## Cómo se construyó
 
@@ -96,7 +98,7 @@ Referencia = entrenamiento; actual = validación remuestreada (nunca la prueba).
 - **Sin causalidad ni uplift:** el modelo predice quién se va, no a quién cambia la llamada; s = 30 % es un supuesto igual para todos.
 - **Brecha E-01:** con igual tasa de contacto y sensibilidad entre géneros, la precisión es 59,6 % (mujeres) frente a 42,2 % (hombres), por tasas base distintas.
 - **Grupo de 3–4 productos** (~3 % de clientes) aporta ~0,08 de AP; los abandonos no detectados son sobre todo jóvenes y activos (18–29 años: 65 % sin contactar en validación).
-- **Demo** sin autenticación; el Space gratuito se suspende tras inactividad (primer acceso lento). El monitoreo es una simulación sobre validación, no producción.
+- **Demo** sin autenticación; Render Free se suspende tras 15 minutos sin tráfico (primer acceso lento). El LLM está desactivado y se usa una plantilla. El monitoreo es una simulación sobre validación, no producción.
 
 ## Trabajo futuro
 
@@ -174,8 +176,11 @@ flowchart LR
 Los escaneos de CVE y secretos se definen en
 [Security scans](.github/workflows/security.yml), con herramientas aisladas y
 sin actualizar dependencias. La [comprobación pública](docs/verificacion-seguridad-publica.md)
-de HTTPS, cookies y orígenes se ejecuta cuando exista una URL real; no está
-certificada por los tests sintéticos.
+de HTTPS, cookies y orígenes se ejecutó sobre la URL real de Render: TLS,
+redirección, control de origen WebSocket y subida protegida por XSRF comprobados.
+Faltan `X-Content-Type-Options`, `Referrer-Policy` y HSTS; framing no verificado.
+La demo funciona, pero la auditoría pública de cabeceras no está cerrada.
+Evidencia y límites en S18 del [registro de avance](docs/registro-avance.md).
 
 ### Reproducir el pipeline
 

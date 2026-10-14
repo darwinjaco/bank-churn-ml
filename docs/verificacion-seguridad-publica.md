@@ -54,6 +54,18 @@ y repetir la comprobación. Subida con XSRF e iframe requieren además un navega
 
 ## Evidencia
 
-Consultar S16 de [registro-avance.md](registro-avance.md). Los tests con respuestas
-sintéticas no se presentan como verificación pública, y un resultado de auditoría
-local no sustituye la ejecución remota del workflow nuevo.
+Consultar S16–S18 de [registro-avance.md](registro-avance.md). En la URL real
+https://bank-churn-ml-ufa7.onrender.com/ se comprobó el 14 de octubre de 2026:
+
+- TLS y redirección HTTPS satisfactorios; WebSocket propio 101 y ajeno 403.
+- Cabeceras `X-Content-Type-Options`, `Referrer-Policy` y HSTS ausentes; framing
+  no verificado. El comprobador HTTP devuelve **código 1**, no una auditoría verde.
+- El comprobador HTTP no observó cookie; un navegador Edge real sí observó
+  `_streamlit_xsrf` con SameSite Lax, Secure falso y HttpOnly falso, sin publicar
+  valores. Subida válida HTTP 204; sin token XSRF, HTTP 403.
+- Referencia, CSV sintético, Modelo y Monitoreo funcionales en navegador.
+  No se probó iframe ni se declara validada toda la CSP.
+
+Los tests con respuestas sintéticas no se presentan como verificación pública,
+y un resultado de auditoría local no sustituye la ejecución remota del workflow.
+La remediación de cabeceras requiere una decisión versionada antes de implementarla.

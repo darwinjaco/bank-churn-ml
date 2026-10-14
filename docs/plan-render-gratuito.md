@@ -4,7 +4,8 @@
 |---|---|
 | Base publicada | `193a13d`, configuración de Render; CI y Security scans remotos en verde; diseño previo en `40f913f` |
 | Autorización | Responsable: «si es gratis vamos» y «adelante modifica lo necesario»; formulario manual preparado en Render |
-| Estado | Configuración validada y publicada con CI remoto verde; despliegue público pendiente (S17) |
+| Estado | Demo pública funcional verificada (S18); cabeceras/framing y evidencia del build pendientes |
+| URL real | https://bank-churn-ml-ufa7.onrender.com/ |
 | Especificación | Enmienda v1.1 de la spec 006, §12 |
 
 ## 1. Recursos y límites
@@ -104,6 +105,23 @@ Guardar y redesplegar si es necesario, y después verificar HTTPS y XSRF.
 
 El botón **Deploy web service** inicia la creación y el build. No constituye por
 sí solo el cierre: esperar estado Live y registrar las comprobaciones públicas.
+
+### 3.2 Resultado público — 14 de octubre de 2026
+
+URL facilitada por el responsable: https://bank-churn-ml-ufa7.onrender.com/.
+Health `ok`, referencia 0,947/contactar/plantilla, lote sintético de 20 clientes,
+Modelo y Monitoreo comprobados en navegador. Subida válida HTTP 204 y subida
+sin token XSRF rechazada HTTP 403. Origen WebSocket propio 101, ajeno 403.
+
+La auditoría HTTP devuelve código 1: faltan `X-Content-Type-Options`,
+`Referrer-Policy` y HSTS; framing no verificado. La cookie que el script HTTP
+no observó sí aparece en navegador como `_streamlit_xsrf`, SameSite Lax,
+sin Secure ni HttpOnly (no se imprimieron valores). No hay iframe probado.
+
+Antes de modificar proxy, cabeceras o arranque se requiere aprobar y versionar
+la solución, conforme a spec 007 §9.2. El hostname efectivo, commit del build,
+SHA-256 registrado en el build y estado del panel requieren evidencia de Render;
+no se deducen del HTML público. Detalle en S18 del registro.
 
 ## 4. Evidencia local y límites de la prueba
 

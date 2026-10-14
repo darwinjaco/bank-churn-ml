@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 14 de octubre de 2026 |
-| Fase actual | Configuración Render publicada en `193a13d` con CI y Security scans remotos verdes (S17); despliegue público, clon limpio Docker, GIF y etiqueta `v1.0.0` pendientes |
+| Fase actual | Render público funcional verificado (S18); auditoría HTTP fallida por cabeceras ausentes y framing no verificado; cierre de seguridad, evidencia del build, clon limpio Docker, GIF y etiqueta pendientes |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -1573,6 +1573,133 @@ En Render, añadir `PORT=10000` si todavía falta, conservar los valores del
 formulario y pulsar **Deploy web service**. Esperar el build y el estado Live,
 facilitar la URL asignada y configurar el hostname de Streamlit según el plan.
 Las comprobaciones públicas siguen pendientes; no se declara la demo operativa.
+
+### S18 — Verificación de la URL pública de Render
+
+| Campo | Valor |
+|---|---|
+| Fecha | 14 de octubre de 2026 |
+| Fase | Despliegue público, specs 006 §12 y 007 §9 |
+| Estado | Verificación funcional completada; auditoría de cabeceras fallida, framing pendiente |
+| Objetivo | Comprobar la URL real facilitada por el responsable y registrar evidencia sin atribuir resultados locales al despliegue |
+
+**URL y comprobaciones reales**
+
+- Responsable facilita https://bank-churn-ml-ufa7.onrender.com/.
+  `/_stcore/health` devuelve `ok`; raíz HTTPS sirve el frontend de Streamlit.
+  La respuesta HTTP/HTML por sí sola no se presentó como prueba de inferencia.
+- Ejecutado:
+
+```powershell
+uv run python scripts/verify_public_security.py --url https://bank-churn-ml-ufa7.onrender.com
+```
+
+- Resultado **código 1, `failed`**: faltan `X-Content-Type-Options`,
+  `Referrer-Policy` y HSTS. Framing `not_verified`; el cliente HTTP no observa
+  cookie XSRF. TLS, página 200, redirección HTTP a HTTPS y origen WebSocket
+  satisfactorios (origen propio 101 y ajeno 403).
+- Verificación adicional con navegador Edge real, headless, mediante Playwright
+  en entorno de herramienta aislado. Helper temporal fuera del workspace;
+  no se modificaron dependencias del proyecto ni se guardaron datos de clientes.
+  Antes de crear el helper se verificó su directorio temporal con `Test-Path`.
+  Comando ejecutado dos veces (ruta temporal expresada con la variable de entorno):
+
+```powershell
+uv tool run --from playwright python "$env:TEMP\opencode\verify_render_browser.py" --url https://bank-churn-ml-ufa7.onrender.com/ --example examples/clientes_ejemplo.csv
+```
+
+- Primera ejecución: interfaz y referencia correctas; el helper falló al buscar
+  subidas POST. Streamlit sube con PUT; se corrigió únicamente la observación
+  del helper temporal y el método de su comprobación negativa. No fue un fallo
+  del producto ni se cambió la aplicación para conseguir un resultado verde.
+- Segunda ejecución satisfactoria:
+  - Cliente de referencia con ocho variables del contrato: **94,7 % y Contactar**;
+    explicación por **plantilla**, sin proveedor LLM.
+  - `examples/clientes_ejemplo.csv`, 20 clientes sintéticos, procesado; botón de
+    descarga disponible. No se inspeccionó el contenido del CSV descargado.
+  - Subida válida **204** y subida sin token XSRF **403**.
+  - CSV inválido genera un error controlado en interfaz.
+  - Modelo muestra el reporte final ya congelado (2.000 clientes, AP 0,705);
+    Monitoreo muestra las expectativas preregistradas. No se cargó ni evaluó
+    nuevamente la partición de prueba.
+  - Cookie `_streamlit_xsrf` observada en navegador: SameSite Lax, Secure falso,
+    HttpOnly falso; solo se imprimieron nombre y atributos, nunca su valor.
+    Es evidencia adicional a la cookie no observada por el comprobador HTTP.
+- Base local `d9b0f85`, árbol limpio antes de esta verificación. El commit exacto
+  desplegado y el registro del build/SHA-256 no son observables desde el HTML;
+  requieren evidencia del panel de Render. No se verificó iframe.
+
+**Documentación actualizada**
+
+- `README.md`: URL real, arquitectura Render y limitaciones comprobadas.
+- `docs/plan-render-gratuito.md`: resultados públicos y pendientes.
+- `docs/verificacion-seguridad-publica.md`: auditoría HTTP y evidencia del navegador.
+- Specs 006 y 007: estado real de despliegue/verificación; sin cambiar el diseño.
+- Este registro: separación entre funcionalidad satisfactoria y auditoría fallida.
+- `git diff --check` y
+  `uv run pre-commit run --files README.md docs/plan-render-gratuito.md docs/registro-avance.md docs/verificacion-seguridad-publica.md specs/006-deployment-monitoring-release.md specs/007-security-hardening.md`
+  satisfactorios. No se repitió la suite sintética para estos cambios documentales:
+  la comprobación relevante fue contra el servicio y el navegador reales.
+
+**Decisiones, bloqueos y siguiente paso**
+
+- La demo funciona; la auditoría pública no se declara completada en verde.
+  Antes de modificar cabeceras, proxy o arranque, registrar y versionar la
+  solución aprobada (spec 007 §9.2 y compuerta SDD). No se cambió aplicación,
+  Dockerfile, configuración ni dependencias para remediar sin esa decisión.
+- Solicitar evidencia del build/commit del servicio y confirmar su hostname.
+  Registrar la solución a cabeceras/framing y volver a comprobar la URL después
+  del despliegue correspondiente.
+- Cambios de documentación únicamente locales; no se realizó nuevo commit/push
+  durante esta comprobación pública.
+
+### S19 — Rama y compuerta del rediseño profesional de Streamlit
+
+| Campo | Valor |
+|---|---|
+| Fecha | 14 de octubre de 2026 |
+| Fase | Presentación y experiencia del dashboard, spec 005 v1.3 |
+| Estado | Compuerta documental en preparación |
+| Objetivo | Construir y mostrar un rediseño con gráficos en una rama aislada |
+
+**Autorización, diseño y trabajo inicial**
+
+- Responsable solicita una interfaz Streamlit profesional, acepta el plan de
+  rama aparte y confirma añadir gráficos con «Adelamte».
+- Creada `feat/dashboard-redesign` mediante `git switch -c feat/dashboard-redesign`,
+  desde `d9b0f85`. Los seis cambios documentales locales de S18 se conservaron.
+- Revisados código del dashboard, helpers, API, tests, reportes finales y de
+  monitoreo, Docker, armado del Space y specs. No hay una interfaz anterior con
+  gráficos en el historial revisado; se propone un rediseño específico.
+- Documentados spec 005 v1.3 y plan: navegación lateral, lenguaje de negocio,
+  tema claro y gráficos de riesgo, SHAP, lote, políticas y monitoreo. Datos por
+  API; resultados por sesión; sin nuevas dependencias ni evaluación en prueba.
+- Aplicadas como criterios las dos skills revisadas y las reglas de interfaz.
+  No se ejecutaron los comandos de instalación de skills.
+- Introspección de Streamlit confirma soporte de las opciones de tema previstas,
+  incluidos color, tipografía, tamaño, borde, radio y sidebar.
+
+**Comprobaciones de partida**
+
+- `git status --short`, `git branch -vv`, `git log --oneline -10` y
+  `git diff --stat`: cambios existentes exclusivamente documentales.
+- `gh run view 38515513914 --json conclusion,headSha,url` y
+  `gh run view 38515513868 --json conclusion,headSha,url`: CI y Security scans
+  satisfactorios sobre la base `d9b0f85c46379383d386633ec47241dac7d21c13`.
+- Código, tests y dependencias todavía sin modificar.
+- Ejecutados `uv sync --locked`, `uv run ruff check .`,
+  `uv run ruff format --check .`, `uv run pre-commit run --all-files`,
+  `uv run pre-commit run --files docs/plan-dashboard-redesign.md` y
+  `uv run pytest --cov=churn --cov-report=term-missing --cov-fail-under=85`:
+  todos satisfactorios, **301 aprobados, cobertura 98,11 %**, 147 avisos
+  históricos y duración 99,99 s. El plan nuevo se comprobó explícitamente.
+- Commit documental previo pendiente de creación en este punto; CI remoto
+  acreditado únicamente para la base, no para esta nueva rama local.
+
+**Siguiente paso**
+
+Verificar y versionar los documentos de T0; implementar T1–T2 solo después de
+esa compuerta. Mostrar la vista local y capturas antes de decidir su publicación.
 
 ## 6. Estado del proyecto y Definition of Done
 

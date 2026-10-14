@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Estado | Implementación original publicada en `fd78f59`; Release `model-v1.0` y Docker verificados; despliegue gratuito Render en preparación, GIF y etiqueta `v1.0.0` pendientes |
+| Estado | Implementación original publicada en `fd78f59`; Render público funcional verificado (S18), cierre de cabeceras/framing y evidencia del build pendientes; GIF y etiqueta `v1.0.0` pendientes |
 | Responsable | Darwin Jacome Cuenca |
 | Semana | 8 (23–29 de noviembre de 2026) |
 | Dependencias | [002](002-modeling-and-evaluation.md) (artefacto congelado), [004](004-decision-layer.md) (regla de decisión), [005](005-api-and-dashboard.md) (API, dashboard e imagen) |
@@ -37,6 +37,7 @@ Visitante ──HTTPS──▶ Space (Docker, ROLE=all)
 | `Dockerfile` | Derivado del `Dockerfile` del repositorio, solo con la variante `release` (§2.3) |
 | `pyproject.toml`, `uv.lock` | Repositorio |
 | `src/churn/*.py`, `dashboard/*.py`, `docker/start.sh` | Repositorio |
+| `.streamlit/config.toml` | Tema nativo del dashboard (enmienda spec 005 v1.3) |
 | `reports/model_metadata.json`, `reports/final_test.json`, `reports/monitoring.json` | Repositorio (el Dockerfile copia los tres; §4.9) |
 | `README.md` | `deploy/space/README.md` (cabecera YAML del Space) |
 
@@ -209,7 +210,8 @@ vigentes. La preparación de Render se define en §12.
 
 **Estado: diseño y plan versionados previamente en `40f913f`; configuración
 validada y publicada en `193a13d`, con CI y Security scans remotos verdes (S17);
-despliegue público pendiente.** El responsable
+demo pública funcional verificada en S18, cierre de seguridad y evidencia del
+build pendientes.** El responsable
 autorizó continuar si la plataforma es gratuita y preparar los archivos tras
 configurar su cuenta y formulario. Sus condiciones Free fueron verificadas.
 Esta enmienda no declara el despliegue público realizado; conserva los criterios
@@ -250,9 +252,12 @@ históricos de Hugging Face en §7 como evidencia de la implementación original
 - [ ] `/_stcore/health` responde `ok`; Cliente reproduce 0,947 y contactar;
   Lote procesa `examples/clientes_ejemplo.csv`; Modelo y Monitoreo muestran
   los reportes congelados. Comprobar XSRF, WebSocket y errores bajo HTTPS con
-  el procedimiento de seguridad pública de la spec 007.
+  el procedimiento de seguridad pública de la spec 007. *Funcionalidad,
+  subida/XSRF y orígenes comprobados en S18; cabeceras/framing pendientes.*
 - [ ] LLM desactivado y plantilla disponible, sin claves de proveedor.
-- [ ] URL real y resultados públicos registrados en README y registro.
+- [x] URL real y resultados públicos registrados en README y registro.
+  *S18: https://bank-churn-ml-ufa7.onrender.com/, auditoría HTTP fallida y
+  verificación funcional en navegador satisfactoria, documentadas por separado.*
 
 El GIF, la verificación Docker desde clon limpio y la etiqueta de código siguen
 pendientes para el cierre general. La partición de prueba no se vuelve a cargar.

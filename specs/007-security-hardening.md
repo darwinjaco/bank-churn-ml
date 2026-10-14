@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Versión | v1.1 — escaneos CI y verificación pública (§9) |
-| Estado | v1.0 publicada en `3419a65`, CI verde; v1.1 implementada y comprobada en local, CI nuevo y verificación pública pendientes |
+| Estado | v1.0 publicada en `3419a65`; v1.1 publicada en `7b1fdb7`, CI y Security scans verdes; URL Render verificada en S18 con cabeceras ausentes y framing pendiente |
 | Base | `a2598ee`, CI remoto en verde |
 | Dependencias | Specs 002, 005 y 006; auditoría SEC-01 a SEC-13 |
 
@@ -129,8 +129,10 @@ MLflow ni la evaluación final real. Los tests de esas rutas usan datos sintéti
 
 ## 9. Enmienda v1.1 — Escaneos y verificación pública
 
-Estado: compuerta `40127be` versionada; implementación comprobada en local.
-El workflow nuevo no está publicado y no hay URL pública para comprobar Render.
+Estado: compuerta `40127be` versionada; implementación publicada en `7b1fdb7`.
+CI y Security scans remotos verdes. La URL pública de Render se comprobó en S18:
+TLS, redirección, orígenes y subida XSRF satisfactorios; cabeceras ausentes y
+framing sin verificar. La solución requiere una decisión versionada según §9.2.
 Responsable autorizó añadir escaneos CI y comprobar HTTPS, cookies y orígenes.
 
 ### 9.1. Escaneos CI

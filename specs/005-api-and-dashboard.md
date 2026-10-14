@@ -94,3 +94,92 @@ texto literal. Modelo, calibración, umbral y respuestas válidas de inferencia
 conservan sus valores. Compuerta versionada en `6343526`; controles implementados
 y comprobados según S14. Código publicado en `3419a65`, con CI remoto en verde;
 verificación formal desde clon limpio pendiente.
+
+## 12. Enmienda v1.3 — Presentación profesional y gráficos
+
+**Motivo:** el responsable pide recuperar una presentación Streamlit atractiva,
+ordenada y gráfica, con lenguaje de herramienta bancaria. Autoriza construirla
+en `feat/dashboard-redesign` y ver una previsualización local antes de decidir
+su publicación. Plan: [plan-dashboard-redesign.md](../docs/plan-dashboard-redesign.md).
+
+### 12.1 Diseño y navegación
+
+- Título «Retención bancaria», subtítulo orientado a priorizar acciones mediante
+  riesgo y beneficio esperado. El contexto del dataset y los supuestos pasa a
+  «Metodología y supuestos»; no se presentan datos sintéticos como una campaña real.
+- Tema claro nativo, sin HTML inseguro ni selectores CSS internos: azul
+  `#1D4ED8`, tinta `#14243B`, fondo `#F5F7FB`, superficie `#FFFFFF`, verde azulado
+  `#0F766E` y ámbar `#B45309`. Tipografía sans serif, números legibles, espacios
+  consistentes, títulos alineados a la izquierda y bordes discretos.
+- Navegación lateral: Cliente, Lote, Modelo y Monitoreo. Solo se ejecuta el
+  contenido de la vista activa. Cliente es la entrada, con formulario compacto,
+  ejemplo explícito y panel de resultados; no se infiere automáticamente.
+- Controles nativos con etiquetas y ayudas en español, unidades y estados
+  vacíos/carga/error con siguiente acción. Saldo ≥ 0 sin el máximo visual de
+  300.000 €: se alinea con el contrato existente, sin cambiar la API.
+- Las referencias técnicas se conservan en ayudas/tablas de detalle. Los
+  colores se acompañan siempre de valores, texto o tablas. No se usan gauges
+  decorativos, animaciones autónomas ni nuevas librerías.
+
+### 12.2 Gráficos y fuentes exactas
+
+Todos los datos se reciben desde la API; Streamlit no abre reportes ni el modelo.
+`src/churn/presentation.py` prepara registros/especificaciones Vega-Lite pequeños
+y números localizados; no importa Streamlit ni aprende parámetros.
+
+| Vista | Gráfico | Fuente y significado |
+|---|---|---|
+| Cliente | Probabilidad y umbral en escala 0–100 % | `prediction.churn_probability` calibrada y umbral de metadata; contactar solo si p > t |
+| Cliente | Barras de las tres razones SHAP con signo | `top_reasons`, contribución ×100 en pp de probabilidad **sin calibrar**; no waterfall completo, no causas ni suma al porcentaje calibrado |
+| Lote | Histograma de probabilidades | Predicciones del lote, diez intervalos fijos de 0,1; p=1 incluido en el último, recuentos conservados; línea de umbral exacta |
+| Lote | Recuento de decisiones | `contact` devuelto por la API; no recalcular con probabilidades redondeadas |
+| Modelo | Beneficio por política | Reporte final ya congelado, modelo/todos/nadie; euros bajo los supuestos, no ingresos de una campaña real |
+| Monitoreo | PSI por variable del escenario seleccionado | `monitoring.json` servido por la API; límites 0,10 y 0,25 del reporte, sin modificar umbrales |
+| Monitoreo | Desviación de calibración por escenario | `calibration_gap` ×100 en pp y banda ±tolerancia del reporte; simulación sobre validación, no prueba nueva |
+
+`GET /model` añade de forma compatible `final_test.evaluated_on` y
+`final_test.policies` para `model`, `everyone` y `nobody`, únicamente
+`contacted` y `benefit_eur` de los agregados existentes. Conserva las claves
+previas y no expone datos por cliente. Si el reporte no contiene una política,
+no se inventa: se muestra la evidencia disponible con estado informativo.
+
+### 12.3 Estado, privacidad y rendimiento
+
+- Resultados individuales y de lote en `st.session_state`, exclusivamente por
+  sesión. Cada resultado individual conserva el perfil evaluado; su panel lo
+  identifica y no afirma corresponder a campos editados sin enviar.
+- Lote: carga y validación local acotada → botón explícito «Procesar lote» →
+  resultado. Se conserva solo el contrato normalizado y las salidas; se descartan
+  extras antes de calcular identidad/guardar. Un nuevo contenido normalizado
+  invalida el resultado anterior. Filtrar, navegar y descargar no reenvían la
+  inferencia. No hay caché global de clientes ni CSV originales en disco.
+- Descarga de ejemplo generada en memoria con el generador sintético existente;
+  no se copian datasets ni CSV al Space. Exportación de resultados conserva
+  minimización, formatos y protección de fórmulas de v1.2.
+- Metadata y reporte público se reutilizan por sesión, con reintento explícito
+  ante error. El cliente HTTP compartido sigue siendo el único recurso global.
+- `.streamlit/config.toml` contiene exclusivamente el tema y se copia en Docker
+  y en el armado del Space. El builder mantiene sus rechazos de CSV, binarios y
+  secretos. Se admiten sus cambios y tests en esta misma compuerta.
+- Sin cambios en dependencias, features, modelo, calibrador, umbral, supuestos,
+  reportes o cargadores. `Gender` no aparece en controles predictivos ni gráficos
+  de inferencia. No se carga de nuevo la partición de prueba.
+
+### 12.4 Aceptación del rediseño
+
+- [ ] Especificación y plan con commit previo a código/tests; trabajo en rama aislada.
+- [ ] Cuatro vistas, tema aplicado, contexto metodológico accesible y gráficos
+  acompañados por números/tablas sin afirmaciones causales incorrectas.
+- [ ] Referencia 0,947/contactar y plantilla; caso no contactar; errores recuperables.
+- [ ] Lote sintético, cambio de archivo, filtrado, retorno de navegación y descarga
+  sin inferencias involuntarias; no se guardan/exportan extras ni identificadores.
+- [ ] Gráficos conservan signos, unidades, recuentos y umbrales; políticas de
+  `/model` corresponden exactamente al reporte congelado.
+- [ ] Navegador local en escritorio/móvil, teclado, foco y zoom revisados;
+  capturas de la vista previa. Sin acreditar WCAG completa por inspección parcial.
+- [ ] Ruff, formato, hooks y pytest ≥85 %; pruebas del empaquetado con el tema.
+- [ ] Registro actualizado, resultados locales distinguidos de CI/despliegue.
+
+Las cabeceras públicas/framing pendientes en S18 requieren su propia solución
+aprobada; el rediseño no los declara resueltos. El despliegue de esta rama se
+decide después de revisar la vista previa.
