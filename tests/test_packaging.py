@@ -16,7 +16,12 @@ from packaging.requirements import Requirement
 from packaging.utils import canonicalize_name
 
 ROOT = Path(__file__).resolve().parents[1]
-ENTRYPOINTS = [ROOT / "src/churn/api.py", ROOT / "dashboard/app.py", ROOT / "src/churn/artifact.py"]
+ENTRYPOINTS = [
+    ROOT / "src/churn/api.py",
+    ROOT / "dashboard/app.py",
+    ROOT / "dashboard/serve.py",
+    ROOT / "src/churn/artifact.py",
+]
 
 
 def _imports(path: Path) -> set[str]:

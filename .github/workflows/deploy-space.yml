@@ -1,12 +1,10 @@
-# Sincroniza la demo con Hugging Face Spaces (spec 006 §2.4).
+# Alternativa manual de Hugging Face Spaces (spec 006 v1.2 §13).
 # Requiere: secreto HF_TOKEN (token de escritura) y variable HF_SPACE (<usuario-hf>/bank-churn-ml),
 # y el Space creado de antemano (SDK Docker, plantilla Blank).
 name: Deploy Space
 
 on:
   workflow_dispatch:
-  push:
-    tags: ["v*"]
 
 concurrency:
   group: deploy-space

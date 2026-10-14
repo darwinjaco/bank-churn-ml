@@ -128,7 +128,7 @@ uv run uvicorn churn.api:app --host 127.0.0.1 --port 8011
 ```powershell
 # Terminal 2: interfaz con controles activos.
 $env:API_URL = "http://127.0.0.1:8011"
-uv run streamlit run dashboard/app.py --server.address 127.0.0.1 --server.port 8511 --server.enableXsrfProtection true --server.enableCORS true --server.maxUploadSize 1 --client.showErrorDetails none --browser.gatherUsageStats false
+uv run streamlit run dashboard/serve.py --server.address 127.0.0.1 --server.port 8511 --server.enableXsrfProtection true --server.enableCORS true --server.maxUploadSize 1 --client.showErrorDetails none --browser.gatherUsageStats false
 ```
 
 Capturas de escritorio (Cliente, Lote, Modelo, Monitoreo), móvil y reflow en el

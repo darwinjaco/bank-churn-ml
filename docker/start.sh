@@ -10,7 +10,7 @@ run_api() {
 }
 
 run_dashboard() {
-    exec streamlit run dashboard/app.py \
+    exec streamlit run dashboard/serve.py \
         --server.port "${PORT}" \
         --server.address 0.0.0.0 \
         --server.headless true \

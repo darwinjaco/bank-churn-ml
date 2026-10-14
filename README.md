@@ -46,7 +46,7 @@ flowchart LR
     REL["GitHub Release model-v1.0<br/>model.joblib + SHA-256"] -- "build: descarga y verifica" --> API
     GH["GitHub: CI (Ruff + pytest ≥ 85 %)"] -- "despliegue manual tras CI verde" --> RD["Render Free<br/>Docker, ROLE=all"]
     RD --> ST
-    GH -. "workflow alternativo: etiqueta v*" .-> HF["Hugging Face Space<br/>despliegue pendiente"]
+    GH -. "workflow alternativo manual" .-> HF["Hugging Face Space<br/>despliegue pendiente"]
 ```
 
 - El dashboard **no carga el modelo**: todo pasa por la API ([spec 005](specs/005-api-and-dashboard.md)).
@@ -128,7 +128,7 @@ pwsh -File scripts/verify-docker.ps1   # verificación automática: build, /pred
 ```powershell
 uv run python -m churn.artifact          # descarga models/model.joblib y verifica el SHA-256
 uv run uvicorn churn.api:app --port 8000
-uv run streamlit run dashboard/app.py    # en otra terminal
+uv run streamlit run dashboard/serve.py  # en otra terminal; launcher con cabeceras
 ```
 
 Para probar el lote, sube [`examples/clientes_ejemplo.csv`](examples/clientes_ejemplo.csv): 20 clientes **sintéticos** generados con semilla por `scripts/make_example_csv.py`.
@@ -181,6 +181,12 @@ redirección, control de origen WebSocket y subida protegida por XSRF comprobado
 Faltan `X-Content-Type-Options`, `Referrer-Policy` y HSTS; framing no verificado.
 La demo funciona, pero la auditoría pública de cabeceras no está cerrada.
 Evidencia y límites en S18 del [registro de avance](docs/registro-avance.md).
+
+El launcher `dashboard/serve.py` usa `st.App` con middleware ASGI nativo para
+servir `nosniff`, política de referencia, HSTS y framing del mismo origen.
+Su comprobación local mantiene WebSocket y subida XSRF; el resultado HTTPS
+final requiere el redeploy manual en Render. El comprobador observa también la
+cookie XSRF de `/_stcore/health`, sin publicar su valor.
 
 ### Reproducir el pipeline
 

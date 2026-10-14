@@ -37,7 +37,7 @@ envía datos de clientes, archivos o inferencia. Comprueba:
 2. Cabeceras del **dashboard público**, distintas de las de la API interna:
    `nosniff`, política de referencia, HSTS y un control limitado de framing.
    No certifica toda la CSP.
-3. Cookie XSRF observada en raíz o host-config: informa solo nombre y atributos,
+3. Health HTTP 200 y cookie XSRF observada en raíz, host-config o health: informa solo nombre y atributos,
    nunca valor. `SameSite=None` requiere `Secure`; `HttpOnly` no se exige al
    token que el frontend necesita leer.
 4. Handshake WebSocket: origen propio aceptado y origen ajeno rechazado. No
@@ -69,3 +69,7 @@ https://bank-churn-ml-ufa7.onrender.com/ se comprobó el 14 de octubre de 2026:
 Los tests con respuestas sintéticas no se presentan como verificación pública,
 y un resultado de auditoría local no sustituye la ejecución remota del workflow.
 La remediación de cabeceras requiere una decisión versionada antes de implementarla.
+
+La enmienda 007 v1.2 versionó la solución nativa mediante `st.App` y middleware.
+Cabeceras, cookie de health, origen propio/ajeno y subida con/sin token comprobados
+en el launcher local; la actualización pública de Render sigue pendiente.

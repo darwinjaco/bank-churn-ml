@@ -60,12 +60,17 @@ def test_checks_use_only_synthetic_responses_and_require_comparison_of_origins()
         if url.endswith("_stcore/stream"):
             status = 101 if headers["Origin"] == "https://demo.onrender.com" else 403
             return public.Response(status, {})
-        return public.Response(200, HEADERS, ("_streamlit_xsrf=privado; SameSite=Lax; Secure",))
+        cookies = (
+            ("_streamlit_xsrf=privado; SameSite=Lax; Secure",)
+            if url.endswith("_stcore/health")
+            else ()
+        )
+        return public.Response(200, HEADERS, cookies)
 
     report, code = public.verify("https://demo.onrender.com", request)
     assert code == 0 and report["status"] == "passed"
     assert "privado" not in json.dumps(report)
-    assert len(calls) == 5
+    assert len(calls) == 6
 
     def blocked(url, headers=None):
         return public.Response(403, {})
@@ -74,6 +79,26 @@ def test_checks_use_only_synthetic_responses_and_require_comparison_of_origins()
     assert code != 0
     origin = next(c for c in report["checks"] if c["check"] == "websocket_origin")
     assert origin["status"] == "not_verified"  # Un 403 general no demuestra CORS.
+
+
+def test_failed_health_never_becomes_green_even_with_valid_cookie():
+    def request(url, headers=None):
+        if url.startswith("http://"):
+            return public.Response(301, {"Location": "https://demo.onrender.com/"})
+        if url.endswith("_stcore/stream"):
+            return public.Response(
+                101 if headers["Origin"] == "https://demo.onrender.com" else 403, {}
+            )
+        if url.endswith("_stcore/health"):
+            return public.Response(503, {}, ("_streamlit_xsrf=sintetico; SameSite=Lax",))
+        return public.Response(200, HEADERS)
+
+    report, code = public.verify("https://demo.onrender.com", request)
+    assert code == 2 and report["status"] == "not_verified"
+    assert (
+        next(row for row in report["checks"] if row["check"] == "dashboard_health")["status"]
+        == "not_verified"
+    )
 
 
 def test_cli_without_url_never_fetches(monkeypatch, capsys):

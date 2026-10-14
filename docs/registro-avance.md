@@ -1894,6 +1894,46 @@ HF manual. Las comprobaciones de build y clon limpio seguirán al código final.
   descargado del Release y hash fijo verificado, tema y módulos incluidos.
   Es build local del rediseño, todavía no clon limpio ni solución de cabeceras.
 
+### S22 — Cabeceras nativas y despliegue alternativo manual
+
+| Campo | Valor |
+|---|---|
+| Fecha | 14 de octubre de 2026 |
+| Estado | Implementado y comprobado en local; comprobaciones completas/publicación en curso |
+| Objetivo | Corregir cabeceras públicas sin proxy ni nuevas dependencias |
+
+- Compuerta previa `562e017`, publicada en PR #2. Sus workflows están verdes:
+  [CI](https://github.com/darwinjaco/bank-churn-ml/actions/runs/38607012486) y
+  [Security scans](https://github.com/darwinjaco/bank-churn-ml/actions/runs/38607012471).
+- Añadidos `DashboardHeaders` y `dashboard/serve.py` con API pública `st.App`.
+  Arranque Docker actualizado; no se modificó ningún fichero de dependencias.
+  CSP solo `frame-ancestors 'self'`, XFO SAMEORIGIN, HSTS sin subdominios/preload,
+  nosniff y política no-referrer. Transportes no HTTP intactos.
+- Cookie XSRF observada también en health; health fallido impide resultado verde.
+  Workflow HF únicamente manual, sin disparador de etiquetas.
+- `uv run ruff format ...`, `uv run ruff check .` y
+  `uv run pytest tests/test_dashboard_security.py tests/test_public_security.py tests/test_dashboard.py tests/test_build_space.py tests/test_packaging.py -q`:
+  **39 aprobados**, 4,74 s; lint correcto.
+- Launcher local en `127.0.0.1:8521`, conectado a la API de referencia 8011,
+  mismas opciones de XSRF/CORS/upload/errores. Helper de navegador del rediseño
+  satisfactorio contra el nuevo launcher: cuatro vistas y gráficos, referencia,
+  lote/exportación, persistencia, cambios/errores, reflow y móvil; sin errores JS.
+- Comprobación real adicional con helper temporal:
+
+```powershell
+uv tool run --with httpx --from playwright python "$env:TEMP\opencode\verify_local_launcher.py" --url http://127.0.0.1:8521 --example examples/clientes_ejemplo.csv
+```
+
+- Cinco cabeceras correctas, health 200, cookie XSRF SameSite Lax observada sin
+  imprimir valor, WebSocket propio 101/ajeno 403, subida válida 204 y sin token
+  403. Alcance **HTTP local**, no se presenta como prueba TLS/HTTPS de Render.
+- Documentación de arranque actualizada al launcher con cabeceras.
+  Siguiente paso: suite completa, commit/push con CI previo verde y clon limpio.
+- Suite completa posterior con los cinco comandos exactos de AGENTS §4 y
+  `uv run pre-commit run --files src/churn/dashboard_security.py dashboard/serve.py tests/test_dashboard_security.py`:
+  **322 aprobados, cobertura 98,19 %**, 147 avisos, 80,83 s. Middleware con
+  100 % de cobertura; lint/formato y hooks correctos. CI previo de `562e017` verde.
+
 ## 6. Estado del proyecto y Definition of Done
 
 Estado al 7 de octubre de 2026, contra la *Definition of Done* del plan maestro (punto 37). ✅ = verificado; ⏳ = implementado, falta una acción externa del responsable; ↔ = desviación justificada.

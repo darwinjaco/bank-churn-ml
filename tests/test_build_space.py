@@ -18,6 +18,7 @@ EXPECTED_STATIC = {
     "uv.lock",
     "docker/start.sh",
     "dashboard/app.py",
+    "dashboard/serve.py",
     "reports/model_metadata.json",
     "reports/final_test.json",
     "reports/monitoring.json",

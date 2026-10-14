@@ -189,7 +189,15 @@ def verify(url: str, requester=fetch) -> tuple[dict, int]:
         *inspect_headers(root.headers),
     ]
     config = requester(base + "_stcore/host-config")
-    checks.append(inspect_cookies(root.cookies + config.cookies))
+    health = requester(base + "_stcore/health")
+    checks.append(
+        check(
+            "dashboard_health",
+            "passed" if health.status == 200 else "not_verified",
+            "Se espera health HTTP 200; no se lee el cuerpo",
+        )
+    )
+    checks.append(inspect_cookies(root.cookies + config.cookies + health.cookies))
     key = base64.b64encode(secrets.token_bytes(16)).decode("ascii")
     websocket = {
         "Upgrade": "websocket",
