@@ -208,7 +208,8 @@ vigentes. La preparación de Render se define en §12.
 ## 12. Enmienda v1.1 — Render gratuito
 
 **Estado: diseño y plan versionados previamente en `40f913f`; configuración
-validada en local (S17), publicación y despliegue pendientes.** El responsable
+validada y publicada en `193a13d`, con CI y Security scans remotos verdes (S17);
+despliegue público pendiente.** El responsable
 autorizó continuar si la plataforma es gratuita y preparar los archivos tras
 configurar su cuenta y formulario. Sus condiciones Free fueron verificadas.
 Esta enmienda no declara el despliegue público realizado; conserva los criterios
@@ -241,9 +242,9 @@ históricos de Hugging Face en §7 como evidencia de la implementación original
 
 ### 12.1 Criterios de aceptación de Render
 
-- [ ] Configuración validada contra el esquema oficial, versionada y publicada
-  en un commit con CI y Security scans satisfactorios. *Esquema y comprobaciones
-  locales satisfactorios (S17); commit, publicación y CI nuevos pendientes.*
+- [x] Configuración validada contra el esquema oficial, versionada y publicada
+  en un commit con CI y Security scans satisfactorios. *Comprobaciones locales
+  satisfactorias (S17), commit `193a13d` publicado y ambos workflows verdes.*
 - [ ] Un único Web Service Free desplegado; modelo descargado del Release y
   comprobado por SHA-256 durante el build. Registrar commit, URL y build.
 - [ ] `/_stcore/health` responde `ok`; Cliente reproduce 0,947 y contactar;

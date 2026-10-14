@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 14 de octubre de 2026 |
-| Fase actual | Base `40f913f` con CI y Security scans remotos verdes; Render preparado y validado en local (S17), pendiente de publicación y despliegue; clon limpio Docker, GIF y etiqueta `v1.0.0` pendientes |
+| Fase actual | Configuración Render publicada en `193a13d` con CI y Security scans remotos verdes (S17); despliegue público, clon limpio Docker, GIF y etiqueta `v1.0.0` pendientes |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -1455,7 +1455,7 @@ Sin defectos en los módulos de análisis (semanas 2–6): ya produjeron los res
 |---|---|
 | Fecha | 14 de octubre de 2026 |
 | Fase | Despliegue público, spec 006 §12 |
-| Estado | Verificación local completada; publicación y despliegue pendientes |
+| Estado | Configuración publicada y verificada en CI; despliegue público pendiente |
 | Objetivo | Preparar la configuración Free siguiendo el diseño previamente versionado y el formulario del responsable |
 
 **Trabajo realizado y decisiones**
@@ -1538,6 +1538,41 @@ uv run python -c "import json, pathlib, urllib.request, yaml, jsonschema; schema
   comprobar CI y Security scans, y pulsar **Deploy web service** con los valores
   documentados. Después registrar la URL asignada y verificar interfaz, health,
   XSRF y WebSocket mediante el procedimiento de seguridad pública.
+
+**Resultado de la publicación autorizada**
+
+- Preparados solo los cuatro archivos previstos mediante
+  `git add -- render.yaml specs/006-deployment-monitoring-release.md docs/plan-render-gratuito.md docs/registro-avance.md`.
+  `git diff --cached --check` y `git diff --cached --stat` satisfactorios.
+  Antes del commit se comprobaron de nuevo sincronización, Ruff, formato y
+  todos los hooks, incluyendo ahora el YAML nuevo en el índice. La suite local
+  previa de 301 tests seguía correspondiendo al mismo código de aplicación.
+- Ejecutados `git commit -m "feat: configure Render free deployment"` y
+  `git push origin docs/pre-production-review`, con los hooks activos.
+  Commit creado y publicado: **`193a13d`**.
+- Consultados `gh run list --branch docs/pre-production-review --limit 4 --json databaseId,workflowName,status,conclusion,headSha,url`
+  y `git rev-parse HEAD`. La consulta inicial con `--commit 193a13d` devolvió
+  una lista vacía; se identificaron los runs verificando el SHA completo.
+- `gh run watch 38515129325 --exit-status --interval 10` confirmó CI en verde;
+  `gh run view 38515129333 --json conclusion,headSha,url` confirmó Security scans
+  en verde. Ambos corresponden a `193a13d44f0648090456bc5c4cd876e833fae7e8`:
+  [CI](https://github.com/darwinjaco/bank-churn-ml/actions/runs/38515129325) y
+  [Security scans](https://github.com/darwinjaco/bank-churn-ml/actions/runs/38515129333).
+- La compuerta de publicación está satisfecha. Actualizada la documentación
+  con evidencia real; PR #1 conserva la misma rama y no se ha fusionado.
+- Antes de versionar esta evidencia se ejecutaron nuevamente los cinco
+  comandos de AGENTS §4: `uv sync --locked`, `uv run ruff check .`,
+  `uv run ruff format --check .`, `uv run pre-commit run --all-files` y
+  `uv run pytest --cov=churn --cov-report=term-missing --cov-fail-under=85`.
+  Todos satisfactorios: **301 aprobados, cobertura 98,11 %**, 147 avisos
+  históricos; duración de pytest 76,88 s. Solo se actualiza documentación.
+
+**Siguiente paso actual**
+
+En Render, añadir `PORT=10000` si todavía falta, conservar los valores del
+formulario y pulsar **Deploy web service**. Esperar el build y el estado Live,
+facilitar la URL asignada y configurar el hostname de Streamlit según el plan.
+Las comprobaciones públicas siguen pendientes; no se declara la demo operativa.
 
 ## 6. Estado del proyecto y Definition of Done
 

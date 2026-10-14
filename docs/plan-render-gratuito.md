@@ -2,9 +2,9 @@
 
 | Campo | Valor |
 |---|---|
-| Base publicada | `40f913f`, diseño y plan previos; CI y Security scans remotos en verde |
+| Base publicada | `193a13d`, configuración de Render; CI y Security scans remotos en verde; diseño previo en `40f913f` |
 | Autorización | Responsable: «si es gratis vamos» y «adelante modifica lo necesario»; formulario manual preparado en Render |
-| Estado | Configuración validada en local; publicación y despliegue pendientes (S17) |
+| Estado | Configuración validada y publicada con CI remoto verde; despliegue público pendiente (S17) |
 | Especificación | Enmienda v1.1 de la spec 006, §12 |
 
 ## 1. Recursos y límites
