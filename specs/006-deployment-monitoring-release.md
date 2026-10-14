@@ -261,3 +261,26 @@ históricos de Hugging Face en §7 como evidencia de la implementación original
 
 El GIF, la verificación Docker desde clon limpio y la etiqueta de código siguen
 pendientes para el cierre general. La partición de prueba no se vuelve a cargar.
+
+## 13. Enmienda v1.2 — Cierre sobre Render
+
+El responsable autoriza avanzar con el cierre; Render sigue siendo la plataforma
+principal y mantiene un único servicio Free con LLM desactivado. Antes de tocar
+el workflow o el arranque se versiona el [plan de cierre](../docs/plan-cierre-release.md).
+
+- Hugging Face se conserva como alternativa **manual**: `deploy-space.yml` queda
+  únicamente con `workflow_dispatch`; se retira `push.tags: ["v*"]`. La etiqueta
+  de código `v1.0.0` no debe iniciar un despliegue alternativo sin cuenta/token.
+- El contenido del Space incluye `dashboard/serve.py` y el middleware de la spec
+  007 v1.2 mediante los globs existentes; se adapta la prueba de lista exacta.
+- Capturar y crear un recorrido GIF de 20–30 s a partir de las cuatro vistas
+  comprobadas con perfiles sintéticos. Si pesa <500 KiB se versiona como
+  `docs/demo.gif`; en otro caso se publica como asset del Release. Describirlo
+  como recorrido animado, no como una grabación de campaña o de datos reales.
+- Antes del cierre: clon limpio del commit publicado, lock/herramientas/tests,
+  build de variante Release y prueba de una sola imagen `ROLE=all` bajo 512 MiB
+  y 0,1 CPU, con hash y cliente de referencia congelados. No se reentrena ni se
+  vuelve a evaluar prueba.
+- La etiqueta/Release final requiere la demo final comprobada y CI verde en su
+  commit. Si el redeploy de Render necesita al responsable, se registra ese
+  bloqueo y se pospone la etiqueta, sin declarar el cierre completo.

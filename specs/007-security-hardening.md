@@ -202,3 +202,61 @@ Responsable autorizó añadir escaneos CI y comprobar HTTPS, cookies y orígenes
 - [uv: exportación de lockfiles](https://docs.astral.sh/uv/concepts/projects/export/).
 - [Render: TLS y redirección](https://render.com/docs/tls).
 - [Streamlit: configuración de cookies y orígenes](https://docs.streamlit.io/develop/api-reference/configuration/config.toml).
+
+## 10. Enmienda v1.2 — Cabeceras del dashboard público
+
+**Motivo y autorización:** el fallo real de S18 afecta al dashboard, no a la API
+interna. El responsable autoriza completar Docker, seguridad y publicación para
+cerrar el proyecto. Se versiona este diseño y el plan de cierre antes de modificar
+el arranque, código o tests. No cambia dependencias, modelo ni protocolo de evaluación.
+
+### 10.1 Solución nativa
+
+- Usar la API pública `st.App(script_path, middleware=...)` de Streamlit 1.65.0,
+  ya fijada en el lock. No hay opción TOML de cabeceras HTTP en esta versión.
+- Nuevo `dashboard/serve.py`: instancia `st.App` con `dashboard/app.py` y
+  middleware ASGI `DashboardHeaders`, definido en `src/churn/dashboard_security.py`.
+  El Docker entrypoint ejecutará `streamlit run dashboard/serve.py`, con las mismas
+  opciones de puerto, XSRF, CORS, upload, errores y telemetría existentes.
+- El middleware no lee ni almacena cuerpos, cookies, datos ni mensajes WebSocket.
+  Intercepta únicamente `http.response.start`, conservando el resto de cabeceras
+  y todos los cuerpos/códigos. Sustituye sin duplicados las cabeceras siguientes:
+
+| Cabecera | Valor |
+|---|---|
+| `X-Content-Type-Options` | `nosniff` |
+| `Referrer-Policy` | `no-referrer` |
+| `Strict-Transport-Security` | `max-age=31536000` |
+| `X-Frame-Options` | `SAMEORIGIN` |
+| `Content-Security-Policy` | `frame-ancestors 'self'` |
+
+- HSTS no incluye subdominios ni preload. Se transmite también en el HTTP local,
+  donde el navegador lo ignora; su eficacia se comprueba en HTTPS real de Render.
+  CSP está limitada a framing: no se afirma una política completa.
+- WebSocket y lifespan se delegan sin alterar sus mensajes ni reglas. Se mantienen
+  las rutas y controles nativos de Streamlit; no se introduce proxy, monkeypatch,
+  copia de su servidor ni otro puerto público. Acceso directo, sin iframe externo.
+- La ejecución directa de `dashboard/app.py` sirve para desarrollo visual, pero
+  la verificación de seguridad y despliegue usa `dashboard/serve.py`.
+
+### 10.2 Comprobación de cookie
+
+El código instalado emite la cookie XSRF en `/_stcore/health`, no en la raíz ni
+host-config. El comprobador público incorpora esa respuesta, sin leer su cuerpo
+ni imprimir valores; también comprueba health HTTP 200. Esto corrige el alcance
+de observación, no debilita los criterios SameSite/Secure ni acepta cookies ausentes.
+
+### 10.3 Aceptación
+
+- [ ] Middleware probado en 200/404/403, streaming y cabeceras duplicadas;
+  Set-Cookie y mensajes de WebSocket/lifespan conservados.
+- [ ] Launcher usa `st.App` público; imagen y Space contienen launcher/middleware.
+- [ ] Navegador real sobre launcher: referencia, lote, descarga, XSRF y origen;
+  cabeceras presentes sin romper scripts, estilos ni gráficos.
+- [ ] Comprobador público: health y cookie de health incluidos; tests de ausencia,
+  formato inválido y error/red mantienen códigos no satisfactorios.
+- [ ] Docker desde clon limpio, Release/hash intactos y prueba bajo límites Free.
+- [ ] CI y Security scans nuevos verdes; URL Render final con auditoría y funcionalidad
+  comprobadas después del redeploy. Local no se presenta como prueba HTTPS pública.
+
+Plan: [plan-cierre-release.md](../docs/plan-cierre-release.md).

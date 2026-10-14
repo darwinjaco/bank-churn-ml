@@ -1874,6 +1874,26 @@ uv tool run --from playwright python "$env:TEMP\opencode\preview_dashboard_redes
 versionar después la enmienda de cabeceras, auditado de cookie en health y workflow
 HF manual. Las comprobaciones de build y clon limpio seguirán al código final.
 
+**Publicación del código y diseño del cierre**
+
+- Commit del rediseño creado con hooks activos: `871ad5e`,
+  `feat: redesign retention dashboard with native charts`.
+  `git push origin feat/dashboard-redesign` satisfactorio; PR #2 actualizado.
+- Enmiendas 007 v1.2 y 006 v1.2 más `docs/plan-cierre-release.md` preparadas
+  antes de editar launcher/middleware/workflow/tests. Se usa `st.App` público
+  con middleware, no internals ni dependencias nuevas.
+- Lectura del código instalado confirmó que la cookie XSRF se emite en health;
+  se especifica observar esa respuesta sin cuerpo/valor y sin debilitar criterios.
+- CI del rediseño `871ad5e` confirmado en verde con `gh pr checks 2 --watch --interval 10`:
+  [CI](https://github.com/darwinjaco/bank-churn-ml/actions/runs/38605677336) y
+  [Security scans](https://github.com/darwinjaco/bank-churn-ml/actions/runs/38605677334).
+- Antes de la nueva compuerta se ejecutaron los cinco comandos de AGENTS §4 y
+  `uv run pre-commit run --files docs/plan-cierre-release.md`: **313 aprobados,
+  98,18 %**, 147 avisos, 376,65 s; herramientas y hooks satisfactorios.
+- `docker build --tag bank-churn-ml:dashboard-preview .` satisfactorio: modelo
+  descargado del Release y hash fijo verificado, tema y módulos incluidos.
+  Es build local del rediseño, todavía no clon limpio ni solución de cabeceras.
+
 ## 6. Estado del proyecto y Definition of Done
 
 Estado al 7 de octubre de 2026, contra la *Definition of Done* del plan maestro (punto 37). ✅ = verificado; ⏳ = implementado, falta una acción externa del responsable; ↔ = desviación justificada.
