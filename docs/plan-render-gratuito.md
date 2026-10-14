@@ -2,10 +2,10 @@
 
 | Campo | Valor |
 |---|---|
-| Base publicada | `3419a65`, CI remoto en verde |
-| Autorización | Responsable: «si es gratis vamos»; está creando su cuenta Render |
-| Estado | Diseño y Blueprint propuestos; pendientes de versionar la enmienda antes de aplicar configuración |
-| Especificación | Borrador de enmienda v1.1 de la spec 006, §12 |
+| Base publicada | `40f913f`, diseño y plan previos; CI y Security scans remotos en verde |
+| Autorización | Responsable: «si es gratis vamos» y «adelante modifica lo necesario»; formulario manual preparado en Render |
+| Estado | Configuración validada en local; publicación y despliegue pendientes (S17) |
+| Especificación | Enmienda v1.1 de la spec 006, §12 |
 
 ## 1. Recursos y límites
 
@@ -20,10 +20,11 @@ el SQLite local al reiniciar o suspender, por lo que no se puede prometer una cu
 persistente de LLM en esa plataforma. Los controles restantes de la spec 007
 siguen activos. No recuperar automáticamente el stash `render-prep`.
 
-## 2. Blueprint propuesto
+## 2. Blueprint
 
-Después de versionar especificación y plan, guardar esta configuración como
-`render.yaml` en la raíz. Render usa BuildKit; el Dockerfile actual ya se ha
+La especificación y el plan previos están versionados en `40f913f`.
+La configuración se guarda como `render.yaml` en la raíz. Render usa BuildKit;
+el Dockerfile actual ya se ha
 verificado con su variante `release` sin contexto local del modelo.
 
 ```yaml
@@ -31,6 +32,7 @@ services:
   - type: web
     name: bank-churn-ml
     runtime: docker
+    region: virginia
     plan: free
     numInstances: 1
     dockerfilePath: ./Dockerfile
@@ -60,18 +62,48 @@ desactivado; seleccionar manualmente un commit con CI satisfactorio.
 
 ## 3. Orden de trabajo y compuerta
 
-1. Confirmar que la cuenta Hobby está conectada a GitHub y completar su acceso.
-2. Versionar la enmienda v1.1 de la spec 006 y este plan, con CI previo verde y
-   las comprobaciones requeridas. No modificar `src/`, tests o dependencias
-   para recuperar la antigua preparación de Render sin esa compuerta.
-3. Añadir `render.yaml`, validar contra el esquema oficial y comprobar la rama
-   publicada antes de crear el Blueprint. Mantener `plan: free` y cero recursos
-   adicionales facturables.
+1. Cuenta conectada y formulario preparado según las capturas del responsable;
+   verificar Hobby y mantener el compute Free seleccionado.
+2. Diseño y plan previos versionados en `40f913f`, con CI y Security scans
+   satisfactorios. La preparación usa esa compuerta y el Dockerfile existente.
+3. Añadir `render.yaml`, validar contra el esquema oficial, publicar los cambios
+   con autorización del responsable y comprobar el CI del commit. Mantener
+   `plan: free` y cero recursos adicionales facturables.
 4. Crear el servicio desde el panel de Render y esperar un build correcto.
    No sustituir el modelo ni el hash si el build falla.
 5. Registrar la URL asignada, probar health, interfaz Cliente (0,947 y contactar),
    CSV sintético, modelo y monitoreo, incluidos errores y XSRF bajo HTTPS.
 6. Actualizar README y criterios solo con la evidencia pública obtenida.
+
+### 3.1 Formulario manual preparado por el responsable
+
+Crear el servicio desde el formulario es equivalente a aplicar estos valores;
+Render no importa `render.yaml` automáticamente en ese flujo. No crear un
+segundo servicio mediante Blueprint después de crear el primero manualmente.
+
+| Campo | Valor |
+|---|---|
+| Name / Language | `bank-churn-ml` / Docker |
+| Branch | `docs/pre-production-review`, hasta fusionar las correcciones |
+| Region / Compute | Virginia / Free ($0, 512 MB, 0,1 CPU) |
+| Root Directory | Vacío |
+| Docker Build Context Directory / Dockerfile Path | `.` / `Dockerfile` |
+| Health Check Path | `/_stcore/health` |
+| Docker Command / Pre-Deploy Command | Vacíos: usar el CMD de la imagen |
+| Registry Credential / Auto-Deploy | No credential / Off |
+| `ROLE` | `all` |
+| `PORT` | `10000` |
+| `API_URL` | `http://127.0.0.1:8000` |
+| `LLM_MAX_CALLS_PER_HOUR` | `0` |
+
+Tras asignarse la URL, añadir `STREAMLIT_BROWSER_SERVER_ADDRESS` con su hostname
+exacto (por ejemplo, `nombre-asignado.onrender.com`, sin protocolo ni `/`). En el
+Blueprint se resuelve mediante la autorreferencia documentada por Render; en el
+formulario manual no dejarlo vacío ni pegar `${RENDER_EXTERNAL_HOSTNAME}`.
+Guardar y redesplegar si es necesario, y después verificar HTTPS y XSRF.
+
+El botón **Deploy web service** inicia la creación y el build. No constituye por
+sí solo el cierre: esperar estado Live y registrar las comprobaciones públicas.
 
 ## 4. Evidencia local y límites de la prueba
 

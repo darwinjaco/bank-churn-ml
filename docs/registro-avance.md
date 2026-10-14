@@ -8,8 +8,8 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Inicio previsto | 5 de octubre de 2026 |
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
-| Última actualización | 9 de octubre de 2026 |
-| Fase actual | Seguridad publicada en `3419a65` (PR #1), CI remoto verde; Release y Docker confirmados; pendientes: Render gratuito (cuenta y enmienda), clon limpio, GIF y etiqueta `v1.0.0` |
+| Última actualización | 14 de octubre de 2026 |
+| Fase actual | Base `40f913f` con CI y Security scans remotos verdes; Render preparado y validado en local (S17), pendiente de publicación y despliegue; clon limpio Docker, GIF y etiqueta `v1.0.0` pendientes |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -1448,6 +1448,96 @@ Sin defectos en los módulos de análisis (semanas 2–6): ya produjeron los res
   [Security scans](https://github.com/darwinjaco/bank-churn-ml/actions/runs/38208352518).
   Rama sincronizada con GitHub y PR #1 actualizado. Permanecen locales los
   borradores documentales de Render y esta actualización posterior de evidencia.
+
+### S17 — Configuración de Render gratuito y formulario manual
+
+| Campo | Valor |
+|---|---|
+| Fecha | 14 de octubre de 2026 |
+| Fase | Despliegue público, spec 006 §12 |
+| Estado | Verificación local completada; publicación y despliegue pendientes |
+| Objetivo | Preparar la configuración Free siguiendo el diseño previamente versionado y el formulario del responsable |
+
+**Trabajo realizado y decisiones**
+
+- El responsable autorizó «adelante modifica lo necesario» tras preparar su
+  cuenta y el formulario de Render. Las capturas muestran la rama
+  `docs/pre-production-review`, Docker, Virginia, Free, health correcto,
+  tres variables y Auto-Deploy Off. Falta añadir `PORT=10000` al formulario.
+- Verificado que `40f913f` ya contiene el diseño y el plan previos de Render.
+  El bloqueo documental «pendiente de versionar» estaba desactualizado.
+  La configuración reproduce esa base, con la región seleccionada en el panel.
+- Añadido `render.yaml`: un único Web Service Free, Dockerfile existente,
+  `ROLE=all`, `PORT=10000`, API interna, LLM desactivado, health Streamlit,
+  autorreferencia al hostname y despliegue automático desactivado.
+- Actualizados spec 006 §12 y plan para distinguir Blueprint de formulario
+  manual. El formulario no aplica automáticamente el YAML; tras recibir la URL,
+  establecer `STREAMLIT_BROWSER_SERVER_ADDRESS` con el hostname real. No
+  introducir un valor vacío ni asumir expansión de variables en el panel.
+- Documentados criterios públicos para Render. No hay URL confirmada ni
+  comprobación pública completada. La futura etiqueta de código requiere
+  revisar los disparadores existentes de Hugging Face antes de publicarla.
+- Sin cambios de aplicación, tests, dependencias, modelo o evaluación final.
+  `render-prep` sigue preservado; no se recuperó.
+
+**Archivos modificados o creados**
+
+- `render.yaml`
+- `specs/006-deployment-monitoring-release.md`
+- `docs/plan-render-gratuito.md`
+- `docs/registro-avance.md`
+
+**Comprobaciones realmente ejecutadas**
+
+```text
+git status --short
+git branch --show-current
+git log --oneline -6
+git stash list
+git show --stat 40f913f
+gh run list --branch docs/pre-production-review --limit 6
+gh run view 38510345402 --json conclusion,headSha,url
+gh run view 38510345373 --json conclusion,headSha,url
+uv sync --locked
+uv run ruff check .
+uv run ruff format --check .
+uv run pre-commit run --all-files
+uv run pre-commit run --files render.yaml
+uv run pytest --cov=churn --cov-report=term-missing --cov-fail-under=85
+git diff --check
+```
+
+- Árbol inicialmente limpio y rama `docs/pre-production-review`; base `40f913f`.
+  Ambos workflows remotos de esa base confirmados en verde:
+  [CI](https://github.com/darwinjaco/bank-churn-ml/actions/runs/38510345402) y
+  [Security scans](https://github.com/darwinjaco/bank-churn-ml/actions/runs/38510345373).
+- Sincronización del lock, Ruff y formato satisfactorios (113 archivos).
+  Hooks satisfactorios sobre archivos versionados y ejecución explícita sobre
+  el YAML nuevo, todavía sin añadir al índice.
+- Suite completa Windows: **301 aprobados, cobertura 98,11 %**, 147 avisos
+  históricos; duración 259,94 s. No se ejecutó la CLI de evaluación final.
+- Validación estructural del Blueprint mediante el esquema oficial consultado
+  en esta sesión; no es una validación autenticada contra la cuenta Render:
+
+```powershell
+uv run python -c "import json, pathlib, urllib.request, yaml, jsonschema; schema = json.load(urllib.request.urlopen('https://render.com/schema/render.yaml.json', timeout=30)); config = yaml.safe_load(pathlib.Path('render.yaml').read_text(encoding='utf-8')); jsonschema.validators.validator_for(schema)(schema).validate(config); print('render.yaml: esquema oficial satisfactorio')"
+```
+
+**Publicación autorizada y siguiente paso**
+
+- Tras la verificación local, el responsable autorizó commit y push con
+  «okay pero reviza que no se rompa nada adelante». El CI de los cambios nuevos
+  y el servicio público siguen pendientes en este punto.
+- Revisión previa: `git status --short`, `git diff`, `git log --oneline -10`,
+  `git branch -vv`, `git remote -v` y
+  `gh pr view 1 --json url,state,headRefName,headRefOid,statusCheckRollup`.
+  Solo hay los cuatro archivos previstos; PR #1 abierto y rama remota en
+  `40f913f`, con quality, dependencies y secrets satisfactorios. El Dockerfile,
+  el arranque y ambos workflows conservan su comportamiento.
+- Versionar y publicar los cuatro archivos en la misma rama,
+  comprobar CI y Security scans, y pulsar **Deploy web service** con los valores
+  documentados. Después registrar la URL asignada y verificar interfaz, health,
+  XSRF y WebSocket mediante el procedimiento de seguridad pública.
 
 ## 6. Estado del proyecto y Definition of Done
 

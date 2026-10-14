@@ -1,0 +1,26 @@
+# Configuración de la spec 006 §12, versionada previamente en 40f913f.
+services:
+  - type: web
+    name: bank-churn-ml
+    runtime: docker
+    region: virginia
+    plan: free
+    numInstances: 1
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeployTrigger: 'off'
+    healthCheckPath: /_stcore/health
+    envVars:
+      - key: ROLE
+        value: all
+      - key: PORT
+        value: '10000'
+      - key: API_URL
+        value: http://127.0.0.1:8000
+      - key: LLM_MAX_CALLS_PER_HOUR
+        value: '0'
+      - key: STREAMLIT_BROWSER_SERVER_ADDRESS
+        fromService:
+          name: bank-churn-ml
+          type: web
+          envVarKey: RENDER_EXTERNAL_HOSTNAME

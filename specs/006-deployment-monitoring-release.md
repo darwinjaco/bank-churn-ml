@@ -203,14 +203,16 @@ La [spec 007](007-security-hardening.md) sustituye §3 en la persistencia del
 presupuesto LLM: mismo límite configurable, compartido por procesos mediante
 SQLite en la misma instancia. También exige XSRF activo, autenticación Git sin
 token en argumentos y referencias inmutables. Los disparadores de §2.4 siguen
-vigentes. Render permanece aparcado, pendiente de su propia decisión de diseño.
+vigentes. La preparación de Render se define en §12.
 
-## 12. Borrador de enmienda v1.1 — Render gratuito
+## 12. Enmienda v1.1 — Render gratuito
 
-**Estado: propuesta documentada, pendiente de versionar antes de aplicar
-configuración.** El responsable autorizó continuar si la plataforma es gratuita;
-sus condiciones Free fueron verificadas. Este borrador no declara el despliegue
-público realizado ni sustituye todavía los criterios históricos de Hugging Face.
+**Estado: diseño y plan versionados previamente en `40f913f`; configuración
+validada en local (S17), publicación y despliegue pendientes.** El responsable
+autorizó continuar si la plataforma es gratuita y preparar los archivos tras
+configurar su cuenta y formulario. Sus condiciones Free fueron verificadas.
+Esta enmienda no declara el despliegue público realizado; conserva los criterios
+históricos de Hugging Face en §7 como evidencia de la implementación original.
 
 - Arquitectura propuesta: un Web Service Docker `plan: free`, `ROLE=all`,
   Streamlit público en `PORT=10000` y FastAPI interna en `127.0.0.1:8000`.
@@ -222,7 +224,34 @@ público realizado ni sustituye todavía los criterios históricos de Hugging Fa
   y una solución de cuota adecuada a la plataforma, con decisión del responsable.
 - XSRF y CORS activos; acceso directo HTTPS sin iframe de otra plataforma.
   Publicación manual únicamente tras CI verde. URL y pruebas reales pendientes.
-- En una futura implementación, Hugging Face queda como alternativa manual:
-  la retirada de los disparadores por etiqueta deberá versionarse expresamente
-  junto con el nuevo diseño. El stash anterior se mantiene preservado.
-- Plan y Blueprint propuestos: [plan-render-gratuito.md](../docs/plan-render-gratuito.md).
+- `render.yaml` reproduce el diseño versionado: una instancia Free, región
+  Virginia seleccionada por el responsable, Dockerfile de la raíz, health
+  `/_stcore/health` y `autoDeployTrigger: 'off'`. No fija rama: el Blueprint usa
+  su propia rama. En el formulario manual, elegir `docs/pre-production-review`
+  mientras las correcciones no estén fusionadas y comprobar el CI del commit.
+- `STREAMLIT_BROWSER_SERVER_ADDRESS` referencia `RENDER_EXTERNAL_HOSTNAME`
+  del mismo servicio en el Blueprint. En creación manual se establece cuando
+  Render asigne el dominio: solo el hostname, sin `https://` ni rutas; no usar
+  un valor vacío ni la cadena literal `${RENDER_EXTERNAL_HOSTNAME}`.
+- Se conserva el workflow de Hugging Face existente. La retirada de sus
+  disparadores por etiqueta requiere una enmienda propia antes de publicar
+  `v1.0.0`. El stash anterior se mantiene preservado.
+- Plan y configuración: [plan-render-gratuito.md](../docs/plan-render-gratuito.md)
+  y [render.yaml](../render.yaml).
+
+### 12.1 Criterios de aceptación de Render
+
+- [ ] Configuración validada contra el esquema oficial, versionada y publicada
+  en un commit con CI y Security scans satisfactorios. *Esquema y comprobaciones
+  locales satisfactorios (S17); commit, publicación y CI nuevos pendientes.*
+- [ ] Un único Web Service Free desplegado; modelo descargado del Release y
+  comprobado por SHA-256 durante el build. Registrar commit, URL y build.
+- [ ] `/_stcore/health` responde `ok`; Cliente reproduce 0,947 y contactar;
+  Lote procesa `examples/clientes_ejemplo.csv`; Modelo y Monitoreo muestran
+  los reportes congelados. Comprobar XSRF, WebSocket y errores bajo HTTPS con
+  el procedimiento de seguridad pública de la spec 007.
+- [ ] LLM desactivado y plantilla disponible, sin claves de proveedor.
+- [ ] URL real y resultados públicos registrados en README y registro.
+
+El GIF, la verificación Docker desde clon limpio y la etiqueta de código siguen
+pendientes para el cierre general. La partición de prueba no se vuelve a cargar.
