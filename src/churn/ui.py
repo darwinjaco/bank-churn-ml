@@ -101,6 +101,9 @@ def read_batch_csv(upload) -> pd.DataFrame:
         raise ValueError("El CSV está vacío o no tiene formato UTF-8 válido.") from error
     if len(header) != len(set(header)):
         raise ValueError("El CSV contiene columnas duplicadas.")
+    missing = [column for column in CONTRACT_COLUMNS if column not in header]
+    if missing:
+        raise ValueError(f"Faltan columnas: {', '.join(missing)}")
     try:
         frame = pd.read_csv(
             io.BytesIO(raw), usecols=lambda column: column in CONTRACT_COLUMNS, nrows=MAX_BATCH + 1

@@ -26,6 +26,7 @@ RUN uv sync --locked --no-dev --no-install-project
 # 2) Código y metadatos que sirve la API. El CSV nunca entra en la imagen.
 COPY src ./src
 COPY dashboard ./dashboard
+COPY .streamlit/config.toml ./.streamlit/config.toml
 COPY docker/start.sh ./docker/start.sh
 COPY reports/model_metadata.json reports/final_test.json reports/monitoring.json ./reports/
 RUN uv sync --locked --no-dev

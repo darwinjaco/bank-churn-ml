@@ -5,7 +5,7 @@
 | Especificación | Spec 005 v1.3 §12, dependiente de 006 y 007 |
 | Rama | `feat/dashboard-redesign`, desde `d9b0f85` de `docs/pre-production-review` |
 | Autorización | Responsable: aplicar las mejoras en una rama para ver el resultado, incluir gráficos y «Adelamte» |
-| Estado | Compuerta documental en preparación |
+| Estado | Compuerta `ca498f2`; rediseño verificado en local (S20), pendiente de revisión/publicación |
 
 ## 1. Objetivo y dirección visual
 
@@ -108,3 +108,35 @@ muestran tablas de detalle en expansores para no saturar la pantalla.
 Spec 005 §12.4 y S19 del registro. Se distingue compuerta documental, cambios
 locales de código, comprobación real en navegador y aprobación de despliegue.
 Las cabeceras públicas pendientes son evidencia previa, no resuelta por el tema.
+
+## 5. Vista previa y cómo volver a arrancarla
+
+Vista local activa al terminar S20: **http://localhost:8511**, API en
+`http://127.0.0.1:8011`. Seleccionar **Cargar ejemplo → Analizar cliente** para
+ver 94,7 %, Contactar y los gráficos. Las otras vistas están en la barra lateral.
+
+Si los procesos se cierran, desde la raíz de esta rama:
+
+```powershell
+uv sync --locked
+uv run python -m churn.artifact
+# Terminal 1: API local, con el LLM desactivado.
+$env:LLM_MAX_CALLS_PER_HOUR = "0"
+uv run uvicorn churn.api:app --host 127.0.0.1 --port 8011
+```
+
+```powershell
+# Terminal 2: interfaz con controles activos.
+$env:API_URL = "http://127.0.0.1:8011"
+uv run streamlit run dashboard/app.py --server.address 127.0.0.1 --server.port 8511 --server.enableXsrfProtection true --server.enableCORS true --server.maxUploadSize 1 --client.showErrorDetails none --browser.gatherUsageStats false
+```
+
+Capturas de escritorio (Cliente, Lote, Modelo, Monitoreo), móvil y reflow en el
+directorio temporal aprobado, con prefijo `redesign-`. No se publicaron como
+assets ni se añadieron al repositorio.
+
+Verificación local: 313 tests, cobertura 98,18 %, Ruff/formato/hooks correctos,
+pruebas de navegador satisfactorias y Space armado con el tema. El build Docker
+no se ejecutó: `docker version` no pudo conectar con el motor Docker Desktop.
+Pendiente antes de desplegar esta rama: build/runtime de la imagen, commit/push
+de implementación con autorización y CI remoto correspondiente.

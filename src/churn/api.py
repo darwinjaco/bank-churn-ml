@@ -181,6 +181,12 @@ def create_app(service_factory: Callable[[], Service] = load_service) -> FastAPI
                 "metrics": svc.final_test["metrics"],
                 "benefit_model_eur": svc.final_test["decision"]["policies"]["model"]["benefit_eur"],
                 "n": svc.final_test["n"],
+                "evaluated_on": svc.final_test.get("evaluated_on"),
+                "policies": {
+                    name: {key: row[key] for key in ("contacted", "benefit_eur") if key in row}
+                    for name, row in svc.final_test["decision"]["policies"].items()
+                    if name in {"model", "everyone", "nobody"}
+                },
             }
         return info
 

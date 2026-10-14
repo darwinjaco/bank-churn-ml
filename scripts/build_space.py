@@ -25,6 +25,7 @@ STATIC_FILES = (
     "reports/model_metadata.json",
     "reports/final_test.json",
     "reports/monitoring.json",
+    ".streamlit/config.toml",
 )
 PY_GLOBS = ("src/churn/*.py", "dashboard/*.py")
 FORBIDDEN_DIRS = {"data", "models", "mlruns", ".git", ".venv"}

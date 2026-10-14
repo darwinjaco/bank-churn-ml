@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Estado | Implementada v1.2 en `3419a65`, CI remoto en verde y Docker con el Release verificado; verificación formal desde clon limpio pendiente |
+| Estado | Base v1.2 publicada; v1.3 implementada y verificada en local en `feat/dashboard-redesign` (S20), vista previa disponible; publicación y build Docker nuevos pendientes |
 | Responsable | Darwin Jacome Cuenca |
 | Semana | 7 (16–22 de noviembre de 2026) |
 | Dependencias | [002](002-modeling-and-evaluation.md) (artefacto congelado), [004](004-decision-layer.md) (regla de decisión) |
@@ -167,18 +167,23 @@ no se inventa: se muestra la evidencia disponible con estado informativo.
 
 ### 12.4 Aceptación del rediseño
 
-- [ ] Especificación y plan con commit previo a código/tests; trabajo en rama aislada.
-- [ ] Cuatro vistas, tema aplicado, contexto metodológico accesible y gráficos
+- [x] Especificación y plan con commit previo a código/tests; trabajo en rama aislada.
+  *Compuerta `ca498f2`, desde la base `d9b0f85` con CI verde.*
+- [x] Cuatro vistas, tema aplicado, contexto metodológico accesible y gráficos
   acompañados por números/tablas sin afirmaciones causales incorrectas.
-- [ ] Referencia 0,947/contactar y plantilla; caso no contactar; errores recuperables.
-- [ ] Lote sintético, cambio de archivo, filtrado, retorno de navegación y descarga
+- [x] Referencia 0,947/contactar y plantilla; caso no contactar; errores recuperables.
+- [x] Lote sintético, cambio de archivo, filtrado, retorno de navegación y descarga
   sin inferencias involuntarias; no se guardan/exportan extras ni identificadores.
-- [ ] Gráficos conservan signos, unidades, recuentos y umbrales; políticas de
+- [x] Gráficos conservan signos, unidades, recuentos y umbrales; políticas de
   `/model` corresponden exactamente al reporte congelado.
-- [ ] Navegador local en escritorio/móvil, teclado, foco y zoom revisados;
+- [x] Navegador local en escritorio/móvil, teclado, foco y zoom revisados;
   capturas de la vista previa. Sin acreditar WCAG completa por inspección parcial.
-- [ ] Ruff, formato, hooks y pytest ≥85 %; pruebas del empaquetado con el tema.
-- [ ] Registro actualizado, resultados locales distinguidos de CI/despliegue.
+  *Escritorio 1440 px, móvil 390 px, reflow equivalente al 200 % mediante ancho
+  720 px; foco visible muestreado. No se certifica zoom nativo ni lector de pantalla.*
+- [x] Ruff, formato, hooks y pytest ≥85 %; pruebas del empaquetado con el tema.
+  *313 tests, 98,18 %; Space armado con 45 archivos. Build de imagen bloqueado
+  por Docker Desktop sin motor activo, no presentado como satisfactorio.*
+- [x] Registro actualizado, resultados locales distinguidos de CI/despliegue.
 
 Las cabeceras públicas/framing pendientes en S18 requieren su propia solución
 aprobada; el rediseño no los declara resueltos. El despliegue de esta rama se

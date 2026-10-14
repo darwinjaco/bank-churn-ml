@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 14 de octubre de 2026 |
-| Fase actual | Render público funcional verificado (S18); auditoría HTTP fallida por cabeceras ausentes y framing no verificado; cierre de seguridad, evidencia del build, clon limpio Docker, GIF y etiqueta pendientes |
+| Fase actual | Rediseño Streamlit verificado en local en `feat/dashboard-redesign` (S20), vista previa localhost:8511; publicación del rediseño, build Docker y cierre de seguridad pública pendientes |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -1659,7 +1659,7 @@ uv tool run --from playwright python "$env:TEMP\opencode\verify_render_browser.p
 |---|---|
 | Fecha | 14 de octubre de 2026 |
 | Fase | Presentación y experiencia del dashboard, spec 005 v1.3 |
-| Estado | Compuerta documental en preparación |
+| Estado | Compuerta documental completada en `ca498f2`; implementación posterior en S20 |
 | Objetivo | Construir y mostrar un rediseño con gráficos en una rama aislada |
 
 **Autorización, diseño y trabajo inicial**
@@ -1700,6 +1700,179 @@ uv tool run --from playwright python "$env:TEMP\opencode\verify_render_browser.p
 
 Verificar y versionar los documentos de T0; implementar T1–T2 solo después de
 esa compuerta. Mostrar la vista local y capturas antes de decidir su publicación.
+
+**Resultado de la compuerta**
+
+- Revisados estado, diff, `git diff --check`, estadística e historial reciente.
+  Preparados únicamente los ocho documentos previstos, incluido el registro
+  pendiente de S18; hooks activos y satisfactorios.
+- Ejecutado `git commit -m "docs: specify professional dashboard redesign (SDD gate)"`:
+  **`ca498f2`**, previo a cualquier cambio en código/tests del rediseño.
+- La rama permanece local. No se ejecutó push ni se creó un PR nuevo; el CI
+  remoto del diseño/implementación sigue sin acreditar, separado de la base verde.
+
+### S20 — Rediseño profesional, gráficos y vista previa local
+
+| Campo | Valor |
+|---|---|
+| Fecha | 14 de octubre de 2026 |
+| Fase | Spec 005 v1.3, T1–T3 del plan de rediseño |
+| Estado | Implementación y verificación local completadas; revisión/publicación pendientes |
+| Objetivo | Mostrar una interfaz profesional con gráficos correctos sin alterar el modelo |
+
+**Cambios realizados**
+
+- Cuatro vistas con navegación lateral y contenido activo únicamente; lenguaje
+  de negocio, ayudas, formularios y estados vacíos/de carga/error en español.
+  Tema nativo claro/azul; metodología accesible en expander, sin el aviso de
+  portafolio como cabecera principal.
+- Cliente: perfil de ejemplo explícito, probabilidad/decisión/valor esperado,
+  comparación con umbral exacto y barras SHAP con signo. Las contribuciones
+  identifican su escala sin calibrar; el texto LLM sigue mostrado literalmente.
+- Lote: ejemplo generado en memoria, procesamiento a demanda, identidad del
+  contrato normalizado, invalidación por cambio de contenido, filtros y descarga
+  completa sin nuevas inferencias. Resultados exclusivamente por sesión; sin
+  caché global ni persistencia propia del CSV original. El widget de subida
+  conserva su buffer efímero mientras la sesión lo utiliza.
+- Modelo: gráfico económico de modelo/todos/nadie obtenido mediante la extensión
+  aditiva de `/model` con agregados del reporte final congelado. No se cargó ni
+  evaluó de nuevo la partición de prueba.
+- Monitoreo: escenario seleccionado, barras PSI y desviación de calibración en
+  pp con tolerancia tomada del reporte; E2 y el límite detectado por S4 visibles.
+- Módulo puro `presentation.py`, generador existente extraído a `examples.py`
+  y script CLI compatible. Tests confirman CSV sintético idéntico. Tema incluido
+  en Docker y en el builder del Space, sin nuevos CSV/binarios/dependencias.
+- Mejorado el error de cabecera CSV incompleta: muestra columnas requeridas
+  antes de pandas, en lugar de confundirlo con lote vacío.
+
+**Archivos principales**
+
+- `dashboard/app.py`, `.streamlit/config.toml`
+- `src/churn/presentation.py`, `src/churn/examples.py`, `src/churn/ui.py`, `src/churn/api.py`
+- `scripts/make_example_csv.py`, `scripts/build_space.py`, `Dockerfile`
+- `tests/test_presentation.py`, `tests/test_dashboard.py`, `tests/test_api.py`,
+  `tests/test_ui.py`, `tests/test_build_space.py`
+- Spec 005, plan de rediseño y este registro.
+
+**Comprobaciones y resultados reales**
+
+```text
+uv run ruff format dashboard/app.py src/churn/presentation.py src/churn/examples.py src/churn/api.py scripts/make_example_csv.py tests/test_dashboard.py tests/test_presentation.py tests/test_api.py
+uv run ruff check .
+uv run pytest tests/test_presentation.py tests/test_dashboard.py tests/test_api.py tests/test_ui.py tests/test_examples.py tests/test_build_space.py -q
+uv sync --locked
+uv run ruff check .
+uv run ruff format --check .
+uv run pre-commit run --all-files
+uv run pre-commit run --files .streamlit/config.toml src/churn/presentation.py src/churn/examples.py tests/test_presentation.py
+uv run pytest --cov=churn --cov-report=term-missing --cov-fail-under=85
+git diff --check
+git diff --stat
+```
+
+- Primera comprobación de Ruff detectó cadenas largas y símbolos ambiguos;
+  corregidos sin omitir reglas. Regresión focalizada final: **74 aprobados**.
+- Comprobaciones completas finales satisfactorias: **313 aprobados, cobertura
+  98,18 %**, 147 avisos históricos, 81,23 s. Módulos nuevos con cobertura del
+  100 %. Nuevos archivos comprobados explícitamente en pre-commit.
+- Revisión final de capturas detectó un gap que apilaba innecesariamente el panel
+  de resultados en escritorio. Se redujo usando la opción nativa y se añadió
+  al helper de navegador una aserción de alineación. Ajustado también el margen
+  del eje económico para que sus etiquetas no se recorten.
+  Después se repitieron los cinco comandos de AGENTS y los hooks de archivos
+  nuevos: **313 aprobados, 98,18 %**, 147 avisos, **70,63 s**; última suite verde.
+- `uv run python -m churn.artifact`: modelo local verificado por el SHA-256 fijo.
+  API real comprobada contra ese hash y las políticas 61.600/22.100/0 €, referencia
+  0,947/contactar y explicación `source=template`.
+- `docker version && docker build --tag bank-churn-ml:dashboard-preview .`:
+  el primer comando falló porque Docker Desktop no tiene motor activo. El build
+  no llegó a ejecutarse; **bloqueo real, no evidencia de imagen construida**.
+- `uv run python scripts/build_space.py --out <temporal-aprobado>/redesign-space`:
+  armado real satisfactorio de **45 archivos**, con tema y módulos nuevos,
+  sin CSV, modelos, binarios ni secretos. Sus tests de COPY/lista exacta pasan.
+  Repetido tras los ajustes finales en `redesign-space-final`: 45 archivos correctos.
+
+**Navegador y decisiones durante la revisión visual**
+
+- API local en `127.0.0.1:8011` con LLM desactivado, Streamlit en
+  `127.0.0.1:8511` con XSRF/CORS activos, 1 MiB y errores técnicos ocultos.
+  Arranque inicial mediante `Start-Process` devolvió un error del harness al
+  finalizar, pero logs y puertos confirmaron procesos activos. Posteriores
+  arranques desacoplados con un helper temporal y salud comprobada.
+- Playwright/Edge en entorno de herramienta aislado, helper temporal fuera del
+  workspace. Hubo intentos incompletos por selectores de inputs ocultos, carreras
+  de reejecución y expectativa demasiado específica del error CSV. Se corrigieron
+  los selectores/esperas del helper, sin atribuir esos fallos al modelo.
+  Invocación real (ruta temporal expresada mediante variable de entorno):
+
+```powershell
+uv tool run --from playwright python "$env:TEMP\opencode\preview_dashboard_redesign.py" --example examples/clientes_ejemplo.csv --out "$env:TEMP\opencode"
+```
+
+- Detectadas barras colapsadas por el autosize por defecto de Streamlit:
+  corregido a `fit-x`. Se reinició el proceso local para cargar el módulo actualizado.
+  También se corrigieron ejes localizados, banda de calibración repetida y
+  distribución a ancho reducido mediante contenedores nativos con wrap.
+- La primera simulación por CSS `zoom` distorsionó el layout; no se acredita
+  como comprobación satisfactoria. La revisión final usa ancho 720 px equivalente
+  al reflow de 200 % respecto a 1440 px, no certifica zoom nativo del navegador.
+- Última ejecución del helper **satisfactoria**, sin errores de consola:
+  - Estado inicial sin inferencia automática, referencia 94,7 %/Contactar y dos gráficos.
+  - Lote de 20 clientes, 13 contactos y 1.339 € esperados bajo los supuestos;
+    filtrado y exportación de 20 filas/11 columnas, sin IDs, Gender ni extras.
+  - Políticas y dos gráficos de monitoreo visibles; resultados conservados al navegar.
+  - Nuevo contenido invalida el resultado; CSV inválido muestra un error controlado.
+  - Perfil ilustrativo alternativo produce No contactar; retorno al ejemplo correcto.
+  - Reflow 720 px con botón usable, móvil 390 px sin desbordamiento de página.
+  - Foco de enlace muestreado por Tab, con anillo azul visible de 3,2 px.
+- Capturas temporales `redesign-cliente-desktop.png`, `redesign-lote-desktop.png`,
+  `redesign-modelo-desktop.png`, `redesign-monitoreo-desktop.png`,
+  `redesign-zoom-200.png` (reflow) y `redesign-cliente-mobile.png`.
+  No se acreditan WCAG completa, lector de pantalla ni todos los dispositivos.
+- Snapshot de WorkingSet Windows: API 306.520.064 bytes e interfaz 133.038.080,
+  suma aproximada 419,2 MiB. No es memoria cgroup Linux ni prueba de carga Free.
+
+**Estado y siguiente paso**
+
+- Vista previa disponible en **http://localhost:8511**. Instrucciones de arranque
+  en `docs/plan-dashboard-redesign.md` §5.
+- Implementación todavía sin commit/push, en la rama aislada; solo la compuerta
+  está versionada. CI remoto nuevo, build/runtime Docker y despliegue pendientes.
+- Responsable revisa el diseño y decide ajustes/publicación. Las cabeceras
+  públicas de S18 requieren su propia solución y no se declaran corregidas.
+
+### S21 — Publicación del rediseño e inicio del cierre
+
+| Campo | Valor |
+|---|---|
+| Fecha | 14 de octubre de 2026 |
+| Estado | Publicación del rediseño en curso; cierre condicionado a evidencia Docker y Render |
+| Objetivo | Publicar el resultado aprobado y completar los pendientes verificables |
+
+- El responsable autoriza avanzar con el cierre después de revisar el rediseño.
+  Se conserva la rama aislada y el modelo congelado.
+- `docker desktop start` satisfactorio; `docker info --format '{{.ServerVersion}}'`
+  confirma motor **29.8.2** disponible.
+- Publicada primero la compuerta mediante `git push -u origin feat/dashboard-redesign`.
+  PR de revisión separado y inicialmente draft:
+  https://github.com/darwinjaco/bank-churn-ml/pull/2, base `docs/pre-production-review`.
+- `gh pr checks 2 --watch --interval 10`: quality, dependencies y secrets
+  satisfactorios para `ca498f2`:
+  [CI](https://github.com/darwinjaco/bank-churn-ml/actions/runs/38604434387) y
+  [Security scans](https://github.com/darwinjaco/bank-churn-ml/actions/runs/38604434690).
+- Repetidos los cinco comandos exactos de AGENTS §4 y hooks de archivos nuevos:
+  **313 aprobados, cobertura 98,18 %**, 172 avisos; pytest 359,38 s. Lint,
+  formato y hooks satisfactorios. Estado/diff/historial/remoto revisados.
+- Investigación de la versión instalada: no existe opción TOML de cabeceras
+  HTTP; sí existe `st.App(..., middleware=...)` público. La futura solución se
+  especificará mediante esa API, sin proxy ni dependencias nuevas, antes de editar.
+- No hay `RENDER_API_KEY` ni `RENDER_SERVICE_ID` en el entorno (solo se consultó
+  su presencia, sin imprimir valores). El redeploy y registro del build necesitan
+  acción del responsable en el panel. No se certifica una nueva versión pública.
+
+**Siguiente paso:** commit/push del rediseño con hooks activos y CI previo verde;
+versionar después la enmienda de cabeceras, auditado de cookie en health y workflow
+HF manual. Las comprobaciones de build y clon limpio seguirán al código final.
 
 ## 6. Estado del proyecto y Definition of Done
 

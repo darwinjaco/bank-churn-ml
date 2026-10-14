@@ -1,0 +1,16 @@
+# Identidad nativa del dashboard, spec 005 v1.3. Sin cambios de seguridad.
+[theme]
+base = "light"
+primaryColor = "#1D4ED8"
+backgroundColor = "#F5F7FB"
+secondaryBackgroundColor = "#FFFFFF"
+textColor = "#14243B"
+font = "sans serif"
+baseFontSize = 16
+baseRadius = "medium"
+borderColor = "#DCE3ED"
+showWidgetBorder = true
+
+[theme.sidebar]
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F5F7FB"

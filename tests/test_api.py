@@ -82,6 +82,31 @@ def test_health_and_model(client):
     assert health == {"status": "ok", "artifact_sha256": "b" * 64, "model_commit": "a" * 40}
     info = client.get("/model").json()
     assert info["threshold"] == pytest.approx(1 / 6) and info["final_test"]["n"] == 2000
+    assert info["final_test"]["policies"] == {"model": {"benefit_eur": 1.0}}
+    assert info["final_test"]["evaluated_on"] is None
+
+
+def test_model_serves_only_frozen_policy_aggregates(model):
+    final = {
+        "n": 10,
+        "evaluated_on": "2026-10-07",
+        "metrics": {"ap": 0.7},
+        "decision": {
+            "policies": {
+                "model": {"contacted": 3, "benefit_eur": 250.0, "churners_captured": 2},
+                "everyone": {"contacted": 10, "benefit_eur": 100.0},
+                "nobody": {"contacted": 0, "benefit_eur": 0.0},
+                "oracle": {"contacted": 2, "benefit_eur": 300.0},
+            }
+        },
+    }
+    service = api.Service(model, METADATA, "b" * 64, final)
+    with TestClient(api.create_app(lambda: service)) as test_client:
+        info = test_client.get("/model").json()["final_test"]
+    assert info["evaluated_on"] == final["evaluated_on"]
+    assert set(info["policies"]) == {"model", "everyone", "nobody"}
+    assert info["policies"]["model"] == {"contacted": 3, "benefit_eur": 250.0}
+    assert final["decision"]["policies"]["model"]["churners_captured"] == 2
 
 
 def test_predict_matches_model_and_rule(client, model):

@@ -205,3 +205,8 @@ def test_csv_reader_rejects_invalid_or_duplicate_headers(data):
 def test_prepare_batch_rejects_infinity_before_json_serialization():
     with pytest.raises(ValueError, match="finitos"):
         ui.prepare_batch(pd.DataFrame([{**ROW, "Balance": float("inf")}]))
+
+
+def test_missing_csv_header_reports_columns_instead_of_an_empty_batch():
+    with pytest.raises(ValueError, match="Faltan columnas: CreditScore, Age"):
+        ui.read_batch_csv(io.BytesIO(b"invalid\n0\n"))
