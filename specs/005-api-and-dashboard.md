@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Estado | Implementada v1.2 (seguridad, §11 y spec 007), verificada en local y Docker con el Release publicado; clon limpio y CI remoto de las nuevas correcciones pendientes |
+| Estado | Implementada v1.2 en `3419a65`, CI remoto en verde y Docker con el Release verificado; verificación formal desde clon limpio pendiente |
 | Responsable | Darwin Jacome Cuenca |
 | Semana | 7 (16–22 de noviembre de 2026) |
 | Dependencias | [002](002-modeling-and-evaluation.md) (artefacto congelado), [004](004-decision-layer.md) (regla de decisión) |
@@ -92,4 +92,5 @@ por las ocho entradas del contrato y los resultados, redacta los errores 422
 y añade controles de tamaño, frecuencia y concurrencia. El LLM se muestra como
 texto literal. Modelo, calibración, umbral y respuestas válidas de inferencia
 conservan sus valores. Compuerta versionada en `6343526`; controles implementados
-y comprobados en local según S14. Publicación y CI remoto del código pendientes.
+y comprobados según S14. Código publicado en `3419a65`, con CI remoto en verde;
+verificación formal desde clon limpio pendiente.

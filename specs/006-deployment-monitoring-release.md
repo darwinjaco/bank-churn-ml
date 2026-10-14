@@ -166,7 +166,7 @@ Si hay tiempo, `GET /monitoring` devuelve `reports/monitoring.json` (404 si no e
 
 Estado al 7 de octubre de 2026. Se distingue verificación local, CI remoto y despliegue público; el detalle está en el registro S12.
 
-- [ ] Spec 005 cerrada: Docker con el Release publicado y CI en verde. *Release y `verify-docker.ps1` sin `-LocalModel` verificados (S14). Pendientes: clon limpio y CI remoto de las correcciones nuevas.*
+- [ ] Spec 005 cerrada: Docker con el Release publicado y CI en verde. *Release y `verify-docker.ps1` sin `-LocalModel` verificados (S14); CI remoto de `3419a65` en verde. Pendiente: clon limpio.*
 - [ ] El Space público responde y reproduce el cliente de referencia (0,947, contactar). *Pendiente: cuenta de Hugging Face (B-03) y workflow. En local, la API real y el dashboard (`AppTest`) dan 94,7 % y contactar.*
 - [x] El Space no contiene datos reales, binarios, `models/` ni secretos: `tests/test_build_space.py` (lista exacta, rechazos, cabecera YAML, cada `COPY` presente); armado real con 41 archivos de texto (792 KB).
 - [ ] LLM con límite por hora y respaldo de plantilla: implementado y probado (`tests/test_narrative.py`: límite, intentos fallidos, ventana deslizante, 0 y valores inválidos). *Falta configurar los secretos en el Space y ver `source="llm"` en la demo.*
@@ -204,3 +204,25 @@ presupuesto LLM: mismo límite configurable, compartido por procesos mediante
 SQLite en la misma instancia. También exige XSRF activo, autenticación Git sin
 token en argumentos y referencias inmutables. Los disparadores de §2.4 siguen
 vigentes. Render permanece aparcado, pendiente de su propia decisión de diseño.
+
+## 12. Borrador de enmienda v1.1 — Render gratuito
+
+**Estado: propuesta documentada, pendiente de versionar antes de aplicar
+configuración.** El responsable autorizó continuar si la plataforma es gratuita;
+sus condiciones Free fueron verificadas. Este borrador no declara el despliegue
+público realizado ni sustituye todavía los criterios históricos de Hugging Face.
+
+- Arquitectura propuesta: un Web Service Docker `plan: free`, `ROLE=all`,
+  Streamlit público en `PORT=10000` y FastAPI interna en `127.0.0.1:8000`.
+  Se conserva el Dockerfile y el modelo del Release ya verificados.
+- Presupuesto: 512 MB, 0,1 CPU y 750 horas mensuales compartidas por workspace;
+  no crear dos servicios ni ningún recurso de pago como alternativa automática.
+- LLM inicialmente desactivado (`LLM_MAX_CALLS_PER_HOUR=0`): el filesystem de
+  Free es efímero. Su activación posterior exige presupuesto gratuito comprobado
+  y una solución de cuota adecuada a la plataforma, con decisión del responsable.
+- XSRF y CORS activos; acceso directo HTTPS sin iframe de otra plataforma.
+  Publicación manual únicamente tras CI verde. URL y pruebas reales pendientes.
+- En una futura implementación, Hugging Face queda como alternativa manual:
+  la retirada de los disparadores por etiqueta deberá versionarse expresamente
+  junto con el nuevo diseño. El stash anterior se mantiene preservado.
+- Plan y Blueprint propuestos: [plan-render-gratuito.md](../docs/plan-render-gratuito.md).

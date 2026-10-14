@@ -1330,7 +1330,7 @@ Sin defectos en los módulos de análisis (semanas 2–6): ya produjeron los res
 
 | Campo | Valor |
 |---|---|
-| Estado | Compuerta `40127be` versionada; implementación y escaneos comprobados en local; publicación/CI nuevo y URL pública pendientes |
+| Estado | Publicada en `7b1fdb7` (PR #1), CI y Security scans remotos en verde; comprobación pública pendiente de URL |
 | Base | `3419a65`, rama `docs/pre-production-review`, CI remoto en verde |
 | Objetivo | Aplicar la propuesta aprobada por el responsable sin alterar modelo ni dependencias congeladas |
 
@@ -1441,6 +1441,13 @@ Sin defectos en los módulos de análisis (semanas 2–6): ya produjeron los res
 - Siguiente paso: crear y publicar el commit de implementación en la misma rama,
   actualizar el PR #1 y comprobar ambos workflows (CI y Security scans).
   No se fusiona `main`; la validación pública sigue pendiente de URL.
+- Creado `7b1fdb7` (`feat: CI security scans and public security verification`)
+  con hooks activos, publicado mediante `git push origin docs/pre-production-review`.
+  `gh run list` confirma los dos workflows completados satisfactoriamente:
+  [CI](https://github.com/darwinjaco/bank-churn-ml/actions/runs/38208352325) y
+  [Security scans](https://github.com/darwinjaco/bank-churn-ml/actions/runs/38208352518).
+  Rama sincronizada con GitHub y PR #1 actualizado. Permanecen locales los
+  borradores documentales de Render y esta actualización posterior de evidencia.
 
 ## 6. Estado del proyecto y Definition of Done
 
