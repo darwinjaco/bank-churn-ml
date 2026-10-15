@@ -81,3 +81,18 @@ def test_calibrated_model_selects_columns_and_clips(valid_df):
     probability = model.predict_proba(pd.DataFrame(valid_df))
     assert probability.shape == (len(valid_df),)
     assert ((probability >= 0) & (probability <= 1)).all()
+
+
+def test_oof_rejects_unscored_rows(valid_df, monkeypatch):
+    class IncompleteSplitter:
+        def __init__(self, **kwargs):
+            pass
+
+        def split(self, features, labels):
+            yield np.arange(2, len(features)), np.array([0])
+
+    monkeypatch.setattr(calibration, "StratifiedKFold", IncompleteSplitter)
+    with pytest.raises(RuntimeError, match="filas sin predicción OOF"):
+        calibration.oof_predictions(
+            build_pipeline("dummy", "raw"), valid_df[FEATURE_SETS["raw"]], valid_df[TARGET]
+        )

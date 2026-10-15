@@ -123,6 +123,36 @@ def test_zero_quota_creates_no_database(tmp_path):
     assert not path.parent.exists()
 
 
+def test_early_disconnect_does_not_invoke_app_and_releases_slot():
+    calls = []
+
+    async def app(scope, receive, send):
+        calls.append(scope["path"])
+        await _echo(scope, receive, send)
+
+    guard = RequestGuards(app, Limits(max_concurrent=1))
+    assert asyncio.run(_call(guard, chunks=())) == []
+    assert not calls
+    assert _status(asyncio.run(_call(guard))) == 200
+    assert calls == ["/predict"]
+
+
+def test_replay_delivers_full_body_once_then_delegates_disconnect():
+    observed = []
+
+    async def app(scope, receive, send):
+        observed.append(await receive())
+        observed.append(await receive())
+        await JSONResponse({"ok": True})(scope, receive, send)
+
+    output = asyncio.run(_call(RequestGuards(app), chunks=(b"ab", b"cd")))
+    assert _status(output) == 200
+    assert observed == [
+        {"type": "http.request", "body": b"abcd", "more_body": False},
+        {"type": "http.disconnect"},
+    ]
+
+
 def _reserve_in_process(path):
     return SQLiteHourlyLimiter(Path(path)).try_acquire(3)
 

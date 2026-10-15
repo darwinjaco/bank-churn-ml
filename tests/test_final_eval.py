@@ -100,3 +100,16 @@ def test_final_rejects_modified_artifact_before_reading_partition(tmp_path, monk
     monkeypatch.setattr(final_eval, "load_test_once", lambda: pytest.fail("No debe leer prueba"))
     with pytest.raises(secure_artifact.ArtifactIntegrityError):
         final_eval.main()
+
+
+def test_threshold_mismatch_stops_before_model_or_partition(tmp_path, monkeypatch):
+    meta = tmp_path / "metadata.json"
+    meta.write_text(json.dumps({"threshold": 0.5, "final_test_evaluation": "pendiente"}))
+    monkeypatch.setattr(final_eval, "METADATA_FILE", meta)
+    monkeypatch.setattr(
+        final_eval, "load_local_model", lambda path: pytest.fail("No cargar modelo")
+    )
+    monkeypatch.setattr(final_eval, "load_test_once", lambda: pytest.fail("No cargar partición"))
+    with pytest.raises(ValueError, match=r"umbral.*no coincide"):
+        final_eval.main()
+    assert list(tmp_path.iterdir()) == [meta]

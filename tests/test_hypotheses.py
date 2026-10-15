@@ -176,3 +176,15 @@ def test_new_modules_do_not_access_audit_column_or_define_test_loader():
             isinstance(node, ast.FunctionDef) and node.name == "load_test"
             for node in ast.walk(tree)
         )
+
+
+def test_zero_cells_produce_finite_pvalue_and_undefined_odds():
+    """OR infinito de Fisher y Woolf indefinido deben representarse sin NaN/Infinity."""
+    table = np.array([[3, 0], [0, 3]])
+    pvalue, method, statistic = h._association(table)
+    assert method == "fisher_exact"
+    assert 0 <= pvalue <= 1 and statistic is None
+    odds = h._or_details(table)
+    assert odds["estimate"] is odds["ic_low"] is odds["ic_high"] is None
+    assert "celdas cero" in odds["nota"]
+    json.dumps({"pvalue": pvalue, "statistic": statistic, "odds": odds}, allow_nan=False)

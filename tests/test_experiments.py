@@ -126,3 +126,63 @@ def test_main_writes_selection(monkeypatch, tmp_path, partitions):
     monkeypatch.setattr(experiments, "run_selection", lambda *args: original(*args, log=False))
     assert experiments.main() == 0
     assert (tmp_path / "selection.json").exists()
+
+
+@pytest.mark.parametrize("logreg_ap, final_model", [(0.65, "rf"), (0.85, "logreg")])
+def test_complex_selection_retains_salary_and_checks_logreg(monkeypatch, logreg_ap, final_model):
+    """Reglas reales con resultados CV sintéticos controlados, sin entrenamientos nuevos."""
+    training = pd.DataFrame({"CustomerId": [1, 2, 3, 4], "NumOfProducts": [1, 2, 3, 4]})
+    validation = training.copy()
+    base_oof = pd.DataFrame(
+        {
+            "CustomerId": [1, 2, 3, 4] * 2,
+            "repeat": [0] * 4 + [1] * 4,
+            "y": [0, 1, 0, 1] * 2,
+            "proba": [0.1, 0.9, 0.2, 0.8] * 2,
+        }
+    )
+    tuning = {
+        "families": {
+            name: {
+                "phase_a": {"best_params": {"marker": name}, "search_ap_optimistic": ap},
+                "phase_b": {
+                    "summary": {"ap": {"mean": ap, "std": 0.01}},
+                    "folds": folds([ap] * 10),
+                },
+            }
+            for name, ap in {"logreg": 0.5, "rf": 0.8, "xgb": 0.6}.items()
+        }
+    }
+    # Incluir otra familia haría duplicados y/o alteraría AP si no se filtra correctamente.
+    phase_b = pd.concat(
+        [
+            base_oof.assign(family="rf"),
+            base_oof.assign(family="xgb", proba=0.5),
+        ],
+        ignore_index=True,
+    )
+    reevaluations, validations = [], []
+
+    def reevaluate(family, params, data, *, exclude):
+        assert family == "rf" and params == {"marker": "rf"} and data is training
+        reevaluations.append(exclude)
+        ap = 0.7 if exclude == ("EstimatedSalary",) else 0.6
+        return {"folds": folds([ap] * 10), "summary": {"ap": {"mean": ap, "std": 0.01}}}
+
+    def validation_ap(family, params, fit, holdout, exclude=()):
+        assert fit is training and holdout is validation
+        assert params == ({} if family == "dummy" else {"marker": family})
+        validations.append((family, exclude))
+        return {"dummy": 0.2, "rf": 0.8, "logreg": logreg_ap}[family]
+
+    monkeypatch.setattr(experiments, "reevaluate", reevaluate)
+    monkeypatch.setattr(experiments, "validation_ap", validation_ap)
+    result = experiments.run_selection(tuning, phase_b, training, validation, log=False)
+    assert result["e03"]["drop_salary"] is False
+    assert result["final_exclude"] == [] and "EstimatedSalary" in result["final_features"]
+    assert "Gender" not in result["final_features"]
+    assert result["e02"]["b_ap_all"]["mean"] == 1.0
+    assert result["e02"]["n_all"] == 4
+    assert result["final_model"] == final_model
+    assert reevaluations == [("EstimatedSalary",), ("NumOfProducts",)]
+    assert validations == [("dummy", ()), ("rf", ()), ("logreg", ())]

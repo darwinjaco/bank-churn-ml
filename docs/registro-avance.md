@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 15 de octubre de 2026 |
-| Fase actual | Entrega v1.0.1 completada; auditoría Git y memoria técnica LaTeX de 34 páginas verificadas; ampliación documental S25 en publicación |
+| Fase actual | Entrega v1.0.1 y memoria publicadas; ampliación S26 con 360 tests locales aprobados y 100 % de sentencias, verificada también sin datos/modelo; publicación de tests en curso |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -2231,7 +2231,7 @@ tectonic --keep-logs --outdir build memoria-tecnica.tex
 | Campo | Valor |
 |---|---|
 | Fecha | 15 de octubre de 2026 |
-| Estado | Diseño previo a tests; compuerta pendiente |
+| Estado | Compuerta e784773 publicada con CI verde; tests al 100 % verificados, segundo commit en publicación |
 | Base | 6487997, memoria LaTeX publicada y workflows verdes |
 | Objetivo | 100 % de sentencias con pruebas aisladas, sin modificar el producto |
 
@@ -2254,6 +2254,63 @@ tectonic --keep-logs --outdir build memoria-tecnica.tex
   explícitos sobre spec 008/plan satisfactorios. **322 aprobados, 98,19 %,
   147 avisos, 287,51 s**. Ningún archivo de implementación/tests modificado
   antes de la compuerta; CI remoto previo de 6487997 confirmado verde.
+
+**Compuerta y pruebas implementadas**
+
+- Creado y publicado `e784773` antes de tocar tests. Workflows confirmados:
+  [CI](https://github.com/darwinjaco/bank-churn-ml/actions/runs/38690851077) y
+  [Security scans](https://github.com/darwinjaco/bank-churn-ml/actions/runs/38690851185)
+  satisfactorios. No se modificaron dependencias ni código productivo.
+- Añadidos 38 casos parametrizados/individuales en tests existentes y
+  `tests/test_cli_entrypoints.py`. Incluyen descarga sin red, configuración del
+  cliente LLM sin peticiones, reset de cuota, OOF incompleta, SHAP no aditivo,
+  umbral inconsistente, OR indefinido, perfiles vacíos, prueba reservada,
+  selección RF con salario conservado y fallback LogReg, tracking aislado,
+  CSV vacío/no UTF-8/malformado, desconexión/replay ASGI y límite de imágenes.
+- Lanzadores ejecutados con `runpy.run_path`, raíz/rutas/argv temporales, sin
+  sustituir main: reportes producen documentos y exit 0; validación sintética
+  exit 0/1; análisis rechaza prerrequisitos ausentes; evaluación final rechaza
+  metadata sintética completada antes de cargar modelo/partición.
+- Primera pasada de Ruff detectó formato y patrones regex explícitos; corregidos
+  sin desactivar reglas. Suite focalizada: 155 aprobados y tres fallos de aislamiento
+  de tests. Dos constantes importadas desde otros módulos conservaban rutas
+  originales y MLflow cacheaba un engine por URI relativa. Se aislaron también
+  esas constantes y se usaron URI por defecto temporales únicas. Ningún resultado
+  real se sobrescribió y los fallos detuvieron los lanzadores antes de entrenar.
+- Primera suite estricta posterior: **359 aprobados, 99,92 %, dos sentencias
+  pendientes** de manejo de error del parser CSV. Añadido caso de cabecera válida
+  con fila entrecomillada sin cerrar; comprueba ValueError y ParserError causal.
+  Focalizada de interfaz posterior: **27 aprobados**, 0,40 s.
+
+**Verificación final y reproducibilidad**
+
+```powershell
+uv sync --locked
+uv run ruff check .
+uv run ruff format --check .
+uv run pre-commit run --all-files
+uv run pytest --cov=churn --cov-report=term-missing --cov-fail-under=85
+uv run coverage report --fail-under=100
+```
+
+- Resultado local: **360 aprobados, 100,00 %, 2.376 sentencias y cero ausentes**,
+  147 avisos de terceros, 142,19 s. Hooks incluyen el archivo nuevo en el índice.
+- Clonado main/e784773 al temporal aprobado; aplicado el diff exacto de los tests
+  del índice mediante `git apply --check` y `git apply`. Es una copia Git limpia
+  con el parche candidato, todavía no el segundo commit publicado. No se copiaron
+  datos, artefacto, tracking ni entorno locales.
+- En esa copia: `uv sync --locked`, Ruff y formato, seguidos de
+  `uv run pytest --cov=churn --cov-report=term-missing --cov-fail-under=100`:
+  **357 aprobados, tres omitidos esperados, 100,00 %, 2.376/2.376**, 147 avisos,
+  205,34 s. Omisiones preexistentes: hash del modelo local y dos tests de dataset.
+- No hay cambios en `src/`, `pyproject.toml`, `uv.lock`, reportes congelados,
+  exclusiones de cobertura o umbral histórico de CI. Cobertura lograda mediante
+  regresiones y aserciones de comportamiento; no se certifica cobertura de ramas.
+- README/contexto actualizados con el resultado posterior a v1.0.1; la memoria
+  LaTeX mantiene las cifras históricas de la versión que documenta.
+- Siguiente paso: revisar diff y hooks finales, crear el segundo commit autorizado,
+  publicar y comprobar CI/Security scans; registrar sus enlaces en el comentario
+  del commit sin crear un tercero únicamente documental.
 
 ## 6. Estado del proyecto y Definition of Done
 
@@ -2291,7 +2348,7 @@ ampliación documental posterior, sin modificar el modelo entregado.
 | Pipeline de inferencia | ✅ | `api.Service` (en lugar del `predict.py` del plan); devuelve probabilidad, decisión y beneficio en vez de un `risk_level` arbitrario |
 | FastAPI | ✅ | Spec 005 v1.3, regresiones de contrato y seguridad; políticas del reporte congelado |
 | Streamlit | ✅ | Cuatro vistas laterales y gráficos; `AppTest` y navegador real, escritorio/móvil/reflow |
-| Tests | ✅ | Entrega `9384e51`: 322 aprobados, 98,19 %; clon sin datos: 319 aprobados y 3 omitidos, 98,11 % |
+| Tests | ✅ | Ampliación S26: 360 aprobados, 100 % de sentencias; copia sin datos: 357 aprobados y 3 omitidos, 100 %. Entrega v1.0.1 histórica: 322/98,19 % |
 | Linting | ✅ | Ruff, formato y hooks satisfactorios en la entrega; ampliación documental S25 con comprobaciones propias |
 | Docker | ✅ | Build del Release, Compose y Space desde clon limpio; `ROLE=all` también bajo límites Free, sin OOM |
 | CI/CD | ✅ | CI y Security scans de main/9384e51 verdes; PR #1 y #2 fusionados; HF alternativo manual |

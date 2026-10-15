@@ -27,6 +27,28 @@ def provenance():
     return {"git_commit": "a" * 40, "csv_sha256": "b" * 64, "split_manifest_sha256": "c" * 64}
 
 
+def test_git_commit_matches_current_repository():
+    from churn.tracking import provenance as current_provenance
+
+    assert train._git_commit() == current_provenance()["git_commit"]
+
+
+def test_default_tracking_is_created_only_inside_temporary_root(tmp_path, monkeypatch, provenance):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(train, "PROJECT_ROOT", tmp_path)
+    monkeypatch.delenv("MLFLOW_TRACKING_URI", raising=False)
+    # URI única: MLflow cachea engines por URI, incluso si cambia el cwd.
+    uri = f"sqlite:///{(tmp_path / 'mlruns' / 'mlflow.db').as_posix()}"
+    monkeypatch.setattr(train, "DEFAULT_TRACKING_URI", uri)
+    metrics = {"summary": {"ap": {"mean": 0.2, "std": 0.0}}, "folds": []}
+    run_id = train.log_run("dummy", "raw", build_pipeline("dummy", "raw"), metrics, provenance)
+    assert (tmp_path / "mlruns" / "mlflow.db").is_file()
+    run = MlflowClient(tracking_uri=train.DEFAULT_TRACKING_URI).get_run(run_id)
+    assert run.info.status == "FINISHED"
+    assert run.data.metrics["ap_mean"] == 0.2
+    assert run.data.tags["final"] == "false"
+
+
 def test_dummy_metrics_determinism_and_sample_std(valid_df):
     pipeline = build_pipeline("dummy", "raw")
     x, y = valid_df[FEATURE_SETS["raw"]], valid_df[TARGET]

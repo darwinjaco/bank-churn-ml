@@ -32,6 +32,27 @@ def test_formatters():
     assert model_card._eur(61950) == "61.950 €"
 
 
+def test_empty_error_profile_is_omitted_without_changing_other_profiles():
+    audit = model_card._load("audit.json")
+    audit["errors"]["profiles"]["FN"] = {"n": 0, "means": None}
+    text = model_card.render_audit(audit)
+    assert "| FN |" not in text
+    assert "| VP |" in text and "| VN |" in text
+
+
+def test_card_before_final_evaluation_marks_test_as_reserved():
+    card = model_card.render_card(
+        model_card._load("audit.json"),
+        model_card._load("decision.json"),
+        model_card._load("model_selection.json"),
+        model_card._load("tuning.json"),
+        model_card._load("model_metadata.json"),
+        None,
+    )
+    assert "Pendiente: la prueba sigue reservada" in card
+    assert "Única evaluación, el" not in card
+
+
 def test_card_with_final_section():
     decision = model_card._load("decision.json")
     final = {

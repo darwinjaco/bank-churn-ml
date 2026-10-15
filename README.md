@@ -17,6 +17,13 @@ La [memoria técnica detallada](docs/latex/memoria-tecnica.tex) documenta metodo
 contratos, resultados, arquitectura, seguridad y operación. Sus instrucciones
 permiten generar el PDF local en `docs/latex/build/`, excluido de Git.
 
+**Pruebas ampliadas después de v1.0.1:** 360 tests locales aprobados y **100 % de
+cobertura de sentencias** de `src/churn` (2.376/2.376). Sin datos/modelo locales:
+357 aprobados y tres omitidos esperados, también al 100 %. No equivale a cobertura
+de ramas ni garantía de ausencia de errores. Protocolo y evidencia en
+[spec 008](specs/008-complete-statement-coverage.md) y registro S26; la memoria
+conserva las cifras históricas de la entrega v1.0.1.
+
 ## Problema
 
 Con un presupuesto de retención, ¿a qué clientes conviene contactar y cuánto dinero aporta el modelo frente a no contactar a nadie, contactar a todos o elegir al azar? El dataset ([*Churn Modelling*](https://www.kaggle.com/datasets/shrutimechlearn/churn-modelling), 10.000 clientes, 20,4 % de abandono) no trae valor del cliente ni costos de campaña: son **supuestos explícitos** (V = 1.000 €, c = 50 €, s = 30 %), no cifras observadas.

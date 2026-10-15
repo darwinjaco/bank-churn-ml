@@ -54,3 +54,17 @@ def test_main_reads_results_and_exploration(plot_input, monkeypatch, tmp_path):
     monkeypatch.setattr(plots, "load_exploration", lambda: df)
     assert plots.main() == 0
     assert len(list(plots.FIGURES_DIR.glob("*.png"))) == 6
+
+
+def test_oversized_figure_is_rejected_and_closed(tmp_path, monkeypatch):
+    fig = plots.plt.figure()
+    target = tmp_path / "large.png"
+
+    def oversized(path, **kwargs):
+        path.write_bytes(b"x" * 200_000)
+
+    monkeypatch.setattr(fig, "savefig", oversized)
+    with pytest.raises(ValueError, match="200 KB"):
+        plots._save(fig, target)
+    assert target.stat().st_size == 200_000
+    assert not plots.plt.fignum_exists(fig.number)

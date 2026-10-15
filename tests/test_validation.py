@@ -52,6 +52,26 @@ def test_auc_perfect_and_random():
     assert _auc(pd.Series([4, 3, 2, 1]), pd.Series(y)) == 0.0
 
 
+@pytest.mark.parametrize("label", [0, 1])
+def test_auc_single_class_is_undefined(label):
+    assert np.isnan(_auc(pd.Series([1, 2, 3]), pd.Series([label] * 3)))
+
+
+def test_soft_report_warns_for_duplicates_extreme_products_and_low_salary(valid_df):
+    # El reporte informativo se prueba directamente; el esquema estricto rechaza IDs duplicados.
+    frame = pd.concat([valid_df, valid_df.iloc[[0]]], ignore_index=True)
+    frame.loc[len(frame) - 1, "RowNumber"] = len(frame)
+    frame["NumOfProducts"] = np.where(frame["Exited"] == 1, 4, 1)
+    frame["EstimatedSalary"] = 500.0
+    report = quality_report(frame)
+    assert report.n_duplicated_rows == 1
+    assert report.churn_by_products[4]["churn_rate"] == 1.0
+    assert report.low_salary_rows == len(frame)
+    assert any("1 duplicated rows" in w for w in report.warnings)
+    assert any("NumOfProducts=4: churn 100%" in w for w in report.warnings)
+    assert any("EstimatedSalary < 1,000" in w for w in report.warnings)
+
+
 def test_leakage_is_flagged(valid_df):
     df = valid_df.copy()
     df["CreditScore"] = 400 + df["Exited"] * 400  # perfectly separates target

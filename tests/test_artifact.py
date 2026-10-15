@@ -1,6 +1,7 @@
 """Descarga y verificación del artefacto sin red (descargador simulado)."""
 
 import hashlib
+import io
 
 import joblib
 import pytest
@@ -71,3 +72,32 @@ def test_local_load_rejects_before_deserialization_and_never_downloads(tmp_path,
     with pytest.raises(artifact.ArtifactIntegrityError):
         artifact.load_local_model(changed)
     assert not calls and not missing.exists()
+
+
+def test_http_downloader_copies_binary_and_closes_response(tmp_path, monkeypatch):
+    payload = b"\x00modelo-sintetico\xff" * 1000
+    response = io.BytesIO(payload)
+    calls = []
+
+    def urlopen(url, *, timeout):
+        calls.append((url, timeout))
+        return response
+
+    monkeypatch.setattr(artifact.urllib.request, "urlopen", urlopen)
+    target = tmp_path / "download.part"
+    artifact._download("https://artifact.invalid/model", target)
+    assert target.read_bytes() == payload
+    assert calls == [("https://artifact.invalid/model", 120)]
+    assert response.closed
+
+
+def test_main_verifies_existing_synthetic_artifact(tmp_path, monkeypatch, capsys):
+    target = tmp_path / "model.joblib"
+    target.write_bytes(b"artefacto sintetico, no deserializado")
+    digest = artifact.sha256_file(target)
+    ensure = artifact.ensure_model
+    monkeypatch.setattr(artifact, "MODEL_SHA256", digest)
+    monkeypatch.setattr(artifact, "ensure_model", lambda: ensure(target, expected=digest))
+    assert artifact.main() == 0
+    output = capsys.readouterr().out
+    assert "Modelo verificado:" in output and str(target) in output and digest[:12] in output

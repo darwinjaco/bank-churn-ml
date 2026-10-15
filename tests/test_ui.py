@@ -10,6 +10,20 @@ import pytest
 
 from churn import ui
 
+
+@pytest.mark.parametrize("payload", [b"", b"\xff\xfeinvalid"])
+def test_empty_or_non_utf8_csv_rejected(payload):
+    with pytest.raises(ValueError, match=r"vacío.*UTF-8"):
+        ui.read_batch_csv(io.BytesIO(payload))
+
+
+def test_valid_header_with_unterminated_quoted_row_reports_format_error():
+    payload = (",".join(ui.CONTRACT_COLUMNS) + '\n"unterminated').encode("utf-8")
+    with pytest.raises(ValueError, match="El CSV no tiene un formato válido") as error:
+        ui.read_batch_csv(io.BytesIO(payload))
+    assert isinstance(error.value.__cause__, pd.errors.ParserError)
+
+
 ROW = {
     "CreditScore": 600,
     "Age": 52,

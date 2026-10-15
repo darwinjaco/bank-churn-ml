@@ -7,6 +7,28 @@ import pytest
 
 from churn import narrative
 
+
+def test_reset_releases_in_memory_budget():
+    limiter = narrative.HourlyLimiter(clock=lambda: 123.0)
+    assert limiter.try_acquire(1)
+    assert not limiter.try_acquire(1)
+    limiter.reset()
+    assert limiter.try_acquire(1)
+    assert not limiter.try_acquire(1)
+
+
+def test_openai_client_configuration_without_requests():
+    client = narrative._openai_client("https://provider.invalid/v1", "synthetic-test-token")
+    try:
+        assert str(client.base_url) == "https://provider.invalid/v1/"
+        assert client.api_key == "synthetic-test-token"
+        assert client.timeout == narrative.LLM_TIMEOUT_S
+        assert client.max_retries == 0
+    finally:
+        client.close()
+    assert client.is_closed()
+
+
 CUSTOMER = {
     "CreditScore": 600,
     "Age": 52,

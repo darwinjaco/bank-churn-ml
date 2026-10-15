@@ -72,3 +72,14 @@ def test_local_explanations_without_customers_above_threshold(small_model, valid
     calibrated = np.zeros(len(valid_df))
     cases = explain.local_explanations(result, calibrated, 0.5)
     assert {case["case"] for case in cases} == {"mayor_probabilidad", "menor_probabilidad"}
+
+
+def test_non_additive_explanation_is_rejected(small_model, valid_df):
+    class CorruptExplainer:
+        expected_value = (0.0, 0.0)
+
+        def shap_values(self, matrix):
+            return np.ones(matrix.shape)
+
+    with pytest.raises(ValueError, match="SHAP no es aditivo"):
+        explain.compute_shap(small_model, valid_df.iloc[:2], CorruptExplainer())

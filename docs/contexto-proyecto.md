@@ -7,6 +7,12 @@ auditoría HTTPS y navegador públicos satisfactorios. Los pendientes del snapsh
 S24 se cerraron en la Release. La ampliación documental actual añade una memoria
 técnica LaTeX, sin cambiar implementación ni resultados; evidencia en S25.
 
+Ampliación posterior de tests (spec 008, S26): 360 aprobados, **100 % de cobertura
+de sentencias**, 2.376 cubiertas y cero ausentes; copia sin datos/modelo con
+357 aprobados y tres omitidos esperados, también al 100 %. Código productivo y
+artefacto sin cambios. El mínimo histórico del workflow sigue en 85 %; el objetivo
+de esta ampliación se comprobó con umbral estricto 100 %.
+
 ## 1. Qué es
 
 Proyecto de portafolio de Darwin Jacome Cuenca: **predicción de abandono bancario convertida en decisiones de retención**. Calcula a quién conviene contactar y cuánto dinero aporta frente a no usar modelo, bajo supuestos económicos explícitos.

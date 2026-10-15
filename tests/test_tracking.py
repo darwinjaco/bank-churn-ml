@@ -27,3 +27,21 @@ def test_provenance_uses_canonical_hash():
     origin = tracking.provenance()
     assert len(origin["git_commit"]) == 40 and len(origin["csv_sha256"]) == 64
     assert origin["split_manifest_sha256"] == tracking.manifest_sha256()
+
+
+def test_default_tracking_directory_and_run_are_temporary(tmp_path, monkeypatch):
+    from mlflow.tracking import MlflowClient
+
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(tracking, "PROJECT_ROOT", tmp_path)
+    monkeypatch.delenv("MLFLOW_TRACKING_URI", raising=False)
+    # Evita compartir el engine del SDK con otros tests que prueban el fallback.
+    uri = f"sqlite:///{(tmp_path / 'mlruns' / 'mlflow.db').as_posix()}"
+    monkeypatch.setattr(tracking, "DEFAULT_TRACKING_URI", uri)
+    origin = {"git_commit": "a" * 40, "csv_sha256": "b" * 64, "split_manifest_sha256": "c" * 64}
+    run_id = tracking.log_run("synthetic", "experiment", {"purpose": "test"}, None, None, origin)
+    assert (tmp_path / "mlruns" / "mlflow.db").is_file()
+    run = MlflowClient(tracking_uri=tracking.DEFAULT_TRACKING_URI).get_run(run_id)
+    assert run.info.status == "FINISHED"
+    assert run.data.params["purpose"] == "test"
+    assert run.data.tags["final"] == "false"

@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Estado | Diseño previo a tests; compuerta SDD pendiente |
+| Estado | Compuerta e784773 publicada con CI verde; 100 % de sentencias comprobado localmente y en copia sin datos/modelo; CI del commit de tests pendiente |
 | Base | `6487997`, CI y Security scans satisfactorios |
 | Objetivo | 100 % de sentencias de `src/churn` mediante pruebas significativas |
 | Autorización | Responsable: probar el 100 % y autorizar dos commits (compuerta y tests), publicados en main |
@@ -64,3 +64,18 @@ Si un test revela un defecto productivo que impida el objetivo, documentar el
 hallazgo y pedir una enmienda antes de cambiar `src/`. No debilitar aserciones.
 
 Plan: [plan-cobertura-completa.md](../docs/plan-cobertura-completa.md).
+
+## 5. Evidencia de aceptación local
+
+- 38 casos adicionales; **360 aprobados** en el entorno local, **2.376/2.376
+  sentencias cubiertas**, sin alterar el denominador ni excluir código.
+- Copia del Git publicado e784773 con el diff exacto de tests preparado para
+  el segundo commit, sin CSV/modelo/MLflow originales: **357 aprobados y tres
+  omitidos preexistentes**, `--cov-fail-under=100` satisfactorio.
+- Los cinco comandos de AGENTS §4 y `uv run coverage report --fail-under=100`
+  satisfactorios en el workspace. Ruff/formato también satisfactorios en la copia.
+- El código productivo y los archivos de dependencias/reportes permanecen intactos.
+  No se volvió a evaluar prueba real; los nuevos lanzadores operan en temporales.
+- Evidencia detallada en registro S26. El CI posterior del commit de tests se
+  enlaza en su comentario de GitHub y en la entrega; el workflow conserva su
+  mínimo histórico del 85 %, distinto de la comprobación estricta realizada aquí.
