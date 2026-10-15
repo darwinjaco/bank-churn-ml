@@ -2226,6 +2226,35 @@ tectonic --keep-logs --outdir build memoria-tecnica.tex
   El PDF local no se añade a Git ni exige redeploy de la demo: su código
   desplegado permanece en la entrega verificada `9384e51`.
 
+### S26 — Cobertura completa de sentencias: compuerta y regresiones
+
+| Campo | Valor |
+|---|---|
+| Fecha | 15 de octubre de 2026 |
+| Estado | Diseño previo a tests; compuerta pendiente |
+| Base | 6487997, memoria LaTeX publicada y workflows verdes |
+| Objetivo | 100 % de sentencias con pruebas aisladas, sin modificar el producto |
+
+- El responsable pide probar el 100 % y autoriza **dos commits** (compuerta y
+  tests) con publicación en main y CI verde. La autorización sustituye el commit
+  único de los trabajos documentales previos para esta sección.
+- Ejecutados `git status --short --branch`, `git log --oneline -5`, consulta
+  `gh run list` y
+  `uv run pytest --cov=churn --cov-report=term-missing --cov-fail-under=85`:
+  **322 aprobados, 98,19 %, 43 sentencias sin cubrir de 2.376**, 147 avisos,
+  217,22 s. Árbol limpio al iniciar; CI y Security scans de 6487997 verdes.
+- Leídos AGENTS, configuración, tests y rutas pendientes. Redactados spec 008
+  y plan de cobertura: descarga/CLI, guardas de errores, selección alternativa,
+  estadística, tracking y transporte ASGI. No se ha modificado `tests/` ni `src/`.
+- Los casos nuevos usan datos sintéticos, transporte simulado y rutas temporales;
+  la evaluación final real permanece reservada a su ejecución histórica. Cobertura
+  de sentencias se distingue de cobertura de ramas y de garantía de corrección.
+- Siguiente paso: comprobaciones previas, commit de compuerta, CI; después tests.
+- Comprobaciones T0 completadas: los cinco comandos de AGENTS §4 y hooks
+  explícitos sobre spec 008/plan satisfactorios. **322 aprobados, 98,19 %,
+  147 avisos, 287,51 s**. Ningún archivo de implementación/tests modificado
+  antes de la compuerta; CI remoto previo de 6487997 confirmado verde.
+
 ## 6. Estado del proyecto y Definition of Done
 
 Estado al 15 de octubre de 2026, contra la *Definition of Done* del plan maestro
