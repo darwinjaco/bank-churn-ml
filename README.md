@@ -6,12 +6,16 @@
 
 **Bank churn → retention decisions.** End-to-end ML system that turns a *calibrated* churn probability into a contact / no-contact decision with an explicit expected-profit rule: contact if p > c / (s·V) = 1/6. On a test set used exactly once, the frozen Random Forest reaches **AP 0.705** and **ROC-AUC 0.862** and, under illustrative assumptions, earns **€61,600 vs €22,100** for contacting everyone (60.5 % of the oracle). Built spec-first (7 specs) with preregistered hypotheses and thresholds, leakage-safe pipelines, MLflow, SHAP and a fairness audit, FastAPI + Streamlit, Docker and CI. A simulated drift study shows that a prevalence shift miscalibrates the model by −9.6 pp **without any input-drift alarm**.
 
-**[Demo en vivo](https://bank-churn-ml-ufa7.onrender.com/)** (funcionalidad verificada; cierre de cabeceras de seguridad pendiente) · [API](#api) · [Ficha del modelo](reports/model_card.md) · [Especificaciones](specs/) · [Registro de avance](docs/registro-avance.md)
+**[Demo en vivo](https://bank-churn-ml-ufa7.onrender.com/)** · [Entrega verificada v1.0.1](https://github.com/darwinjaco/bank-churn-ml/releases/tag/v1.0.1) · [Memoria técnica LaTeX](docs/latex/README.md) · [API](#api) · [Ficha del modelo](reports/model_card.md) · [Especificaciones](specs/) · [Registro de avance](docs/registro-avance.md)
 
 ![Recorrido de Cliente, Lote, Modelo y Monitoreo](docs/demo.gif)
 
 Recorrido animado de 24 segundos con capturas reales de la interfaz local,
 perfiles sintéticos y reportes históricos congelados. No representa una campaña real.
+
+La [memoria técnica detallada](docs/latex/memoria-tecnica.tex) documenta metodología,
+contratos, resultados, arquitectura, seguridad y operación. Sus instrucciones
+permiten generar el PDF local en `docs/latex/build/`, excluido de Git.
 
 ## Problema
 
@@ -181,14 +185,15 @@ Los escaneos de CVE y secretos se definen en
 sin actualizar dependencias. La [comprobación pública](docs/verificacion-seguridad-publica.md)
 de HTTPS, cookies y orígenes se ejecutó sobre la URL real de Render: TLS,
 redirección, control de origen WebSocket y subida protegida por XSRF comprobados.
-Faltan `X-Content-Type-Options`, `Referrer-Policy` y HSTS; framing no verificado.
-La demo funciona, pero la auditoría pública de cabeceras no está cerrada.
-Evidencia y límites en S18 del [registro de avance](docs/registro-avance.md).
+El cierre de `v1.0.1` comprobó además `X-Content-Type-Options`, `Referrer-Policy`,
+HSTS y framing. Auditoría pública: **código 0 / passed**; navegador y subida XSRF
+satisfactorios. Evidencia posterior a S24 e informe JSON en la
+[Release verificada](https://github.com/darwinjaco/bank-churn-ml/releases/tag/v1.0.1).
 
 El launcher `dashboard/serve.py` usa `st.App` con middleware ASGI nativo para
 servir `nosniff`, política de referencia, HSTS y framing del mismo origen.
-Su comprobación local mantiene WebSocket y subida XSRF; el resultado HTTPS
-final requiere el redeploy manual en Render. El comprobador observa también la
+Su comprobación local y el redeploy HTTPS final mantienen WebSocket y subida
+XSRF. El comprobador observa también la
 cookie XSRF de `/_stcore/health`, sin publicar su valor.
 
 ### Reproducir el pipeline

@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Estado | v1.3 publicada en `871ad5e`; launcher en `bacb47b`, CI remoto verde; build/runtime y Compose desde clon limpio comprobados; despliegue final en curso (S23) |
+| Estado | v1.3 cerrada: Compose desde clon limpio, CI y Render verificados; entrega v1.0.1 en 9384e51; evidencia final en Release y registro S25 |
 | Responsable | Darwin Jacome Cuenca |
 | Semana | 7 (16–22 de noviembre de 2026) |
 | Dependencias | [002](002-modeling-and-evaluation.md) (artefacto congelado), [004](004-decision-layer.md) (regla de decisión) |

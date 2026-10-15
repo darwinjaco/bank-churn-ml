@@ -27,3 +27,6 @@ mlartifacts/
 !.env.example
 .runtime/
 .DS_Store
+
+# Salidas regenerables de la memoria LaTeX (PDF, logs y auxiliares)
+/docs/latex/build/

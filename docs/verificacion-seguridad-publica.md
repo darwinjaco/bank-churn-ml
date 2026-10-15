@@ -72,10 +72,23 @@ La remediación de cabeceras requiere una decisión versionada antes de implemen
 
 La enmienda 007 v1.2 versionó la solución nativa mediante `st.App` y middleware.
 Cabeceras, cookie de health, origen propio/ajeno y subida con/sin token comprobados
-en el launcher local; la actualización pública de Render sigue pendiente.
+en el launcher local; el cierre posterior en Render se documenta debajo.
 
 S23 repite la auditoría: cabeceras aún ausentes (código 1) y algunos intentos
 incompletos por timeout de lectura (código 2). El navegador sigue mostrando la
 interfaz anterior, con pestañas y botón «Evaluar». El estado Live informado no
 basta para identificar el código servido. El responsable pospone la revisión
 del panel; no se certifica la actualización HTTPS ni el cierre de la Release.
+
+### Cierre verificado de v1.0.1
+
+El 15 de octubre se comprobó el deploy Live de `9384e51` en el servicio existente.
+El script público terminó con **código 0 / passed**: TLS, redirección, cabeceras,
+framing, health, cookie y orígenes correctos. Edge completó doce controles de
+interfaz sin errores de consola. Una prueba HTTPS adicional comprobó plantilla,
+subida válida 204 y subida sin token 403.
+
+Los fallos y pausas de S18–S24 son evidencia histórica. Quedan superados por el
+informe final de la [Release v1.0.1](https://github.com/darwinjaco/bank-churn-ml/releases/tag/v1.0.1),
+que contiene `verification-v1.0.1.json`. La CSP se evalúa solo respecto al framing;
+no se certifican iframe externo, WCAG completa ni capacidad de producción.

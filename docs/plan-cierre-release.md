@@ -6,7 +6,7 @@
 | Rama | `feat/dashboard-redesign`, PR #2 sobre `docs/pre-production-review` |
 | Especificaciones | 007 v1.2 §10 y 006 v1.2 §13 |
 | Autorización | Responsable: «okay adelante» tras el checklist de cierre |
-| Estado | Cierre local comprobado; el responsable autoriza commit único e integración GitHub primero; Release condicionada al redeploy de main |
+| Estado | Entrega v1.0.1 completada en 9384e51; ampliación posterior: memoria técnica LaTeX (§7) |
 
 ## 1. Compuerta
 
@@ -114,3 +114,26 @@ La evidencia posterior al commit (su hash, ejecuciones de CI, PR integrados y
 deploy) se publica en los PR y, al satisfacer el despliegue, en las notas de
 `v1.0.1`. El registro versionado es el snapshot previo a esas acciones; no se
 crea un segundo commit para actualizar resultados que solo existen después.
+
+## 7. Memoria técnica LaTeX solicitada después de la entrega
+
+El cierre de §6 se completó: PR fusionados, `main` único, CI verde, Render
+comprobado y Release publicada. Las pausas de §6 son historia, no bloqueos
+actuales. Evidencia en la [Release v1.0.1](https://github.com/darwinjaco/bank-churn-ml/releases/tag/v1.0.1).
+
+Plan de la enmienda documental 006 v1.4 §15:
+
+1. Revisar working tree, ramas local/remota, tags, PR, ignorados y Release.
+2. Leer reportes y specs; fijar la versión documentada en `v1.0.1`/`9384e51`.
+3. Redactar una fuente LaTeX principal y sus instrucciones de compilación;
+   reutilizar las figuras existentes, con fórmulas y tablas verificables.
+4. Alinear los estados vigentes de README, contexto, registro y specs con la
+   evidencia pública de la Release, sin alterar datos ni reportes históricos.
+5. Compilar y revisar el PDF. Mantener todas las salidas en `docs/latex/build/`,
+   ignorado; validar enlaces, referencias, hooks y diff final.
+
+El nuevo pedido no implica mover etiquetas, modificar la Release publicada ni
+repetir la evaluación real. El stash histórico se conserva y se identifica como
+trabajo apartado, no como cambio pendiente de la entrega.
+El responsable autoriza un único commit documental y push a `main` después
+de validar la memoria, con las comprobaciones obligatorias y CI posterior.

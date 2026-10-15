@@ -1,12 +1,11 @@
 # Contexto del proyecto — bank-churn-ml (documento de cierre)
 
 Documento de traspaso para quien retome el proyecto (persona o agente). Estado al
-**14 de octubre de 2026**: semanas 1–8 implementadas, rediseño y seguridad
-publicados en `feat/dashboard-redesign`, commit de serving **`bacb47b`**, con CI
-y Security scans verdes. Limpieza documental y demo comprobadas. El responsable
-autoriza **GitHub primero**: único commit e integración con CI verde, seguidos de
-redeploy de `main`. La Release y el cierre público esperan esa comprobación.
-Detalle en registro S23–S24 y en los PR de integración.
+**15 de octubre de 2026**: entrega **v1.0.1 completada**, código
+**`9384e51`**, integrado y desplegado desde `main`. CI y Security scans verdes;
+auditoría HTTPS y navegador públicos satisfactorios. Los pendientes del snapshot
+S24 se cerraron en la Release. La ampliación documental actual añade una memoria
+técnica LaTeX, sin cambiar implementación ni resultados; evidencia en S25.
 
 ## 1. Qué es
 
@@ -26,7 +25,7 @@ Proyecto de portafolio de Darwin Jacome Cuenca: **predicción de abandono bancar
   SDD previas siguen siendo obligatorias si se modifica código, tests o dependencias.
 - **Preregistro:** hipótesis, reglas, umbrales y expectativas antes de ver resultados; los cambios son enmiendas versionadas.
 - **Reglas fijas (`AGENTS.md`):** `Gender` nunca es variable del modelo (solo auditoría); la partición de prueba ya se usó **una vez** y no se vuelve a evaluar (tampoco para monitoreo); el modelo `model-v1.0` está congelado.
-- **Registro:** `docs/registro-avance.md` (S01–S24; estado y Definition of Done en §6).
+- **Registro:** `docs/registro-avance.md` (S01–S25; estado y Definition of Done en §6).
   Los planes semanales y secciones anteriores conservan el historial; las cifras
   de los reportes se generan desde JSON con código.
 
@@ -36,7 +35,7 @@ Proyecto de portafolio de Darwin Jacome Cuenca: **predicción de abandono bancar
 |---|---|---|
 | 1–6 | Contrato, división, EDA, pipelines, ajuste, calibración, decisión, SHAP, auditoría y evaluación final en prueba | Cerradas y publicadas (CI #29 en `6e8e54d`) |
 | 7 | API FastAPI, dashboard Streamlit, Docker, LLM opcional | Publicada; Release/hash y rediseño comprobados; última suite local de código: 322 aprobados, 98,19 % |
-| 8 | Monitoreo simulado, despliegue, README y cierre | Render principal; HF manual; cierre HTTPS final, integración y Release de código en curso |
+| 8 | Monitoreo simulado, despliegue, README y cierre | Cerrada sobre Render y v1.0.1; HF alternativo manual; memoria documental posterior en S25 |
 
 ## 4. Resultados clave
 
@@ -70,21 +69,18 @@ CLIs: `churn-validate`, `churn-split`, `churn-hypotheses`, `churn-baselines`, `c
 - Clon limpio de `bacb47b`: 319 aprobados y 3 omitidos esperados sin datos/modelo,
   cobertura 98,11 %; lock, lint, formato y hooks satisfactorios. Build del Release
   correcto, imagen `ROLE=all` comprobada bajo 512 MiB y 0,1 CPU. Evidencia en S23.
-- La última inspección pública sigue mostrando la interfaz anterior y cabeceras
-  ausentes. Tras el arranque en frío, health y TLS responden, pero esto no acredita
-  el rediseño. Comprobar hash del deploy, rama y `./Dockerfile`; el responsable
-  autoriza integrar primero GitHub y después desplegar `main`. LLM desactivado
-  en la configuración aprobada: `LLM_MAX_CALLS_PER_HOUR=0`.
-- Integración prevista por avance rápido: rama del rediseño → revisión → `main`,
-  con CI satisfactorio y sin conflictos, seguida del redeploy de `main`. Los
-  resultados posteriores al commit se registran en los PR
+- Deploy Live de `9384e51` confirmado por el responsable y comprobado mediante
+  auditoría HTTPS independiente, doce controles de navegador y subida 204/sin
+  token 403. Plantilla determinista; LLM desactivado. El arranque en frío de
+  Render Free puede mostrar Application loading sin implicar un deploy fallido.
+- Integración completada por avance rápido hacia `main`, sin conflictos ni
+  commits adicionales de fusión. Solo queda `main` local y remota. Evidencia en
+  los PR
   [#2](https://github.com/darwinjaco/bank-churn-ml/pull/2) y
   [#1](https://github.com/darwinjaco/bank-churn-ml/pull/1).
-- Etiqueta `v1.0.0` existente, creada antes del cierre público. El responsable
-  autoriza `v1.0.1` para la entrega final, sin mover etiquetas previas. La Release
-  necesita CI del commit final y despliegue comprobado.
-  [Releases](https://github.com/darwinjaco/bank-churn-ml/releases) conserva la
-  evidencia de publicación posterior a este snapshot, cuando corresponda.
+- [Release v1.0.1](https://github.com/darwinjaco/bank-churn-ml/releases/tag/v1.0.1)
+  publicada con informe JSON y evidencia final. Se preservaron `v1.0.0` y
+  `model-v1.0`; no hay tareas obligatorias abiertas de la entrega acordada.
 - Hugging Face es opcional: no se necesita cuenta/token para cerrar Render ni
   se habilita un LLM público para satisfacer criterios históricos del Space.
 - `render-prep` se conserva como stash histórico revisado; contiene propuestas
@@ -107,6 +103,7 @@ CLIs: `churn-validate`, `churn-split`, `churn-hypotheses`, `churn-baselines`, `c
 | Documento | Función |
 |---|---|
 | `README.md` | Presentación, recorrido, resultados e instrucciones de uso |
+| `latex/memoria-tecnica.tex`, `latex/README.md` | Memoria completa y compilación del PDF local |
 | `contexto-proyecto.md` | Traspaso y decisiones vigentes |
 | `registro-avance.md` | Evidencia cronológica y estado actual en §6 |
 | `plan-cierre-release.md` | Secuencia y condiciones de la entrega consolidada |

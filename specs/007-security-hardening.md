@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Versión | v1.2 — cabeceras nativas del dashboard (§10) |
-| Estado | Implementación publicada en `bacb47b`, CI y Security scans verdes; transporte y cabeceras locales comprobados; verificación HTTPS final pendiente de redeploy (S23) |
+| Estado | v1.2 cerrada en v1.0.1/9384e51: CI y Security scans verdes, auditoría HTTPS código 0 y navegador real satisfactorios |
 | Base | `a2598ee`, CI remoto en verde |
 | Dependencias | Specs 002, 005 y 006; auditoría SEC-01 a SEC-13 |
 
@@ -256,11 +256,13 @@ de observación, no debilita los criterios SameSite/Secure ni acepta cookies aus
 - [x] Comprobador público: health y cookie de health incluidos; tests de ausencia,
   formato inválido y error/red mantienen códigos no satisfactorios.
 - [x] Docker desde clon limpio, Release/hash intactos y prueba bajo límites Free.
-- [ ] CI y Security scans nuevos verdes; URL Render final con auditoría y funcionalidad
+- [x] CI y Security scans nuevos verdes; URL Render final con auditoría y funcionalidad
   comprobadas después del redeploy. Local no se presenta como prueba HTTPS pública.
 
 Plan: [plan-cierre-release.md](../docs/plan-cierre-release.md).
 
 Evidencia de los criterios locales: S22–S23 del registro; CI de `bacb47b` y
-Security scans satisfactorios. El último criterio combina CI y despliegue:
-permanece abierto hasta comprobar ambos después del redeploy real.
+Security scans satisfactorios. El último criterio combina CI y despliegue y se
+cerró el 15 de octubre en `9384e51`: auditoría pública código 0, doce controles
+de navegador, plantilla y subida 204/sin token 403. Evidencia e informe JSON en
+la [Release v1.0.1](https://github.com/darwinjaco/bank-churn-ml/releases/tag/v1.0.1).

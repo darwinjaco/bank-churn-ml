@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Estado | v1.3 documental (§14), cierre local comprobado; autorizada integración GitHub primero con commit único y CI; Render final y Release `v1.0.1` condicionados al redeploy de main |
+| Estado | Entrega `v1.0.1` cerrada en `9384e51`, Render/CI comprobados; ampliación documental v1.4 (§15): memoria técnica LaTeX |
 | Responsable | Darwin Jacome Cuenca |
 | Semana | 8 (23–29 de noviembre de 2026) |
 | Dependencias | [002](002-modeling-and-evaluation.md) (artefacto congelado), [004](004-decision-layer.md) (regla de decisión), [005](005-api-and-dashboard.md) (API, dashboard e imagen) |
@@ -250,14 +250,19 @@ históricos de Hugging Face en §7 como evidencia de la implementación original
 - [x] Configuración validada contra el esquema oficial, versionada y publicada
   en un commit con CI y Security scans satisfactorios. *Comprobaciones locales
   satisfactorias (S17), commit `193a13d` publicado y ambos workflows verdes.*
-- [ ] Un único Web Service Free desplegado; modelo descargado del Release y
+- [x] Un único Web Service Free desplegado; modelo descargado del Release y
   comprobado por SHA-256 durante el build. Registrar commit, URL y build.
-- [ ] `/_stcore/health` responde `ok`; Cliente reproduce 0,947 y contactar;
+  *Entrega v1.0.1: servicio existente en main/9384e51, deploy Live aportado por
+  el responsable, duración indicada 2m14s; build/arranque con verificación obligatoria
+  de hash y referencia comprobada. Evidencia en Release e informe final.*
+- [x] `/_stcore/health` responde `ok`; Cliente reproduce 0,947 y contactar;
   Lote procesa `examples/clientes_ejemplo.csv`; Modelo y Monitoreo muestran
   los reportes congelados. Comprobar XSRF, WebSocket y errores bajo HTTPS con
   el procedimiento de seguridad pública de la spec 007. *Funcionalidad,
-  subida/XSRF y orígenes comprobados en S18; cabeceras/framing pendientes.*
-- [ ] LLM desactivado y plantilla disponible, sin claves de proveedor.
+  subida/XSRF y orígenes inicialmente comprobados en S18; cierre de cabeceras,
+  framing y navegador final comprobados en v1.0.1.*
+- [x] LLM desactivado y plantilla disponible, sin claves de proveedor.
+  *Configuración Free con límite 0 y plantilla comprobada en HTTPS.*
 - [x] URL real y resultados públicos registrados en README y registro.
   *S18: https://bank-churn-ml-ufa7.onrender.com/, auditoría HTTP fallida y
   verificación funcional en navegador satisfactoria, documentadas por separado.*
@@ -316,3 +321,27 @@ documental: no cambia código, tests, dependencias, modelo ni protocolo estadís
   al snapshot se enlazan en los PR y notas de Release sin un segundo commit.
 
 Plan operativo: [plan-cierre-release.md §6](../docs/plan-cierre-release.md#6-cierre-consolidado-autorizado--14-de-octubre-de-2026).
+
+## 15. Enmienda v1.4 — Memoria técnica LaTeX
+
+El responsable solicita revisar la higiene de Git y generar documentación
+detallada en LaTeX de la entrega ya publicada. Alcance exclusivamente documental:
+no cambia implementación, tests, dependencias, modelo ni resultados congelados.
+
+- Documento principal `docs/latex/memoria-tecnica.tex`, en español, con portada,
+  resumen, índice, metodología, contrato, H1–H6, selección, E-01–E-04, calibración,
+  economía, evaluación final, arquitectura, API, dashboard, seguridad, monitoreo,
+  reproducibilidad, operación, limitaciones y referencias.
+- Toda cifra procede de reportes versionados o de la evidencia publicada en
+  `v1.0.1`; se distinguen desarrollo, prueba única y comprobaciones de despliegue.
+  No se ejecuta ningún entrenamiento ni se vuelve a cargar prueba para redactar.
+- Reutilizar figuras versionadas por ruta relativa. Sin copiar datasets, modelo,
+  secretos ni identificadores de clientes en la memoria.
+- Instrucciones en `docs/latex/README.md`. Compilar a `docs/latex/build/`, excluido
+  de Git: el PDF es un entregable local regenerable, no un auxiliar versionado.
+  El compilador es externo a `pyproject.toml`/`uv.lock`.
+- Actualizar estados documentales que aún reflejan el snapshot anterior al
+  cierre; conservar secciones históricas y enlazar la Release como evidencia.
+- Aceptación: fuente compilable con rutas resueltas, PDF con índice y referencias,
+  sin errores LaTeX ni referencias indefinidas; hooks pertinentes y Git sin
+  archivos generados propuestos para versionar. Registrar comandos y límites en S25.

@@ -8,8 +8,8 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Inicio previsto | 5 de octubre de 2026 |
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
-| Última actualización | 14 de octubre de 2026 |
-| Fase actual | Cierre local comprobado; autorizados commit único e integración GitHub primero (S24), con CI verde; Release condicionada al redeploy de main |
+| Última actualización | 15 de octubre de 2026 |
+| Fase actual | Entrega v1.0.1 completada; auditoría Git y memoria técnica LaTeX de 34 páginas verificadas; ampliación documental S25 en publicación |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -34,7 +34,7 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 | Semana 5 | 2–8 nov | Calibración (E-04) y umbral monetario analítico (opción A); deciles y sensibilidad excluidos por decisión del responsable | Umbral justificado por beneficio esperado bajo supuestos explícitos | Completada |
 | Semana 6 | 9–15 nov | SHAP, errores, segmentos, E-01, ficha del modelo y evaluación final (con confirmación) | Limitaciones documentadas | Completada |
 | Semana 7 | 16–22 nov | FastAPI, Streamlit, tests de API y Docker Compose | `docker compose up` funciona desde cero | Código publicado; Compose con Release desde clon limpio completado en S23; CI de `bacb47b` verde |
-| Semana 8 | 23–29 nov | Cambio de distribución simulado, despliegue y README final | URL pública y reproducibilidad verificadas | Monitoreo congelado y demo pública existente; cierre HTTPS final y Release de código en curso |
+| Semana 8 | 23–29 nov | Cambio de distribución simulado, despliegue y README final | URL pública y reproducibilidad verificadas | Cerrada en v1.0.1/9384e51: CI, Render y evidencia pública satisfactorios; ampliación documental posterior en S25 |
 
 **Prioridad de alcance:** proteger la capa de decisión de la semana 5. Si hay retrasos, reducir primero el monitoreo de cambios de distribución de la semana 8 y registrar el ajuste.
 
@@ -47,8 +47,8 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 | 003 | [EDA e hipótesis preregistradas](../specs/003-eda-and-hypotheses.md) | Implementada v1.1 y revisada; H1–H6 congeladas en v1.0 | Semana 2 |
 | 004 | Capa de decisión y beneficio esperado | Implementada v1.0 (opción A) | Semana 5 |
 | 005 | API y dashboard | v1.3 publicada; Compose y navegador desde clon limpio comprobados; CI de `bacb47b` verde | Semana 7 |
-| 006 | [Despliegue, monitoreo simulado y cierre](../specs/006-deployment-monitoring-release.md) | Render principal/HF alternativo; v1.3 documental de cierre en preparación; Release `v1.0.1` autorizada | Semana 8 |
-| 007 | [Correcciones de seguridad](../specs/007-security-hardening.md) | v1.2 publicada en `bacb47b`, CI y Security scans verdes; comprobación HTTPS final pendiente | Después de semana 8 |
+| 006 | [Despliegue, monitoreo simulado y cierre](../specs/006-deployment-monitoring-release.md) | Cerrada en v1.0.1; enmienda documental v1.4 para memoria LaTeX | Semana 8 |
+| 007 | [Correcciones de seguridad](../specs/007-security-hardening.md) | v1.2 cerrada en v1.0.1: auditoría HTTPS código 0, navegador, CI y Security scans satisfactorios | Después de semana 8 |
 
 ## 4. Punto de partida — 6 de octubre de 2026
 
@@ -2133,13 +2133,106 @@ docker volume rm release-verification-bacb47b_llm-state
 - [Releases](https://github.com/darwinjaco/bank-churn-ml/releases): `v1.0.1`
   solamente después del redeploy verificado, sin mover `v1.0.0` ni `model-v1.0`.
 
+### S25 — Auditoría de Git y memoria técnica LaTeX
+
+| Campo | Valor |
+|---|---|
+| Fecha | 15 de octubre de 2026 |
+| Estado | Memoria, PDF y comprobaciones locales satisfactorios; publicación autorizada en un único commit documental |
+| Base documentada | v1.0.1, código `9384e51e22b069d0bab4ae58b6be9920d97d68f0` |
+| Objetivo | Confirmar higiene/unificación de Git y entregar documentación detallada compilable |
+
+**Cierre de entrega anterior confirmado**
+
+- La [Release v1.0.1](https://github.com/darwinjaco/bank-churn-ml/releases/tag/v1.0.1)
+  se publicó después del snapshot S24. Contiene `verification-v1.0.1.json`:
+  auditoría HTTPS código 0; doce controles Edge, referencia y plantilla, lote/
+  exportación, subida válida 204 y sin token 403. El responsable aportó el
+  deploy Live de `9384e51`; el arranque en frío no fue un fallo de despliegue.
+- PR #2 y #1 fusionados por avance rápido; CI de main
+  [38681814423](https://github.com/darwinjaco/bank-churn-ml/actions/runs/38681814423)
+  y Security scans
+  [38681814586](https://github.com/darwinjaco/bank-churn-ml/actions/runs/38681814586)
+  satisfactorios. Solo se creó el commit `9384e51` para el cierre anterior.
+- Ramas terminadas retiradas; tags `model-v1.0`, `v1.0.0` y `v1.0.1` preservados.
+  Se retiraron las copias temporales de Space y clon de verificación después de
+  publicar su evidencia; no se borraron datos, modelo, MLflow ni el stash histórico.
+
+**Auditoría solicitada y alcance documental**
+
+- Ejecutados `git status --short --branch`, `git branch -avv`, `git log`,
+  `git remote -v`, `git stash list`, `git ls-files` con ignorados/no versionados,
+  `git ls-remote --heads --tags`, y consultas `gh` de Release, PR y workflows.
+  Resultado inicial: working tree limpio, únicamente `main` local/remota en
+  `9384e51`, sin temporales versionados ni cambios de entrega sin integrar.
+- El stash `render-prep` contiene propuestas históricas no incorporadas al
+  diseño final; se conserva, no se confunde con un cambio pendiente de main.
+- Leídos specs y reportes de datos, hipótesis, baselines, selección, decisión,
+  prueba final, auditoría y monitoreo. Solo lectura documental: no se ejecutaron
+  entrenamiento, selección, calibración, monitoreo ni evaluación final reales.
+- Spec 006 §15 y plan de cierre §7 delimitan la memoria. Añadidos
+  `docs/latex/memoria-tecnica.tex` y sus instrucciones. `.gitignore` excluye
+  únicamente `docs/latex/build/` para PDF/logs/auxiliares regenerables.
+- README, contexto y estados vigentes alineados con la Release. Las secciones
+  anteriores conservan los bloqueos históricos; los pendientes del snapshot
+  S24 ya no se presentan como bloqueos actuales.
+- El responsable autoriza **un único commit y push a main** de esta ampliación,
+  con comprobaciones obligatorias y CI posterior; no se mueven etiquetas ni
+  se altera la Release del código ya publicado.
+
+**Compilación y validación del documento**
+
+- No se encontró compilador TeX en PATH. Consultada la Release oficial de
+  Tectonic y descargado **0.17.0, Windows MSVC**, al temporal aprobado. ZIP
+  verificado contra digest oficial:
+  `f61ce51f0b0ade1015b7de7ef368541c5424e9756ecbd0d7af97d6d48030845f`.
+  No se modificaron dependencias del proyecto.
+- Compilación desde `docs/latex/` con ejecutable portátil y configuración de
+  fuentes local al temporal:
+
+```powershell
+tectonic --keep-logs --outdir build memoria-tecnica.tex
+```
+
+- Primera pasada encontró incompatibilidad de Babel con porcentaje matemático;
+  corregida su notación. Se corrigieron después desbordamiento de un comando,
+  versalitas/numeración y destinos PDF duplicados. Última compilación real:
+  **sin errores ni advertencias LaTeX, sin overfull/underfull ni referencias
+  indefinidas**. Configuración Fontconfig de la herramienta permanece fuera del repo.
+- PDF final: **34 páginas, 300.268 bytes**, 14 capítulos contando dos apéndices,
+  14 tablas, cuatro figuras existentes y un diagrama de arquitectura.
+- Revisión mediante lector PDF y helper temporal con PyMuPDF aislado:
+  **55 marcadores, 96 enlaces, 79 destinos internos válidos**, páginas con texto,
+  referencias/citas/figuras resueltas y métricas finales contrastadas contra
+  el JSON congelado. El helper contempla destinos PDF directos y nombrados.
+- `git ls-files` sobre auxiliares, cachés, modelos, parquet, DB y CSV:
+  solo aparece `examples/clientes_ejemplo.csv`, sintético e intencional.
+  `git check-ignore -v` confirma que PDF y log quedan fuera de Git;
+  `git diff --check` satisfactorio.
+
+**Siguiente paso**
+
+- Ejecutados los cinco comandos exactos de AGENTS §4 y
+  `uv run pre-commit run --files docs/latex/memoria-tecnica.tex docs/latex/README.md`:
+  **322 aprobados, cobertura 98,19 %, 147 avisos, 345,99 s**. Sincronización,
+  Ruff, formato y hooks satisfactorios; los archivos nuevos se incluyeron
+  explícitamente. No hay cambios en código, tests, dependencias o reportes.
+- CI remoto de la base `9384e51` confirmado verde antes del commit autorizado.
+  El nuevo hash y su CI posterior se informan en GitHub y en la entrega final;
+  no se consideran comprobados por haber pasado las pruebas locales.
+- Publicar el único commit documental y comprobar
+  [CI de main](https://github.com/darwinjaco/bank-churn-ml/actions/workflows/ci.yml?query=branch%3Amain)
+  y [Security scans](https://github.com/darwinjaco/bank-churn-ml/actions/workflows/security.yml?query=branch%3Amain).
+  El PDF local no se añade a Git ni exige redeploy de la demo: su código
+  desplegado permanece en la entrega verificada `9384e51`.
+
 ## 6. Estado del proyecto y Definition of Done
 
-Estado al 14 de octubre de 2026, contra la *Definition of Done* del plan maestro
+Estado al 15 de octubre de 2026, contra la *Definition of Done* del plan maestro
 (punto 37). ✅ = verificado; ⏳ = cierre pendiente; ↔ = desviación justificada.
-Los resultados anteriores se conservan en el historial; S23–S24 registran el
-cierre local y la secuencia de integración vigente. Evidencias posteriores al
-snapshot del único commit: PR, Actions y notas de Release enlazados en S24.
+Los resultados anteriores se conservan en el historial; la Release v1.0.1
+cierra los pendientes del snapshot S24. S25 incorpora esa evidencia y una
+ampliación documental posterior, sin modificar el modelo entregado.
 
 | Ítem | Estado | Evidencia o justificación |
 |---|---|---|
@@ -2169,14 +2262,15 @@ snapshot del único commit: PR, Actions y notas de Release enlazados en S24.
 | Pipeline de inferencia | ✅ | `api.Service` (en lugar del `predict.py` del plan); devuelve probabilidad, decisión y beneficio en vez de un `risk_level` arbitrario |
 | FastAPI | ✅ | Spec 005 v1.3, regresiones de contrato y seguridad; políticas del reporte congelado |
 | Streamlit | ✅ | Cuatro vistas laterales y gráficos; `AppTest` y navegador real, escritorio/móvil/reflow |
-| Tests | ✅ | Código `bacb47b`: 322 aprobados, 98,19 %; clon sin datos: 319 aprobados y 3 omitidos, 98,11 % |
-| Linting | ✅ | Ruff, formato y hooks satisfactorios en el código publicado; árbol documental final en comprobación |
+| Tests | ✅ | Entrega `9384e51`: 322 aprobados, 98,19 %; clon sin datos: 319 aprobados y 3 omitidos, 98,11 % |
+| Linting | ✅ | Ruff, formato y hooks satisfactorios en la entrega; ampliación documental S25 con comprobaciones propias |
 | Docker | ✅ | Build del Release, Compose y Space desde clon limpio; `ROLE=all` también bajo límites Free, sin OOM |
-| CI/CD | ✅ / ⏳ | CI y Security scans de `bacb47b` verdes; CI del único commit final e integración pendientes; HF alternativo manual |
-| Deployment | ⏳ | Render funcional existente; cierre de cabeceras/versión final y build público pendiente |
+| CI/CD | ✅ | CI y Security scans de main/9384e51 verdes; PR #1 y #2 fusionados; HF alternativo manual |
+| Deployment | ✅ | Render Live en 9384e51; auditoría HTTPS código 0, doce controles de navegador y XSRF comprobados |
 | README profesional | ✅ | Resultados y limitaciones, URL pública y recorrido animado de 24 s; estado de seguridad explícito |
 | Reproducibilidad verificada | ✅ | Pipeline histórico reproducido; tests, hooks, build y Compose desde clon limpio acreditados en S23 |
-| Release de código | ⏳ | `v1.0.1` autorizada; etiqueta `v1.0.0` anterior preservada, sin confundirla con una Release publicada |
+| Release de código | ✅ | v1.0.1 publicada con informe JSON; v1.0.0 y model-v1.0 preservados |
+| Memoria técnica | ✅ | Fuente LaTeX y PDF local de 34 páginas compilados y revisados; salidas generadas ignoradas |
 
 **Lo que aporta el proyecto más allá del checklist:** decisión económica explícita en lugar de una métrica aislada, preregistro de hipótesis, reglas y umbrales (con expectativas que se reportan aunque no se cumplan, como E2), una única evaluación en prueba protegida por código, y un monitoreo que demuestra un límite real: el cambio de prevalencia degrada el modelo sin alarmas de entrada.
 
