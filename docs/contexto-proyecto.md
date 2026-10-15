@@ -1,32 +1,42 @@
 # Contexto del proyecto — bank-churn-ml (documento de cierre)
 
-Documento de traspaso para quien retome el proyecto (persona o agente). Estado al **7 de octubre de 2026**: semanas 1–8 implementadas; quedan acciones externas del responsable (§6). Base de código: `fd78f59` (semana 8 publicada, CI en verde).
+Documento de traspaso para quien retome el proyecto (persona o agente). Estado al
+**14 de octubre de 2026**: semanas 1–8 implementadas, rediseño y seguridad
+publicados en `feat/dashboard-redesign`, commit de serving **`bacb47b`**, con CI
+y Security scans verdes. Limpieza documental y demo comprobadas. El responsable
+autoriza **GitHub primero**: único commit e integración con CI verde, seguidos de
+redeploy de `main`. La Release y el cierre público esperan esa comprobación.
+Detalle en registro S23–S24 y en los PR de integración.
 
 ## 1. Qué es
 
 Proyecto de portafolio de Darwin Jacome Cuenca: **predicción de abandono bancario convertida en decisiones de retención**. Calcula a quién conviene contactar y cuánto dinero aporta frente a no usar modelo, bajo supuestos económicos explícitos.
 
-- Repositorio: https://github.com/darwinjaco/bank-churn-ml (rama `main`, público).
-- Demo prevista: https://huggingface.co/spaces/darwinjaco/bank-churn-ml (usuario provisional, B-03).
+- Repositorio: https://github.com/darwinjaco/bank-churn-ml (público).
+- Demo: https://bank-churn-ml-ufa7.onrender.com/ (Render Free, acceso directo HTTPS).
+- Hugging Face se conserva como alternativa manual, sin despliegue certificado.
 - Dataset: *Churn Modelling* (Kaggle), 10.000 clientes, probablemente sintético. El CSV **no** se versiona (`data/raw/Churn_Modelling.csv`).
 - Idioma: español (identificadores técnicos en inglés); resumen del README en inglés.
 
 ## 2. Forma de trabajo (obligatoria)
 
 - **SDD:** ninguna línea de `src/` o `tests/` sin spec y plan versionados. Cada semana empieza con una tarea T0 de documentación.
-- **Una tarea = un commit**, con el mensaje fijado en el plan; Ruff, formato, hooks y pytest (≥ 85 %) en verde. Excepción documentada: la semana 8 se publicó en dos commits (`d0e8e6c` y `fd78f59`).
+- **Cierre consolidado:** el responsable solicita un único commit al terminar la
+  limpieza y la documentación, con comprobaciones satisfactorias. Las compuertas
+  SDD previas siguen siendo obligatorias si se modifica código, tests o dependencias.
 - **Preregistro:** hipótesis, reglas, umbrales y expectativas antes de ver resultados; los cambios son enmiendas versionadas.
 - **Reglas fijas (`AGENTS.md`):** `Gender` nunca es variable del modelo (solo auditoría); la partición de prueba ya se usó **una vez** y no se vuelve a evaluar (tampoco para monitoreo); el modelo `model-v1.0` está congelado.
-- **Registro:** `docs/registro-avance.md` (S01–S12, estado y Definition of Done en §6). Todas las cifras de reportes se generan desde JSON con código.
-- Desde la semana 4, Claude planifica, implementa y verifica; en la semana 8 el responsable hace los commits al final.
+- **Registro:** `docs/registro-avance.md` (S01–S24; estado y Definition of Done en §6).
+  Los planes semanales y secciones anteriores conservan el historial; las cifras
+  de los reportes se generan desde JSON con código.
 
 ## 3. Estado por semana
 
 | Semana | Contenido | Estado |
 |---|---|---|
 | 1–6 | Contrato, división, EDA, pipelines, ajuste, calibración, decisión, SHAP, auditoría y evaluación final en prueba | Cerradas y publicadas (CI #29 en `6e8e54d`) |
-| 7 | API FastAPI, dashboard Streamlit, Docker, LLM opcional | Implementada; Docker verificado con modelo local; falta repetir con el Release |
-| 8 | Sincronización con Hugging Face, límite del LLM, monitoreo simulado, README final, revisión de código | Implementada y verificada en local; despliegue pendiente (B-03) |
+| 7 | API FastAPI, dashboard Streamlit, Docker, LLM opcional | Publicada; Release/hash y rediseño comprobados; última suite local de código: 322 aprobados, 98,19 % |
+| 8 | Monitoreo simulado, despliegue, README y cierre | Render principal; HF manual; cierre HTTPS final, integración y Release de código en curso |
 
 ## 4. Resultados clave
 
@@ -39,34 +49,70 @@ Proyecto de portafolio de Darwin Jacome Cuenca: **predicción de abandono bancar
 ## 5. Estructura
 
 ```text
-specs/        001 contrato · 002 modelado (v1.6) · 003 EDA (v1.1) · 004 decisión · 005 API (v1.1) · 006 despliegue y monitoreo
-docs/         registro-avance.md, plan-semana-2..8.md, historial-semanal.md, este archivo
+specs/        001 contrato · 002 modelado · 003 EDA · 004 decisión · 005 API y dashboard · 006 despliegue · 007 seguridad
+docs/         registro vigente, contexto, planes históricos y de cierre, seguridad y demo
 src/churn/    config, data, validation, split, stats, hypotheses, features, pipeline, train, tune, selection,
               experiments, calibration, decision, decide, explain, audit, run_audit, final_eval, model_card,
-              artifact, api, narrative, ui, monitoring, plots, reports, tracking
-dashboard/    app.py (Streamlit; solo consume la API)
+              artifact, api, narrative, ui, monitoring, plots, reports, tracking, security, presentation
+dashboard/    app.py (solo consume la API) y serve.py (launcher público con cabeceras)
 reports/      JSON y Markdown generados (incluido monitoring) y figures/
-scripts/      verify-docker.ps1, build_space.py, make_example_csv.py
-deploy/space/ README del Space · examples/ CSV sintético · .github/workflows/ ci.yml y deploy-space.yml
+scripts/      comprobación Docker/HTTPS, armado HF, credenciales HF, escaneos y CSV sintético
+deploy/space/ README alternativo HF · examples/ CSV sintético · .github/workflows/ CI, Security scans y HF manual
 models/       model.joblib (16 MB, fuera de Git; Release model-v1.0, SHA-256 579b7fe3…095a) + metadata.json
 ```
 
 CLIs: `churn-validate`, `churn-split`, `churn-hypotheses`, `churn-baselines`, `churn-tune`, `churn-select`, `churn-decide`, `churn-audit`, `churn-monitor` y `churn-final` (ya ejecutado: falla si se repite).
 
-## 6. Pendientes (responsable, en orden)
+## 6. Cierre vigente
 
-1. Completado: semana 8 publicada en `fd78f59` con CI en verde.
-2. Release `model-v1.0` con `models/model.joblib`.
-3. `pwsh -File scripts/verify-docker.ps1` sin `-LocalModel` (incluye la imagen del Space).
-4. Cuenta y token de Hugging Face (B-03); crear el Space (Docker, *Blank*, público); `HF_TOKEN` (secreto) y `HF_SPACE` (variable) en GitHub.
-5. *Actions → Deploy Space → Run workflow*; verificar la URL pública con el cliente de referencia (0,947, contactar); secretos del LLM en el Space.
-6. GIF de demo y etiqueta/Release `v1.0.0`; marcar los criterios restantes de las specs 005 y 006.
+- `model-v1.0` está publicado: asset `model.joblib`, 16.544.282 bytes y digest
+  SHA-256 fijado; no es un prerrequisito pendiente.
+- Clon limpio de `bacb47b`: 319 aprobados y 3 omitidos esperados sin datos/modelo,
+  cobertura 98,11 %; lock, lint, formato y hooks satisfactorios. Build del Release
+  correcto, imagen `ROLE=all` comprobada bajo 512 MiB y 0,1 CPU. Evidencia en S23.
+- La última inspección pública sigue mostrando la interfaz anterior y cabeceras
+  ausentes. Tras el arranque en frío, health y TLS responden, pero esto no acredita
+  el rediseño. Comprobar hash del deploy, rama y `./Dockerfile`; el responsable
+  autoriza integrar primero GitHub y después desplegar `main`. LLM desactivado
+  en la configuración aprobada: `LLM_MAX_CALLS_PER_HOUR=0`.
+- Integración prevista por avance rápido: rama del rediseño → revisión → `main`,
+  con CI satisfactorio y sin conflictos, seguida del redeploy de `main`. Los
+  resultados posteriores al commit se registran en los PR
+  [#2](https://github.com/darwinjaco/bank-churn-ml/pull/2) y
+  [#1](https://github.com/darwinjaco/bank-churn-ml/pull/1).
+- Etiqueta `v1.0.0` existente, creada antes del cierre público. El responsable
+  autoriza `v1.0.1` para la entrega final, sin mover etiquetas previas. La Release
+  necesita CI del commit final y despliegue comprobado.
+  [Releases](https://github.com/darwinjaco/bank-churn-ml/releases) conserva la
+  evidencia de publicación posterior a este snapshot, cuando corresponda.
+- Hugging Face es opcional: no se necesita cuenta/token para cerrar Render ni
+  se habilita un LLM público para satisfacer criterios históricos del Space.
+- `render-prep` se conserva como stash histórico revisado; contiene propuestas
+  no incorporadas. No aplicarlo sobre la interfaz actual sin otra decisión SDD.
 
 ## 7. Notas técnicas
 
 - Windows: `uv` gestiona `.venv`; `.gitattributes` fuerza LF. No ejecutar `uv` desde otro sistema operativo sobre el `.venv` de Windows (la verificación de Claude usa un entorno aparte).
-- Comprobaciones: `uv sync --locked --all-groups`, `uv run ruff check .`, `uv run ruff format --check .`, `uv run pre-commit run --all-files`, `uv run pytest --cov=churn --cov-report=term-missing --cov-fail-under=85`. Último resultado: 243 tests, 98,25 % (240 + 3 omitidos sin datos en un clon limpio).
+- Comprobaciones obligatorias: los cinco comandos exactos de AGENTS §4; incluir
+  los archivos nuevos en pre-commit. El grupo `eda` se instala con
+  `uv sync --locked --all-groups` cuando se necesita trabajar con el notebook.
 - MLflow: `uv run mlflow ui --backend-store-uri sqlite:///mlruns/mlflow.db` (local, fuera de Git).
 - LLM opcional: `LLM_BASE_URL`, `LLM_API_KEY`, `LLM_MODEL` y `LLM_MAX_CALLS_PER_HOUR` (vacío = 30) en `.env` o secretos del Space.
 - Trabajo futuro: opciones B y C de la spec 004, mitigación de E-01, uplift, monitoreo con etiquetas reales, migrar `penalty="l2"` (obsoleto desde scikit-learn 1.9; se elimina en la 1.10).
-- Commits con autor `Darwin Jacome <daabjaco@espol.edu.ec>` y línea `Co-Authored-By` de Claude cuando corresponde.
+- Limpieza: cachés regenerables y temporales propios al final; conservar modelo,
+  datos y MLflow. La carpeta `.venv` es el entorno instalado, no un entregable Git.
+
+## 8. Cómo orientarse en la documentación
+
+| Documento | Función |
+|---|---|
+| `README.md` | Presentación, recorrido, resultados e instrucciones de uso |
+| `contexto-proyecto.md` | Traspaso y decisiones vigentes |
+| `registro-avance.md` | Evidencia cronológica y estado actual en §6 |
+| `plan-cierre-release.md` | Secuencia y condiciones de la entrega consolidada |
+| `seguridad-demo.md`, `verificacion-seguridad-publica.md` | Controles y procedimiento de comprobación |
+| `plan-semana-2..8.md`, `historial-semanal.md` | Planificación y resultados históricos; no son pendientes vigentes |
+| Otros planes y `verificacion-preproduccion.md` | Decisiones anteriores; aplicar las enmiendas y el registro posteriores |
+
+El código y los reportes siguen vinculados a esos planes. Se conservan para no
+perder trazabilidad ni romper referencias de las especificaciones.

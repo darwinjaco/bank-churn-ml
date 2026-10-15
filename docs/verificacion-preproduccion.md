@@ -1,5 +1,11 @@
 # Revisión integral de las semanas 1–8 — bank-churn-ml
 
+> Documento histórico del 7 de octubre. Las propuestas de despliegue y los
+> pendientes de §4 fueron revisados después: Render usa un único servicio Free,
+> Hugging Face es alternativo manual y la entrega vigente se rige por
+> [plan-cierre-release.md](plan-cierre-release.md) y el registro S23. Las
+> propuestas del stash no se aplican como instrucciones actuales.
+
 | Campo | Valor |
 |---|---|
 | Fecha | 7 de octubre de 2026 |

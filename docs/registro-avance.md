@@ -9,7 +9,7 @@ Documento de seguimiento del proyecto **Abandono bancario → Decisiones de rete
 | Fin previsto | 29 de noviembre de 2026 |
 | Dedicación estimada | 8 horas por semana; 64 horas en total |
 | Última actualización | 14 de octubre de 2026 |
-| Fase actual | Rediseño Streamlit verificado en local en `feat/dashboard-redesign` (S20), vista previa localhost:8511; publicación del rediseño, build Docker y cierre de seguridad pública pendientes |
+| Fase actual | Cierre local comprobado; autorizados commit único e integración GitHub primero (S24), con CI verde; Release condicionada al redeploy de main |
 
 Referencias: [README](../README.md), [especificación 001](../specs/001-overview-and-data-contract.md) y [especificación 002](../specs/002-modeling-and-evaluation.md).
 
@@ -33,8 +33,8 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 | Semana 4 | 26 oct–1 nov | RF, XGBoost, validación cruzada y ajuste acotado | Tabla de media ± desviación estándar por modelo | Completada y publicada (`a868641..7013dfc`, CI #26); B-02 resuelto |
 | Semana 5 | 2–8 nov | Calibración (E-04) y umbral monetario analítico (opción A); deciles y sensibilidad excluidos por decisión del responsable | Umbral justificado por beneficio esperado bajo supuestos explícitos | Completada |
 | Semana 6 | 9–15 nov | SHAP, errores, segmentos, E-01, ficha del modelo y evaluación final (con confirmación) | Limitaciones documentadas | Completada |
-| Semana 7 | 16–22 nov | FastAPI, Streamlit, tests de API y Docker Compose | `docker compose up` funciona desde cero | Base publicada con CI verde; Docker con el Release verificado (S14); seguridad nueva comprobada en local, publicación pendiente |
-| Semana 8 | 23–29 nov | Cambio de distribución simulado, despliegue y README final | URL pública y reproducibilidad verificadas | Implementada, verificada en local (S12) y publicada en `fd78f59` (CI en verde); despliegue pendiente (B-03) |
+| Semana 7 | 16–22 nov | FastAPI, Streamlit, tests de API y Docker Compose | `docker compose up` funciona desde cero | Código publicado; Compose con Release desde clon limpio completado en S23; CI de `bacb47b` verde |
+| Semana 8 | 23–29 nov | Cambio de distribución simulado, despliegue y README final | URL pública y reproducibilidad verificadas | Monitoreo congelado y demo pública existente; cierre HTTPS final y Release de código en curso |
 
 **Prioridad de alcance:** proteger la capa de decisión de la semana 5. Si hay retrasos, reducir primero el monitoreo de cambios de distribución de la semana 8 y registrar el ajuste.
 
@@ -46,9 +46,9 @@ Todas las fechas corresponden a 2026 y representan objetivos de planificación.
 | 002 | Modelado y evaluación | Completada v1.6: selección, calibración, auditoría y evaluación final en prueba (una vez) | Semanas 3–6 |
 | 003 | [EDA e hipótesis preregistradas](../specs/003-eda-and-hypotheses.md) | Implementada v1.1 y revisada; H1–H6 congeladas en v1.0 | Semana 2 |
 | 004 | Capa de decisión y beneficio esperado | Implementada v1.0 (opción A) | Semana 5 |
-| 005 | API y dashboard | Implementada v1.2 en local; Docker con Release verificado; CI remoto de la base verde, correcciones nuevas pendientes de publicación | Semana 7 |
-| 006 | [Despliegue, monitoreo simulado y cierre](../specs/006-deployment-monitoring-release.md) | Implementada v1.0 y publicada (`fd78f59`, CI en verde); despliegue público pendiente (B-03) | Semana 8 |
-| 007 | [Correcciones de seguridad](../specs/007-security-hardening.md) | Implementada y verificada en local: 282 tests, 98,11 %; publicación y CI nuevo pendientes | Después de semana 8 |
+| 005 | API y dashboard | v1.3 publicada; Compose y navegador desde clon limpio comprobados; CI de `bacb47b` verde | Semana 7 |
+| 006 | [Despliegue, monitoreo simulado y cierre](../specs/006-deployment-monitoring-release.md) | Render principal/HF alternativo; v1.3 documental de cierre en preparación; Release `v1.0.1` autorizada | Semana 8 |
+| 007 | [Correcciones de seguridad](../specs/007-security-hardening.md) | v1.2 publicada en `bacb47b`, CI y Security scans verdes; comprobación HTTPS final pendiente | Después de semana 8 |
 
 ## 4. Punto de partida — 6 de octubre de 2026
 
@@ -1934,15 +1934,218 @@ uv tool run --with httpx --from playwright python "$env:TEMP\opencode\verify_loc
   **322 aprobados, cobertura 98,19 %**, 147 avisos, 80,83 s. Middleware con
   100 % de cobertura; lint/formato y hooks correctos. CI previo de `562e017` verde.
 
+### S23 — Limpieza conservadora y entrega consolidada
+
+| Campo | Valor |
+|---|---|
+| Fecha | 14 de octubre de 2026 |
+| Estado | Cierre local comprobado y guardado; bloqueado por versión pública anterior; sin commit ni fusiones por decisión del responsable |
+| Base de serving | `bacb47b9eacdc87d518fba7c5f4c9bbc4ebfb56f` |
+| Objetivo | Completar evidencia y limpiar sin perder trazabilidad; un único commit final |
+
+**Autorización y alcance**
+
+- El responsable pide conservar los cambios en local hasta terminar y crear un
+  único commit, integrando las ramas si no existen conflictos y todo está probado.
+  Confirma conservar Hugging Face, hacer el redeploy de `bacb47b` en Render y
+  usar `v1.0.1` como Release final sin mover la etiqueta `v1.0.0` existente.
+- Plan de cierre §6 y enmienda documental 006 §14. No se modifican código,
+  tests ni dependencias; se conservan modelo, datos, particiones y MLflow.
+- Revisados inventario Git, ignorados, tamaños, referencias, planes, criterios,
+  ramas, PR y Release. Antes de limpiar: 164 archivos versionados, 1,625 MiB;
+  `.venv` ~853 MiB corresponde al entorno local, no a archivos publicados.
+- Retirado únicamente `notebooks/.gitkeep`, redundante al existir el notebook.
+  Documentación de contexto y estados actualizada; planes históricos conservados.
+- `git stash show --include-untracked --stat` y diff del stash `render-prep`:
+  siete rutas con propuestas antiguas de Dockerfile derivado/reintentos. Conservado,
+  sin aplicar ni descartar trabajo aparcado. Configuración personal conservada.
+
+**GitHub y situación pública comprobada**
+
+- `gh pr list`, `gh pr view`, `gh pr checks 1`, `gh pr checks 2`, `gh run list`,
+  `gh release list`, `git ls-remote`, relaciones de ancestros y protección de `main`:
+  PR #2 draft hacia revisión, PR #1 hacia main; ambas relaciones permiten avance
+  rápido y ambos PR tienen sus checks verdes. Integración todavía no ejecutada.
+- Serving `bacb47b` con [CI](https://github.com/darwinjaco/bank-churn-ml/actions/runs/38608466814)
+  y [Security scans](https://github.com/darwinjaco/bank-churn-ml/actions/runs/38608466835)
+  satisfactorios. Solo existe la Release de modelo `model-v1.0`, no Release de
+  código `v1.0.0`; su etiqueta prematura queda registrada como desviación de §13.
+- Release de modelo consultada: asset 16.544.282 bytes y digest
+  `579b7fe349dc035c3171582cbfba1bfaed4599a795da4b149d7664ed21dc095a`.
+- `python scripts/verify_public_security.py --url https://bank-churn-ml-ufa7.onrender.com/`:
+  inicialmente **código 1** por cabeceras ausentes; TLS/redirección, health,
+  cookie y origen correctos. Otro intento durante la preparación no pudo
+  verificar red/TLS (**código 2**); no se presenta como auditoría verde.
+- No hay credenciales/id de Render en el entorno (solo presencia consultada).
+  El responsable confirma que realizará el redeploy en el servicio Free existente.
+
+**Reproducibilidad y Docker**
+
+- Resultados de la comprobación previa del clon Git limpio de `bacb47b`, sin
+  CSV/modelo/venv originales: los cinco comandos de AGENTS §4 satisfactorios,
+  **319 aprobados, 3 omitidos esperados, 98,11 %**, 147 avisos, 210,59 s.
+  Las omisiones corresponden al artefacto y al dataset locales ausentes.
+- Build `docker build --tag bank-churn-ml:release-candidate .` en ese clon:
+  correcto, Release descargado y hash comprobado. Imagen
+  `sha256:cb5f1bf837c4257fe44defc03885ea0ca74568c4f7a3a1c13d5e95e672b6a0d5`.
+- Prueba anterior: API interna, políticas 61.600/22.100/0 €, referencia
+  **0,947001474187885/contactar**, `source=template`, cinco cabeceras, health 200,
+  WebSocket 101/403, subida válida 204/sin token 403 bajo 512 MiB y 0,1 CPU.
+  Tiempo de `/explain` observado 3,4 s; no se extrapola a capacidad de producción.
+- Reanudado Docker Desktop; `docker info` devuelve 29.8.2. Ejecutado desde el
+  mismo clon limpio, cuyo HEAD y árbol se comprobaron antes:
+
+```powershell
+pwsh -File scripts/verify-docker.ps1 -Down
+```
+
+- **VERIFICACIÓN COMPLETA**: Compose, referencia/hash, Gender → 422, plantilla,
+  monitoreo y dashboard; imagen derivada HF de 47 archivos construida y comprobada.
+  Imágenes de 3,32 GB. Compose temporal detenido al finalizar, sin retirar volúmenes
+  del proyecto original. Cierra el criterio literal de spec 005 §9.
+- Navegador Edge repetido sobre `ROLE=all`, 512 MiB sin swap extra y 0,1 CPU.
+  Primer intento agotó la espera inicial del helper durante el arranque; contenedor
+  vivo y sin OOM. Tras arrancar, recorrido completo **satisfactorio**, 12 controles,
+  sin errores de consola: referencia, lote/exportación minimizada, cuatro vistas,
+  persistencia, cambio de archivo, error CSV, no contactar, reflow y móvil.
+- Helper temporal con esperas de condiciones del DOM/gráficos, sin modificar la
+  aplicación ni rebajar aserciones. `docker inspect`: `OOMKilled=false`, límites
+  536.870.912 bytes y 100.000.000 NanoCpus. Snapshot posterior: 364 MiB/512 MiB.
+
+**Recorrido y siguiente paso**
+
+- Creado `docs/demo.gif` a partir de capturas reales del recorrido local:
+  cuatro escenas de seis segundos, **24 s, 1080×790, 300.449 bytes**. Incluye
+  perfiles sintéticos y reportes históricos; no es una campaña ni vídeo en vivo.
+  GIF decodificado y tamaño/duración/número de frames comprobados con Pillow
+  mediante herramienta aislada, sin añadir dependencias al proyecto.
+- Siguiente paso: comprobaciones completas del árbol final, verificar Render
+  después del redeploy y terminar el registro antes del único commit solicitado.
+  CI del commit final, integración y Release quedan condicionados a ese cierre.
+- Comprobaciones completas del árbol de cierre ejecutadas después de añadir el GIF:
+
+```powershell
+uv sync --locked
+uv run ruff check .
+uv run ruff format --check .
+uv run pre-commit run --all-files
+uv run pre-commit run --files docs/demo.gif
+uv run pytest --cov=churn --cov-report=term-missing --cov-fail-under=85
+```
+
+- **322 aprobados, cobertura 98,19 %, 147 avisos, 109,00 s**. Lock, lint,
+  formato y hooks satisfactorios; GIF nuevo incluido explícitamente en los hooks.
+  `git diff --check` correcto y ningún cambio en `src/`, `tests/`, dependencias
+  o reportes congelados. Estos resultados son locales; el CI remoto citado
+  corresponde todavía al código base `bacb47b`.
+- Última repetición pública: vuelve a responder, pero el comprobador devuelve
+  **código 1**, con las cabeceras nuevas aún ausentes. No se crea el commit final
+  ni se integra una rama hasta resolver el redeploy confirmado por el responsable.
+
+**Bloqueo final de Render y pausa solicitada**
+
+- El responsable seleccionó inicialmente «Live en bacb47b». La comprobación
+  independiente posterior no lo confirma: peticiones HTTP con timeout de lectura,
+  y el navegador no encontró «Analizar cliente» en 120 s. Ese recorrido fallido
+  no acredita funcionalidad pública del rediseño.
+- Una inspección de navegador separada sí recibió HTTP 200 y mostró el contenido:
+  **«Abandono bancario → decisiones de retención», pestañas y botón «Evaluar»**,
+  correspondiente a la interfaz anterior. No se infiere el commit desplegado a
+  partir del estado Live ni del título de la pestaña del navegador.
+- La comprobación de subida pública no llegó a ejecutarse: el helper invocado
+  era exclusivamente local y rechazó la URL HTTPS. No se presenta como prueba
+  pública de XSRF. La comprobación local anterior permanece válida.
+- Se solicitaron hash/título del deploy Live, rama y Dockerfile Path del servicio
+  para comprobar `bacb47b` y `./Dockerfile`. El responsable elige **«Dejarlo
+  pendiente»**, conservar el trabajo en local y no hacer commit ni fusiones.
+- Por ello tampoco se publica `v1.0.1`, no se mueven etiquetas y no se afirma
+  cierre del 100 %. El siguiente paso es revisar el panel de Render, desplegar
+  la versión correcta y repetir HTTP/navegador antes de finalizar el único commit.
+
+**Limpieza realizada y estado de entrega local**
+
+- Hooks completos repetidos tras documentar el bloqueo, incluidos los del GIF
+  nuevo: satisfactorios. `git diff --check` correcto.
+- Primero se revisó el dry-run y después se ejecutó únicamente esta lista de
+  cachés regenerables (no una limpieza global de ignorados):
+
+```powershell
+git clean -ndX -- .coverage .pytest_cache .ruff_cache dashboard/__pycache__ scripts/__pycache__ src/churn/__pycache__ tests/__pycache__
+git clean -fdX -- .coverage .pytest_cache .ruff_cache dashboard/__pycache__ scripts/__pycache__ src/churn/__pycache__ tests/__pycache__
+docker rm --force churn-release-check-bacb47b
+docker volume rm release-verification-bacb47b_llm-state
+```
+
+- Retirados el contenedor de comprobación propio y el volumen creado por el
+  Compose temporal de esta sección. Los contenedores/volúmenes del proyecto
+  original no se eliminaron. Se conserva el clon de verificación y sus helpers
+  para retomar Render; no se borra material de otros proyectos en Temp.
+- Estado final local: documentación, GIF y retirada del marcador de notebook;
+  **sin cambios en código, tests, dependencias o reportes congelados**. No hay
+  commit nuevo, push, integración ni Release de esta sección. Próxima acción
+  del responsable: comprobar commit Live/rama/Dockerfile en Render y avisar.
+
+### S24 — Reanudación e integración GitHub primero
+
+| Campo | Valor |
+|---|---|
+| Fecha | 14 de octubre de 2026 |
+| Estado | Cierre local preparado; autorizados commit único e integración con CI; despliegue final pendiente |
+| Objetivo | Integrar el trabajo comprobado sin confundir GitHub con el despliegue de Render |
+
+- Responsable: «ya revisé el commit, ahora sí termina todo». Se repitió primero
+  la comprobación pública: un intento devolvió `not_verified` por red/lectura;
+  Edge vio **503, Render Application loading**, indicativo de arranque en frío.
+- Se esperó health sin cambiar la aplicación ni sus controles. Después respondió
+  `ok`; la auditoría volvió a **código 1**, con TLS/redirección, health, cookie y
+  origen correctos, pero cabeceras ausentes. Navegador HTTP 200 confirmó título
+  **«Abandono bancario → decisiones de retención»**: todavía la interfaz anterior.
+- Se explicó que revisar un commit no sustituye un deploy manual. El responsable
+  elige **«Integrar GitHub primero»**: permite el commit único y la integración en
+  `main`; hará después el redeploy. La Release no se publica antes de verificarlo.
+- `git fetch origin`, estado/diffs, remoto, historial completo `origin/main..HEAD`,
+  PR y checks revisados. `main` no tiene protección y las dos relaciones de
+  ancestros permiten `--ff-only`; no hay cambios concurrentes en código, tests,
+  dependencias o reportes. El stash permanece preservado.
+- Snapshot previo al commit: resultado local completo y reproducibilidad en S23;
+  aquí se incorporan las comprobaciones finales antes de publicar. Los hashes y
+  resultados posteriores se registran en los PR y notas de la futura Release,
+  evitando un segundo commit meramente documental.
+
+**Comprobaciones de publicación**
+
+- Ejecutados los cinco comandos exactos de AGENTS §4 y
+  `uv run pre-commit run --files docs/demo.gif`: **322 aprobados, cobertura
+  98,19 %, 147 avisos, 88,85 s**; lock, lint, formato y hooks satisfactorios.
+- Revisados los doce commits de `origin/main..HEAD`, sus cambios y el diff final
+  de limpieza/documentación. Sin cambios de esta sección en `src/`, `tests/`,
+  dependencias o reportes. El GIF nuevo pasó su comprobación explícita.
+- El CI previo confirmado corresponde a `bacb47b`:
+[CI](https://github.com/darwinjaco/bank-churn-ml/actions/runs/38608466814) y
+[Security scans](https://github.com/darwinjaco/bank-churn-ml/actions/runs/38608466835).
+
+**Seguimiento posterior al commit**
+
+- [PR #2: rediseño/cierre hacia revisión](https://github.com/darwinjaco/bank-churn-ml/pull/2).
+- [PR #1: revisión hacia main](https://github.com/darwinjaco/bank-churn-ml/pull/1).
+- [CI de main](https://github.com/darwinjaco/bank-churn-ml/actions/workflows/ci.yml?query=branch%3Amain)
+  y [Security scans de main](https://github.com/darwinjaco/bank-churn-ml/actions/workflows/security.yml?query=branch%3Amain).
+- [Releases](https://github.com/darwinjaco/bank-churn-ml/releases): `v1.0.1`
+  solamente después del redeploy verificado, sin mover `v1.0.0` ni `model-v1.0`.
+
 ## 6. Estado del proyecto y Definition of Done
 
-Estado al 7 de octubre de 2026, contra la *Definition of Done* del plan maestro (punto 37). ✅ = verificado; ⏳ = implementado, falta una acción externa del responsable; ↔ = desviación justificada.
+Estado al 14 de octubre de 2026, contra la *Definition of Done* del plan maestro
+(punto 37). ✅ = verificado; ⏳ = cierre pendiente; ↔ = desviación justificada.
+Los resultados anteriores se conservan en el historial; S23–S24 registran el
+cierre local y la secuencia de integración vigente. Evidencias posteriores al
+snapshot del único commit: PR, Actions y notas de Release enlazados en S24.
 
 | Ítem | Estado | Evidencia o justificación |
 |---|---|---|
 | Dataset documentado | ✅ | [spec 001](../specs/001-overview-and-data-contract.md) §2 y §6; [calidad](../reports/data_quality.json) |
 | Data contract definido | ✅ | Spec 001 §4–5; Pandera (`validation.py`) y Pydantic en la API |
-| SDD completo | ✅ | Specs 001–006 con enmiendas versionadas; planes semanales en `docs/` |
+| SDD completo | ✅ | Specs 001–007 y compuertas de implementación versionadas; planes y decisiones históricas conservados |
 | EDA terminado | ✅ | [Notebook](../notebooks/01_eda.ipynb) delgado y figuras generadas por código |
 | Hipótesis analizadas | ✅ | H1–H6 preregistradas ([reporte](../reports/eda_hypotheses.md)) |
 | Preprocessing reproducible | ✅ | `pipeline.py`: `ColumnTransformer` aprendido solo en entrenamiento; `InputGuard` rechaza `Gender` |
@@ -1964,15 +2167,16 @@ Estado al 7 de octubre de 2026, contra la *Definition of Done* del plan maestro 
 | Segment analysis | ✅ | Geografía, edad, productos, actividad, saldo y E-01 por género (alerta en precisión documentada) |
 | Modelo serializado | ✅ | `CalibratedModel` (pipeline + calibrador) en `model.joblib`, SHA-256 fijado; metadata versionada |
 | Pipeline de inferencia | ✅ | `api.Service` (en lugar del `predict.py` del plan); devuelve probabilidad, decisión y beneficio en vez de un `risk_level` arbitrario |
-| FastAPI | ✅ | Spec 005 v1.1; 20 tests de API |
-| Streamlit | ✅ | Cuatro pestañas; prueba de humo con `AppTest` y la API real |
-| Tests | ✅ | 243 tests (98,25 %); 240 + 3 omitidos en un clon limpio sin datos (98,16 %) |
-| Linting | ✅ | Ruff, formato y hooks de pre-commit en verde (S12) |
-| Docker | ⏳ | Verificado en Windows con el modelo local (S11); falta repetirlo con el Release y la imagen del Space |
-| CI/CD | ⏳ | Semanas 7–8 publicadas; CI de `fd78f59` en verde. Workflow *Deploy Space* sin ejecuciones; faltan `HF_TOKEN` y `HF_SPACE` |
-| Deployment | ⏳ | Space pendiente de la cuenta de Hugging Face (B-03) |
-| README profesional | ⏳ | Redactado; faltan el GIF y la URL pública activa |
-| Reproducibilidad verificada | ✅ / ⏳ | Pipeline completo reproducido desde un clon limpio (S08–S10); tests y hooks desde un clon limpio (S12); `docker build` desde un clon limpio pendiente |
+| FastAPI | ✅ | Spec 005 v1.3, regresiones de contrato y seguridad; políticas del reporte congelado |
+| Streamlit | ✅ | Cuatro vistas laterales y gráficos; `AppTest` y navegador real, escritorio/móvil/reflow |
+| Tests | ✅ | Código `bacb47b`: 322 aprobados, 98,19 %; clon sin datos: 319 aprobados y 3 omitidos, 98,11 % |
+| Linting | ✅ | Ruff, formato y hooks satisfactorios en el código publicado; árbol documental final en comprobación |
+| Docker | ✅ | Build del Release, Compose y Space desde clon limpio; `ROLE=all` también bajo límites Free, sin OOM |
+| CI/CD | ✅ / ⏳ | CI y Security scans de `bacb47b` verdes; CI del único commit final e integración pendientes; HF alternativo manual |
+| Deployment | ⏳ | Render funcional existente; cierre de cabeceras/versión final y build público pendiente |
+| README profesional | ✅ | Resultados y limitaciones, URL pública y recorrido animado de 24 s; estado de seguridad explícito |
+| Reproducibilidad verificada | ✅ | Pipeline histórico reproducido; tests, hooks, build y Compose desde clon limpio acreditados en S23 |
+| Release de código | ⏳ | `v1.0.1` autorizada; etiqueta `v1.0.0` anterior preservada, sin confundirla con una Release publicada |
 
 **Lo que aporta el proyecto más allá del checklist:** decisión económica explícita en lugar de una métrica aislada, preregistro de hipótesis, reglas y umbrales (con expectativas que se reportan aunque no se cumplan, como E2), una única evaluación en prueba protegida por código, y un monitoreo que demuestra un límite real: el cambio de prevalencia degrada el modelo sin alarmas de entrada.
 

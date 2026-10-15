@@ -73,3 +73,9 @@ La remediación de cabeceras requiere una decisión versionada antes de implemen
 La enmienda 007 v1.2 versionó la solución nativa mediante `st.App` y middleware.
 Cabeceras, cookie de health, origen propio/ajeno y subida con/sin token comprobados
 en el launcher local; la actualización pública de Render sigue pendiente.
+
+S23 repite la auditoría: cabeceras aún ausentes (código 1) y algunos intentos
+incompletos por timeout de lectura (código 2). El navegador sigue mostrando la
+interfaz anterior, con pestañas y botón «Evaluar». El estado Live informado no
+basta para identificar el código servido. El responsable pospone la revisión
+del panel; no se certifica la actualización HTTPS ni el cierre de la Release.

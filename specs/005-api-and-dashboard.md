@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Estado | Base v1.2 publicada; v1.3 implementada y verificada en local en `feat/dashboard-redesign` (S20), vista previa disponible; publicación y build Docker nuevos pendientes |
+| Estado | v1.3 publicada en `871ad5e`; launcher en `bacb47b`, CI remoto verde; build/runtime y Compose desde clon limpio comprobados; despliegue final en curso (S23) |
 | Responsable | Darwin Jacome Cuenca |
 | Semana | 7 (16–22 de noviembre de 2026) |
 | Dependencias | [002](002-modeling-and-evaluation.md) (artefacto congelado), [004](004-decision-layer.md) (regla de decisión) |
@@ -67,12 +67,14 @@ Mismos rangos que el contrato de datos (spec 001): `CreditScore` 300–900, `Age
 
 ## 9. Criterios de aceptación
 
-- [ ] `docker compose up` levanta API y dashboard desde un clon limpio (con el Release publicado).
-  - Verificado en Docker Desktop con el Release publicado: `pwsh -File scripts/verify-docker.ps1` termina en «VERIFICACIÓN COMPLETA» (registro S14). Falta registrar el procedimiento desde un clon limpio.
+- [x] `docker compose up` levanta API y dashboard desde un clon limpio (con el Release publicado).
+  - S23: clon Git limpio de `bacb47b`, sin datos ni modelo locales;
+    `pwsh -File scripts/verify-docker.ps1 -Down` termina en «VERIFICACIÓN COMPLETA».
+    Incluye API/dashboard, Release/hash y build de la imagen derivada del Space.
 - [x] `/predict` devuelve la misma probabilidad que `models/model.joblib` para el mismo cliente.
 - [x] Hash del artefacto verificado en build y al arrancar (build real y descarga del Release verificados, S14).
 - [x] Sin clave de LLM, `/explain` responde con la plantilla.
-- [x] CI en verde con cobertura ≥ 85 % (CI remoto en `fd78f59`; local: 243 tests, 98,25 %).
+- [x] CI en verde con cobertura ≥ 85 % (CI remoto en `bacb47b`; local de código: 322 tests, 98,19 %; clon sin datos: 319 aprobados, 3 omitidos, 98,11 %).
 
 ## 10. Enmienda v1.1 (7 de octubre de 2026, semana 8)
 
@@ -93,7 +95,7 @@ y añade controles de tamaño, frecuencia y concurrencia. El LLM se muestra como
 texto literal. Modelo, calibración, umbral y respuestas válidas de inferencia
 conservan sus valores. Compuerta versionada en `6343526`; controles implementados
 y comprobados según S14. Código publicado en `3419a65`, con CI remoto en verde;
-verificación formal desde clon limpio pendiente.
+verificación formal desde clon limpio completada después en S23.
 
 ## 12. Enmienda v1.3 — Presentación profesional y gráficos
 

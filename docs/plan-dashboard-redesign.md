@@ -5,7 +5,7 @@
 | Especificación | Spec 005 v1.3 §12, dependiente de 006 y 007 |
 | Rama | `feat/dashboard-redesign`, desde `d9b0f85` de `docs/pre-production-review` |
 | Autorización | Responsable: aplicar las mejoras en una rama para ver el resultado, incluir gráficos y «Adelamte» |
-| Estado | Compuerta `ca498f2`; rediseño verificado en local (S20), pendiente de revisión/publicación |
+| Estado | Rediseño publicado en `871ad5e`, launcher en `bacb47b`, CI verde; Docker y navegador verificados desde clon limpio (S23) |
 
 ## 1. Objetivo y dirección visual
 
@@ -105,13 +105,13 @@ muestran tablas de detalle en expansores para no saturar la pantalla.
 
 ## 4. Evidencia de cierre
 
-Spec 005 §12.4 y S19 del registro. Se distingue compuerta documental, cambios
+Spec 005 §12.4 y S19–S23 del registro. Se distingue compuerta documental, cambios
 locales de código, comprobación real en navegador y aprobación de despliegue.
 Las cabeceras públicas pendientes son evidencia previa, no resuelta por el tema.
 
 ## 5. Vista previa y cómo volver a arrancarla
 
-Vista local activa al terminar S20: **http://localhost:8511**, API en
+Vista local usada en S20: **http://localhost:8511**, API en
 `http://127.0.0.1:8011`. Seleccionar **Cargar ejemplo → Analizar cliente** para
 ver 94,7 %, Contactar y los gráficos. Las otras vistas están en la barra lateral.
 
@@ -132,11 +132,13 @@ uv run streamlit run dashboard/serve.py --server.address 127.0.0.1 --server.port
 ```
 
 Capturas de escritorio (Cliente, Lote, Modelo, Monitoreo), móvil y reflow en el
-directorio temporal aprobado, con prefijo `redesign-`. No se publicaron como
-assets ni se añadieron al repositorio.
+directorio temporal aprobado, con prefijo `redesign-`. S23 incorpora un recorrido
+animado derivado de las cuatro vistas: [demo.gif](demo.gif), 24 s y 300.449 bytes.
 
-Verificación local: 313 tests, cobertura 98,18 %, Ruff/formato/hooks correctos,
-pruebas de navegador satisfactorias y Space armado con el tema. El build Docker
-no se ejecutó: `docker version` no pudo conectar con el motor Docker Desktop.
-Pendiente antes de desplegar esta rama: build/runtime de la imagen, commit/push
-de implementación con autorización y CI remoto correspondiente.
+Verificación histórica S20: 313 tests y cobertura 98,18 %, con Docker inicialmente
+detenido. Ese bloqueo se superó en S21–S23: código publicado, 322 tests locales
+de código y 98,19 %, CI y Security scans verdes en `bacb47b`, build Release y
+Compose desde clon Git limpio satisfactorios. Navegador repetido sobre la imagen
+limitada a 512 MiB/0,1 CPU: cuatro vistas, lote/exportación, persistencia,
+errores, reflow y móvil correctos, sin errores de consola ni OOM.
+El estado HTTPS final se registra por separado en S23.

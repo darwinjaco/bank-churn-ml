@@ -2,8 +2,8 @@
 
 | Campo | Valor |
 |---|---|
-| Versión | v1.1 — escaneos CI y verificación pública (§9) |
-| Estado | v1.0 publicada en `3419a65`; v1.1 publicada en `7b1fdb7`, CI y Security scans verdes; URL Render verificada en S18 con cabeceras ausentes y framing pendiente |
+| Versión | v1.2 — cabeceras nativas del dashboard (§10) |
+| Estado | Implementación publicada en `bacb47b`, CI y Security scans verdes; transporte y cabeceras locales comprobados; verificación HTTPS final pendiente de redeploy (S23) |
 | Base | `a2598ee`, CI remoto en verde |
 | Dependencias | Specs 002, 005 y 006; auditoría SEC-01 a SEC-13 |
 
@@ -248,15 +248,19 @@ de observación, no debilita los criterios SameSite/Secure ni acepta cookies aus
 
 ### 10.3 Aceptación
 
-- [ ] Middleware probado en 200/404/403, streaming y cabeceras duplicadas;
+- [x] Middleware probado en 200/404/403, streaming y cabeceras duplicadas;
   Set-Cookie y mensajes de WebSocket/lifespan conservados.
-- [ ] Launcher usa `st.App` público; imagen y Space contienen launcher/middleware.
-- [ ] Navegador real sobre launcher: referencia, lote, descarga, XSRF y origen;
+- [x] Launcher usa `st.App` público; imagen y Space contienen launcher/middleware.
+- [x] Navegador real sobre launcher: referencia, lote, descarga, XSRF y origen;
   cabeceras presentes sin romper scripts, estilos ni gráficos.
-- [ ] Comprobador público: health y cookie de health incluidos; tests de ausencia,
+- [x] Comprobador público: health y cookie de health incluidos; tests de ausencia,
   formato inválido y error/red mantienen códigos no satisfactorios.
-- [ ] Docker desde clon limpio, Release/hash intactos y prueba bajo límites Free.
+- [x] Docker desde clon limpio, Release/hash intactos y prueba bajo límites Free.
 - [ ] CI y Security scans nuevos verdes; URL Render final con auditoría y funcionalidad
   comprobadas después del redeploy. Local no se presenta como prueba HTTPS pública.
 
 Plan: [plan-cierre-release.md](../docs/plan-cierre-release.md).
+
+Evidencia de los criterios locales: S22–S23 del registro; CI de `bacb47b` y
+Security scans satisfactorios. El último criterio combina CI y despliegue:
+permanece abierto hasta comprobar ambos después del redeploy real.

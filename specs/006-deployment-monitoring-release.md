@@ -2,7 +2,7 @@
 
 | Campo | Valor |
 |---|---|
-| Estado | Implementación original publicada en `fd78f59`; Render público funcional verificado (S18), cierre de cabeceras/framing y evidencia del build pendientes; GIF y etiqueta `v1.0.0` pendientes |
+| Estado | v1.3 documental (§14), cierre local comprobado; autorizada integración GitHub primero con commit único y CI; Render final y Release `v1.0.1` condicionados al redeploy de main |
 | Responsable | Darwin Jacome Cuenca |
 | Semana | 8 (23–29 de noviembre de 2026) |
 | Dependencias | [002](002-modeling-and-evaluation.md) (artefacto congelado), [004](004-decision-layer.md) (regla de decisión), [005](005-api-and-dashboard.md) (API, dashboard e imagen) |
@@ -165,7 +165,10 @@ Si hay tiempo, `GET /monitoring` devuelve `reports/monitoring.json` (404 si no e
 
 ## 7. Criterios de aceptación
 
-Estado al 7 de octubre de 2026. Se distingue verificación local, CI remoto y despliegue público; el detalle está en el registro S12.
+Checklist histórico al 7 de octubre de 2026 (registro S12). Los requisitos
+vigentes de cierre sobre Render se definen en §12–§14 y se siguen en registro
+S23: el Space y la activación pública del LLM son alternativos, no prerrequisitos
+de Render. Se conserva este checklist como evidencia de la planificación inicial.
 
 - [ ] Spec 005 cerrada: Docker con el Release publicado y CI en verde. *Release y `verify-docker.ps1` sin `-LocalModel` verificados (S14); CI remoto de `3419a65` en verde. Pendiente: clon limpio.*
 - [ ] El Space público responde y reproduce el cliente de referencia (0,947, contactar). *Pendiente: cuenta de Hugging Face (B-03) y workflow. En local, la API real y el dashboard (`AppTest`) dan 94,7 % y contactar.*
@@ -259,8 +262,9 @@ históricos de Hugging Face en §7 como evidencia de la implementación original
   *S18: https://bank-churn-ml-ufa7.onrender.com/, auditoría HTTP fallida y
   verificación funcional en navegador satisfactoria, documentadas por separado.*
 
-El GIF, la verificación Docker desde clon limpio y la etiqueta de código siguen
-pendientes para el cierre general. La partición de prueba no se vuelve a cargar.
+S23 acredita GIF y verificación Docker desde clon limpio; la etiqueta de código
+`v1.0.0` existe, pero la Release final autorizada es `v1.0.1` (§14), condicionada
+a CI y despliegue final. La partición de prueba no se vuelve a cargar.
 
 ## 13. Enmienda v1.2 — Cierre sobre Render
 
@@ -284,3 +288,31 @@ el workflow o el arranque se versiona el [plan de cierre](../docs/plan-cierre-re
 - La etiqueta/Release final requiere la demo final comprobada y CI verde en su
   commit. Si el redeploy de Render necesita al responsable, se registra ese
   bloqueo y se pospone la etiqueta, sin declarar el cierre completo.
+
+## 14. Enmienda v1.3 — Limpieza y entrega consolidada
+
+El responsable autoriza el 14 de octubre de 2026 un único commit al finalizar
+las tareas y la integración de las ramas sin conflictos y con las comprobaciones
+satisfactorias. Mantiene Hugging Face como alternativa manual. Esta enmienda es
+documental: no cambia código, tests, dependencias, modelo ni protocolo estadístico.
+
+- Conservar especificaciones, planes, reportes y tracking; retirar únicamente
+  el marcador de notebook redundante y cachés/temporales propios regenerables.
+- Actualizar los estados vigentes sin reescribir resultados históricos. Registrar
+  por separado evidencia local, CI remoto y despliegue real.
+- `v1.0.0` existe en `bacb47b`, pero se publicó antes del cierre HTTPS final;
+  no equivale a una Release de código publicada. El responsable autoriza
+  **`v1.0.1`** como etiqueta/Release de la entrega final, sin mover la anterior.
+  El paquete sigue en 1.0.0 y el modelo permanece en `model-v1.0`.
+- La integración usa avances rápidos si la relación de ancestros y las revisiones
+  lo permiten. No se fuerzan ramas. CI del commit final, deploy e identificación
+  del build se registran en las notas de la Release y en el informe de entrega.
+- Se mantienen los requisitos de §13: demo comprobada, GIF, reproducibilidad,
+  un único servicio Free, LLM desactivado y evaluación final no repetida.
+- Reanudación: el responsable autoriza **«Integrar GitHub primero»** después de
+  verificar que la URL todavía sirve la interfaz anterior. Commit e integración
+  pueden preceder al redeploy; la etiqueta/Release de `v1.0.1` sigue esperando
+  CI del commit y comprobación HTTPS/funcional pública. Las evidencias posteriores
+  al snapshot se enlazan en los PR y notas de Release sin un segundo commit.
+
+Plan operativo: [plan-cierre-release.md §6](../docs/plan-cierre-release.md#6-cierre-consolidado-autorizado--14-de-octubre-de-2026).
